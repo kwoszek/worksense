@@ -8,14 +8,14 @@ export default function DefaultLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="relative flex flex-col h-screen">
+    <div className="relative flex flex-col h-screen ">
       <Navbar />
-      <main >
+      <main className="mt-15">
         {children}
       </main>
       <footer className="w-full flex items-center justify-center py-3 p-5 m-5">
         <div className="flex items-center justify-center py-3 gap-5 p-5 m-5 w-1/3">
-        <div>
+        <div className="p-5">
           <ul className="list-disc">
             <li>
               <Link color="" underline="always" href="/dashboard">Dashboard</Link>
@@ -29,7 +29,7 @@ export default function DefaultLayout({
           </ul>
           </div>
           <div>
-            <ul>
+            <ul className="list-disc">
                <li>
               <Link color="" underline="always" href="/progress">Progress</Link>
             </li>
@@ -43,11 +43,13 @@ export default function DefaultLayout({
           </div>
           </div>
           <h1 className="w-1/3 text-center">WorkSense</h1>
-          <ul className="list-disc w-1/3 flex flex-col justify-center items-center">
+          <div className="w-1/3 flex justify-center" >
+          <ul className="list-disc  ">
             <li>Terms</li>
             <li>privacy</li>
           </ul>
-      </footer>
+          </div>
+      </footer >
     </div>
   );
 }

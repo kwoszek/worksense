@@ -17,7 +17,7 @@ export const Navbar = () => {
   const {pathname} = useLocation();
 
   return (
-    <div className="flex justify-between items-center">
+    <div className="flex justify-between items-center mt-3 mx-5">
     <h1 className="m-5 text-3xl">WorkSense</h1>
     <div className="flex justify-end m-5 gap-5">
 
