@@ -1,144 +1,43 @@
-import { Button } from "@heroui/button";
-import { Kbd } from "@heroui/kbd";
-import { Link } from "@heroui/link";
-import { Input } from "@heroui/input";
-import {
-  Navbar as HeroUINavbar,
-  NavbarBrand,
-  NavbarContent,
-  NavbarItem,
-  NavbarMenuToggle,
-  NavbarMenu,
-  NavbarMenuItem,
-} from "@heroui/navbar";
-import { link as linkStyles } from "@heroui/theme";
-import clsx from "clsx";
 
-import { siteConfig } from "@/config/site";
 import { ThemeSwitch } from "@/components/theme-switch";
-import {
-  TwitterIcon,
-  GithubIcon,
-  DiscordIcon,
-  HeartFilledIcon,
-  SearchIcon,
-} from "@/components/icons";
-import { Logo } from "@/components/icons";
+import {Tabs, Tab} from "@heroui/tabs";
+import {Route, Routes, useLocation} from "react-router-dom";
+import {Avatar, AvatarIcon} from "@heroui/avatar";
+
+
+import DashboardPage from "@/pages/dashboard";
+import ForumPage from "@/pages/forum";
+import ProgressPage from "@/pages/progress";
+import ArticlesPage from "@/pages/articles";
+import FocusPage from "@/pages/focus";
+
 
 export const Navbar = () => {
-  const searchInput = (
-    <Input
-      aria-label="Search"
-      classNames={{
-        inputWrapper: "bg-default-100",
-        input: "text-sm",
-      }}
-      endContent={
-        <Kbd className="hidden lg:inline-block" keys={["command"]}>
-          K
-        </Kbd>
-      }
-      labelPlacement="outside"
-      placeholder="Search..."
-      startContent={
-        <SearchIcon className="text-base text-default-400 pointer-events-none flex-shrink-0" />
-      }
-      type="search"
-    />
-  );
+  
+  const {pathname} = useLocation();
 
   return (
-    <HeroUINavbar maxWidth="xl" position="sticky">
-      <NavbarContent className="basis-1/5 sm:basis-full" justify="start">
-        <NavbarBrand className="gap-3 max-w-fit">
-          <Link
-            className="flex justify-start items-center gap-1"
-            color="foreground"
-            href="/"
-          >
-            <Logo />
-            <p className="font-bold text-inherit">ACME</p>
-          </Link>
-        </NavbarBrand>
-        <div className="hidden lg:flex gap-4 justify-start ml-2">
-          {siteConfig.navItems.map((item) => (
-            <NavbarItem key={item.href}>
-              <Link
-                className={clsx(
-                  linkStyles({ color: "foreground" }),
-                  "data-[active=true]:text-primary data-[active=true]:font-medium",
-                )}
-                color="foreground"
-                href={item.href}
-              >
-                {item.label}
-              </Link>
-            </NavbarItem>
-          ))}
-        </div>
-      </NavbarContent>
+    <div className="flex justify-between items-center">
+    <h1 className="m-5 text-3xl">WorkSense</h1>
+    <div className="flex justify-end m-5 gap-5">
 
-      <NavbarContent
-        className="hidden sm:flex basis-1/5 sm:basis-full"
-        justify="end"
-      >
-        <NavbarItem className="hidden sm:flex gap-2">
-          <Link isExternal href={siteConfig.links.twitter} title="Twitter">
-            <TwitterIcon className="text-default-500" />
-          </Link>
-          <Link isExternal href={siteConfig.links.discord} title="Discord">
-            <DiscordIcon className="text-default-500" />
-          </Link>
-          <Link isExternal href={siteConfig.links.github} title="GitHub">
-            <GithubIcon className="text-default-500" />
-          </Link>
-          <ThemeSwitch />
-        </NavbarItem>
-        <NavbarItem className="hidden lg:flex">{searchInput}</NavbarItem>
-        <NavbarItem className="hidden md:flex">
-          <Button
-            isExternal
-            as={Link}
-            className="text-sm font-normal text-default-600 bg-default-100"
-            href={siteConfig.links.sponsor}
-            startContent={<HeartFilledIcon className="text-danger" />}
-            variant="flat"
-          >
-            Sponsor
-          </Button>
-        </NavbarItem>
-      </NavbarContent>
-
-      <NavbarContent className="sm:hidden basis-1 pl-4" justify="end">
-        <Link isExternal href={siteConfig.links.github}>
-          <GithubIcon className="text-default-500" />
-        </Link>
-        <ThemeSwitch />
-        <NavbarMenuToggle />
-      </NavbarContent>
-
-      <NavbarMenu>
-        {searchInput}
-        <div className="mx-4 mt-2 flex flex-col gap-2">
-          {siteConfig.navMenuItems.map((item, index) => (
-            <NavbarMenuItem key={`${item}-${index}`}>
-              <Link
-                color={
-                  index === 2
-                    ? "primary"
-                    : index === siteConfig.navMenuItems.length - 1
-                      ? "danger"
-                      : "foreground"
-                }
-                href="#"
-                size="lg"
-              >
-                {item.label}
-              </Link>
-            </NavbarMenuItem>
-          ))}
-        </div>
-      </NavbarMenu>
-    </HeroUINavbar>
+    <ThemeSwitch/>
+      <Tabs  aria-label="Tabs" radius="full" selectedKey={pathname} variant="bordered">
+          <Tab key="/dashboard" title="Dashboard" href="/dashboard"/>
+          <Tab key="/forum" title="Forum" href="forum"/>
+          <Tab key="/articles" title="Articles" href="articles" />
+          <Tab key="/progress" title="Progress" href="progress"/>
+          <Tab key="/focus" title="Focus" href="focus"/>
+        </Tabs>
+         <Routes>
+              <Route index element={<DashboardPage />} path="dashboard" />
+              <Route element={<ForumPage />} path="/forum" />
+              <Route element={<ProgressPage />} path="/progress" />
+              <Route element={<ArticlesPage />} path="/articles" />
+              <Route element={<FocusPage />} path="/focus" />
+            </Routes>
+                  <Avatar isBordered src="https://i.pravatar.cc/150?u=a042581f4e29026024d" />
+    </div>
+    </div>
   );
 };
