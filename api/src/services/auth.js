@@ -3,7 +3,7 @@ const bcrypt = require('bcryptjs');
 const { db } = require('../database/db');
 
 const ACCESS_TTL = process.env.JWT_ACCESS_TTL || '15m';
-const REFRESH_TTL = process.env.JWT_REFRESH_TTL || '7d';
+const REFRESH_TTL = process.env.JWT_REFRESH_TTL || '30d';
 const ACCESS_SECRET = process.env.JWT_ACCESS_SECRET || 'change_this_access_secret';
 const REFRESH_SECRET = process.env.JWT_REFRESH_SECRET || 'change_this_refresh_secret';
 
@@ -39,7 +39,7 @@ async function persistRefreshToken(userId, token, userAgent, ip) {
   const decoded = jwt.decode(token);
   const expiresAt = new Date((decoded.exp || 0) * 1000);
   await db.query(
-    `INSERT INTO refresh_tokens("userId", token, "expiresAt", "userAgent", ip)
+    `INSERT INTO refresh_tokens(userid, token, expiresAt, userAgent, ip)
      VALUES ($1,$2,$3,$4,$5)`,
     [userId, token, expiresAt, userAgent || null, ip || null]
   );
@@ -47,7 +47,7 @@ async function persistRefreshToken(userId, token, userAgent, ip) {
 
 async function revokeRefreshToken(token) {
   await db.query(
-    `UPDATE refresh_tokens SET "revokedAt" = NOW() WHERE token = $1 AND "revokedAt" IS NULL`,
+    `UPDATE refresh_tokens SET revokedAt = NOW() WHERE token = $1 AND revokedAt IS NULL`,
     [token]
   );
 }
@@ -55,7 +55,7 @@ async function revokeRefreshToken(token) {
 async function isRefreshTokenActive(token) {
   const res = await db.query(
     `SELECT id FROM refresh_tokens
-     WHERE token = $1 AND "revokedAt" IS NULL AND "expiresAt" > NOW()
+     WHERE token = $1 AND revokedAt IS NULL AND expiresAt > NOW()
      LIMIT 1`,
     [token]
   );

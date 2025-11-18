@@ -6,9 +6,10 @@ import { Divider } from "@heroui/divider";
 import Post from "@/components/post";
 import MoodChart from "@/components/moodChart";
 import ProposedExercise from "@/components/proposedExercise";
+import { useGetPostsQuery } from "@/services/forumApi";
 
 export default function DashboardPage() {
-
+  const {data: popularPosts, isLoading: isLoadingPopularPosts} = useGetPostsQuery({ limit: 5, offset: 0, orderBy: 'likes', direction: 'DESC' });
   const articles = [
   { tittle: "How to Prevent and Overcome Burnout (APS)", summary: "Guidelines on preventing burnout through self-care and reflection.", href: "https://psychology.org.au/getmedia/85f586e3-a856-47f2-a306-d0568e318193/aps-burnout-community-resource.pdf" },
   { tittle: "Job Burnout: How to Spot It and Take Action", summary: "Mayo Clinic guide explaining symptoms of burnout and what to do next.", href: "https://www.mayoclinic.org/healthy-lifestyle/adult-health/in-depth/burnout/art-20046642" },
@@ -38,7 +39,16 @@ export default function DashboardPage() {
       </CardHeader>
       <Divider />
       <CardBody>
-         <Post/>
+         {!isLoadingPopularPosts ? (
+              popularPosts?.map((post) => (
+                <div key={post.id} className="mb-4">
+                  <h3>{post.title}</h3>
+                  <Divider />
+                </div>
+              ))
+            ) : (
+              <></>
+          )}
       </CardBody>
     </Card>
 

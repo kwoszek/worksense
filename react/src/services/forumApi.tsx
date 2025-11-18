@@ -7,7 +7,10 @@ export interface Post {
 	title: string;
 	content: string;
 	dateposted: string;
+	likes: number;
+	liked?: boolean;
 	username?: string;
+	avatar?: string;
 }
 
 export interface Comment {
@@ -16,7 +19,15 @@ export interface Comment {
 	postid: number;
 	content: string;
 	dateposted: string;
+	likes: number;
+	liked?: boolean;
 	username?: string;
+	avatar?: string;
+}
+
+export interface CommentsResponse {
+	comments: Comment[];
+	total: number;
 }
 
 export interface Checkin {
@@ -37,14 +48,23 @@ interface PostWithComments {
 // Base URL can be overridden by Vite env `VITE_API_BASE_URL`
 const baseUrl = `${import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000'}/api/forum`;
 
+const baseQuery = fetchBaseQuery({
+	baseUrl,
+	prepareHeaders: (headers) => {
+		const token = typeof window !== 'undefined' ? localStorage.getItem('ws_access_token') : null;
+		if (token) headers.set('authorization', `Bearer ${token}`);
+		return headers;
+	},
+});
+
 export const forumApi = createApi({
 	reducerPath: 'forumApi',
-	baseQuery: fetchBaseQuery({ baseUrl }),
+	baseQuery,
 	tagTypes: ['Posts', 'Post', 'Comments', 'Checkins'],
 	endpoints: (builder) => ({
 		// Posts
-		getPosts: builder.query<Post[], void>({
-			query: () => '/posts',
+		getPosts: builder.query<Post[], { limit: number; offset: number; orderBy: string; direction: string }>({
+			query: ({ limit, offset, orderBy, direction }) => `/posts?limit=${limit}&offset=${offset}&orderBy=${orderBy}&direction=${direction}`,
 			providesTags: ['Posts'],
 		}),
 		getPost: builder.query<PostWithComments, number>({
@@ -71,9 +91,32 @@ export const forumApi = createApi({
 				{ type: 'Comments' as const, id: postId },
 			],
 		}),
-		getComments: builder.query<Comment[], { postId: number; offset?: number; limit?: number }>({
-		query: ({ postId, offset = 0, limit = 20 }) =>
-			`/posts/${postId}/comments?offset=${offset}&limit=${limit}`,
+		getComments: builder.query<CommentsResponse, { postId: number; offset?: number; limit?: number }>({
+			query: ({ postId, offset = 0, limit = 20 }) =>
+				`/posts/${postId}/comments?offset=${offset}&limit=${limit}`,
+			providesTags: (_result, _error, { postId }) => [
+				{ type: 'Comments' as const, id: postId },
+			],
+		}),
+
+		// Likes - Posts
+		likePost: builder.mutation<{ liked: boolean; likes: number }, { postId: number }>({
+			query: ({ postId }) => ({ url: `/posts/${postId}/like`, method: 'POST' }),
+			invalidatesTags: ['Posts'],
+		}),
+		unlikePost: builder.mutation<{ liked: boolean; likes: number }, { postId: number }>({
+			query: ({ postId }) => ({ url: `/posts/${postId}/like`, method: 'DELETE' }),
+			invalidatesTags: ['Posts'],
+		}),
+
+		// Likes - Comments
+		likeComment: builder.mutation<{ liked: boolean; likes: number }, { commentId: number; postId: number }>({
+			query: ({ commentId }) => ({ url: `/comments/${commentId}/like`, method: 'POST' }),
+			invalidatesTags: (_r,_e,{ postId }) => [ { type: 'Comments' as const, id: postId } ],
+		}),
+		unlikeComment: builder.mutation<{ liked: boolean; likes: number }, { commentId: number; postId: number }>({
+			query: ({ commentId }) => ({ url: `/comments/${commentId}/like`, method: 'DELETE' }),
+			invalidatesTags: (_r,_e,{ postId }) => [ { type: 'Comments' as const, id: postId } ],
 		}),
 
 		// Checkins
@@ -94,10 +137,16 @@ export const forumApi = createApi({
 // Hooks
 export const {
 	useGetPostsQuery,
+	useLazyGetPostsQuery,
 	useGetPostQuery,
 	useAddPostMutation,
 	useAddCommentMutation,
 	useGetCommentsQuery,
+	useLazyGetCommentsQuery,
 	useGetCheckinsQuery,
 	useAddCheckinMutation,
+	useLikePostMutation,
+	useUnlikePostMutation,
+	useLikeCommentMutation,
+	useUnlikeCommentMutation,
 } = forumApi;

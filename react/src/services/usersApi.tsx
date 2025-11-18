@@ -5,6 +5,9 @@ export interface AuthUser {
   id: number;
   username: string;
   email: string;
+  avatar?: string | null;
+  badges?: string[];
+  streak?: number;
 }
 export interface LoginRequest {
   identifier: string; // email or username
