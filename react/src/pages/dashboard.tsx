@@ -5,10 +5,19 @@ import { Link } from "@heroui/link";
 import { Divider } from "@heroui/divider";
 import Post from "@/components/post";
 import MoodChart from "@/components/moodChart";
+import { useGetCheckinsQuery } from "@/services/forumApi";
+import { useSelector } from "react-redux";
+import { selectAuthUser } from "@/features/auth/authSlice";
 import ProposedExercise from "@/components/proposedExercise";
 import { useGetPostsQuery } from "@/services/forumApi";
 
 export default function DashboardPage() {
+  const { data: checkins } = useGetCheckinsQuery();
+  const user = useSelector(selectAuthUser);
+
+  const chartCheckins = checkins
+    ?.filter((c: any) => c.userid === user?.id)
+    .map((c: any) => ({ date: c.createdAt ?? c.date, stress: c.stress ?? 5, energy: c.energy ?? 5 }));
   const {data: popularPosts, isLoading: isLoadingPopularPosts} = useGetPostsQuery({ limit: 5, offset: 0, orderBy: 'likes', direction: 'DESC' });
   const articles = [
   { tittle: "How to Prevent and Overcome Burnout (APS)", summary: "Guidelines on preventing burnout through self-care and reflection.", href: "https://psychology.org.au/getmedia/85f586e3-a856-47f2-a306-d0568e318193/aps-burnout-community-resource.pdf" },
@@ -31,7 +40,7 @@ export default function DashboardPage() {
     <DefaultLayout>
       <div className="flex flex-wrap justify-center gap-5">
       <div className= "flex flex-col gap-5 w-full sm:w-1/2 min-w-0" >
-      <MoodChart/>
+      <MoodChart checkins={chartCheckins} />
     <Card className="p-5 hidden sm:block">
       <CardHeader>
         <h2 className="opacity-60 text-2xl">Popular posts</h2>
