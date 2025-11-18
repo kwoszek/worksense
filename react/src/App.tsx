@@ -10,6 +10,7 @@ import LoginPage from "./pages/login";
 import RequireAuth from "@/features/auth/RequireAuth";
 import Profile from "@/pages/profile";
 import Landing from "./pages/landing";
+import CheckinPage from "./pages/checkin";
 
 function App() {
   return (
@@ -20,6 +21,7 @@ function App() {
       <Route path="/forum" element={<RequireAuth><ForumPage /></RequireAuth>} />
       <Route path="/progress" element={<RequireAuth><ProgressPage /></RequireAuth>} />
       <Route path="/articles" element={<RequireAuth><ArticlesPage /></RequireAuth>} />
+      <Route path="/checkin" element={<RequireAuth><CheckinPage /></RequireAuth>} />
   <Route path="/focus" element={<RequireAuth><FocusPage /></RequireAuth>} />
   <Route path="/focus/settings" element={<RequireAuth><PomodoroSettingsPage /></RequireAuth>} />
   <Route path="/focus/about" element={<RequireAuth><AboutPage /></RequireAuth>} />
