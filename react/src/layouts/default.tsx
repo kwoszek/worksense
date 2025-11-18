@@ -28,7 +28,7 @@ export default function DefaultLayout({ children }: { children: React.ReactNode 
               </div>
 
               <div className="flex-1 flex items-center justify-center">
-                <h1 className="text-center">WorkSense</h1>
+                <Link underline="always" href="/" color="foreground" className="text-2xl">WorkSense</Link>
               </div>
 
               <div className="flex-1 flex items-center justify-center">
@@ -46,8 +46,9 @@ export default function DefaultLayout({ children }: { children: React.ReactNode 
               </div>
             </div>
             <div className="mt-4 text-center text-sm text-muted-foreground mb-5">
-              <span className="mr-4">Terms</span>
-              <span>Privacy</span>
+              <span className="">Terms</span>
+              <span className="ml-5">Privacy</span>
+               
             </div>
           </div>
         </div>

@@ -9,10 +9,12 @@ import AboutPage from "@/pages/about";
 import LoginPage from "./pages/login";
 import RequireAuth from "@/features/auth/RequireAuth";
 import Profile from "@/pages/profile";
+import Landing from "./pages/landing";
 
 function App() {
   return (
     <Routes>
+      <Route path="/" element={<Landing />} />
       <Route path="/login" element={<LoginPage />} />
       <Route path="/dashboard" element={<RequireAuth><DashboardPage /></RequireAuth>} />
       <Route path="/forum" element={<RequireAuth><ForumPage /></RequireAuth>} />

@@ -34,13 +34,13 @@ export default function ForumPage() {
 
   return (
     <DefaultLayout>
-      <div className="flex justify-center gap-5 flex-col w-9/10 ml-auto mr-auto">
-        <div className="w-full justify-between flex">
+      <div className="max-w-6xl mx-auto w-full px-4 sm:px-6 lg:px-8">
+        <div className="w-full flex justify-between items-center py-4">
             <Button>sort placeholder</Button>
             <Button onPress={() => setIsOpen(true)}>New Post</Button>
         </div>
-        <div className="flex justify-center gap-5">
-        <Card className="w-full">
+        <div className="flex flex-col sm:flex-row gap-5 items-start">
+          <Card className="flex-1 min-w-0 sm:basis-2/3 w-full">
           <CardHeader className="pb-0">
             <h2 className="opacity-60 text-2xl">Posts</h2>
           </CardHeader>
@@ -53,7 +53,7 @@ export default function ForumPage() {
             )}
           </CardBody>
         </Card>
-        <Card className="w-4/11">
+        <Card className="min-w-0 sm:basis-1/3 hidden sm:block">
           <CardHeader>
             <h2 className="opacity-60 text-2xl">Popular posts</h2>
           </CardHeader>

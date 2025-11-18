@@ -28,10 +28,10 @@ export default function DashboardPage() {
 
   return (
     <DefaultLayout>
-      <div className="flex justify-center gap-5 ">
-      <div className= " flex flex-col gap-5 w-1/2" >
+      <div className="flex flex-wrap justify-center gap-5">
+      <div className= "flex flex-col gap-5 w-full sm:w-1/2 min-w-0" >
       <MoodChart/>
-    <Card className="p-5">
+    <Card className="p-5 hidden sm:block">
       <CardHeader>
         <h2 className="opacity-60 text-2xl">Popular posts</h2>
 
@@ -44,7 +44,7 @@ export default function DashboardPage() {
 
     
     </div>
-    <div className="flex flex-col gap-5 w-3/10">
+    <div className="flex flex-col gap-5 w-full sm:w-1/3 min-w-0">
       <Card className="p-3">
         <CardHeader>
           <h2 className="text-2xl opacity-60">Hello User!</h2>
