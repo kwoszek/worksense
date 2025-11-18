@@ -26,6 +26,8 @@ export default function ForumPost(post: Post) {
     }
   return (
     <div>
+        <Divider className="mb-2"/>
+
         <div className="flex items-center gap-2 mb-1">
         <Avatar name={post.username || ""} size="sm" />
         <span className="text-sm opacity-80">{post.username}</span>
@@ -102,7 +104,6 @@ export default function ForumPost(post: Post) {
       ) : (
         <></>
         )}
-        <Divider />
     </div>
   );
 }

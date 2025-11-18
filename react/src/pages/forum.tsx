@@ -34,12 +34,16 @@ export default function ForumPage() {
 
   return (
     <DefaultLayout>
-      <div className="flex justify-center gap-5">
-        <Card className="w-4/7">
-              <div className="justify-between flex m-2">
-                <Button>sort placeholder</Button>
-        <Button onPress={() => setIsOpen(true)}>New Post</Button>
-      </div>
+      <div className="flex justify-center gap-5 flex-col w-9/10 ml-auto mr-auto">
+        <div className="w-full justify-between flex">
+            <Button>sort placeholder</Button>
+            <Button onPress={() => setIsOpen(true)}>New Post</Button>
+        </div>
+        <div className="flex justify-center gap-5">
+        <Card className="w-full">
+          <CardHeader className="pb-0">
+            <h2 className="opacity-60 text-2xl">Posts</h2>
+          </CardHeader>
           <CardBody>
             {!isLoadingPosts ? (
               posts?.map((post) => (
@@ -49,7 +53,7 @@ export default function ForumPage() {
             )}
           </CardBody>
         </Card>
-        <Card className="w-3/11">
+        <Card className="w-4/11">
           <CardHeader>
             <h2 className="opacity-60 text-2xl">Popular posts</h2>
           </CardHeader>
@@ -67,6 +71,8 @@ export default function ForumPage() {
             )}
           </CardBody>
         </Card>
+
+        </div>
       </div>
       <Modal isOpen={isOpen} placement="top-center" onOpenChange={setIsOpen}>
         <ModalContent>
