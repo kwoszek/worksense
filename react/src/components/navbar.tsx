@@ -6,7 +6,7 @@ import {Avatar, AvatarIcon} from "@heroui/avatar";
 import { useSelector } from 'react-redux';
 import { selectAuthUser } from '@/features/auth/authSlice';
 import { useLogoutMutation } from '@/services/usersApi';
-import { Button } from '@heroui/button';
+
  import { useNavigate } from "react-router-dom";
 
 
@@ -53,8 +53,7 @@ export const Navbar = () => {
         {user && (
           <div className="flex items-center gap-3">
             <Avatar isBordered name={user.username} src="" onClick={() => nav("/profile")}/>
-            {/* <span className="text-sm opacity-80">{user.username}</span>
-            <Button size="sm" variant="flat" onPress={() => logout().catch(()=>{})}>Logout</Button> */}
+            
           </div>
         )}
     </div>

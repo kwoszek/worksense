@@ -9,7 +9,7 @@ export default function DefaultLayout({ children }: { children: React.ReactNode 
         {children}
       </main>
 
-      <footer className="w-full mt-5">
+      <footer className="w-full mt-20">
         <div className="max-w-6xl mx-auto w-full px-4 sm:px-6 lg:px-8">
           <div className="w-full border-t pt-6">
             <div className="flex flex-col sm:flex-row items-stretch justify-between gap-4">

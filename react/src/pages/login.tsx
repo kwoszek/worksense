@@ -17,6 +17,7 @@ export default function LoginPage() {
     const navigate = useNavigate();
     const location = useLocation();
     const authedUser = useSelector(selectAuthUser);
+    const [passError, setPassError] = useState(false);
 
     // If already authenticated, redirect to dashboard
     if (authedUser) {
@@ -42,8 +43,10 @@ export default function LoginPage() {
         const data = new FormData(e.currentTarget);
         const username = (data.get('username') || '').toString().trim();
         const email = (data.get('email') || '').toString().trim();
-        const password = (data.get('password') || '').toString();
-        if (!username || !email || !password) return;
+        const password: string = (data.get('password') || '').toString();
+        if (!username || !email || !password.match(/[A-Z]/g) || password.length<5 || !password.match(/[0-9]/g)) {
+            setPassError(true);
+            return};
         try {
             await registerMutation({ username, email, password }).unwrap();
             navigate('/dashboard', { replace: true });
@@ -53,11 +56,11 @@ export default function LoginPage() {
     return (
         <DefaultLayout>
             <div className="min-h-full flex items-center justify-center gap-5 p-6">
-                <Card className="w-full max-w-xl">
-                    <CardHeader className="flex justify-between">
-                        <ButtonGroup>
-                            <Button disabled={mode==='login'} onPress={() => setMode('login')}>Login</Button>
-                            <Button disabled={mode==='register'} onPress={() => setMode('register')}>Register</Button>
+                <Card className="w-100">
+                    <CardHeader className="flex justify-between w-full">
+                        <ButtonGroup className="w-full">
+                            <Button disabled={mode==='login'} onPress={() => setMode('login')} color={mode=="login"?"success":"default"} className="w-1/2 opacity-80">Login</Button>
+                            <Button disabled={mode==='register'} onPress={() => setMode('register')} className="w-1/2 opacity-80" color={mode=="register"?"success":"default"} >Register</Button>
                         </ButtonGroup>
                     </CardHeader>
                     <Divider />
@@ -81,9 +84,9 @@ export default function LoginPage() {
                                     type="password"
                                 />
                                 {loginError && <p className="text-sm text-red-600">Login failed</p>}
-                                <div className="flex gap-2">
-                                    <Button color="primary" type="submit" isDisabled={loggingIn} isLoading={loggingIn}>Login</Button>
-                                    <Button type="reset" variant="flat" isDisabled={loggingIn}>Reset</Button>
+                                <div className="flex gap-2 justify-center w-full">
+                                    <Button  color="success" type="submit" className="w-1/2" isDisabled={loggingIn} isLoading={loggingIn}>Login</Button>
+                                    <Button type="reset" variant="flat" className="w-1/2" isDisabled={loggingIn}>Reset</Button>
                                 </div>
                             </Form>
                         </CardBody>
@@ -113,11 +116,13 @@ export default function LoginPage() {
                                     name="password"
                                     placeholder="Create password"
                                     type="password"
+                                    isInvalid={passError}
+                                    errorMessage="Password must be at least 5 characters long, contain at least one uppercase letter and one number."
                                 />
                                 {registerError && <p className="text-sm text-red-600">Registration failed</p>}
-                                <div className="flex gap-2">
-                                    <Button color="primary" type="submit" isDisabled={registering} isLoading={registering}>Create Account</Button>
-                                    <Button type="reset" variant="flat" isDisabled={registering}>Reset</Button>
+                                <div className="flex gap-2 w-full justify-center">
+                                    <Button className="w-1/2" color="success" type="submit" isDisabled={registering} isLoading={registering}>Create Account</Button>
+                                    <Button type="reset" className="w-1/2" variant="flat" isDisabled={registering} onPress={()=>setPassError(false)}>Reset</Button>
                                 </div>
                             </Form>
                         </CardBody>
