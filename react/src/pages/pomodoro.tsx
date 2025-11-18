@@ -26,7 +26,7 @@ const defaultSettings = {
   sound: true,
 };
 
-export default function FocusPage() {
+export default function PomodoroPage() {
   const saved = loadSettings() ?? defaultSettings;
   const [settings] = useState(() => ({ ...defaultSettings, ...saved }));
 
@@ -37,6 +37,7 @@ export default function FocusPage() {
   const intervalRef = useRef<number | null>(null);
 
   useEffect(() => {
+    // ensure seconds match mode when mode changes
     if (mode === "work") setSecondsLeft(settings.workMinutes * 60);
     if (mode === "short") setSecondsLeft(settings.shortBreakMinutes * 60);
     if (mode === "long") setSecondsLeft(settings.longBreakMinutes * 60);
@@ -56,6 +57,8 @@ export default function FocusPage() {
 
   useEffect(() => {
     if (secondsLeft > 0) return;
+    // session ended
+    // small sound
     if (settings.sound) {
       try {
         const ctx = new (window.AudioContext || (window as any).webkitAudioContext)();
@@ -84,6 +87,7 @@ export default function FocusPage() {
       setMode(nextMode);
       if (!settings.autoStartNext) setIsRunning(false);
     } else {
+      // from break to work
       setMode("work");
       if (!settings.autoStartNext) setIsRunning(false);
     }
@@ -96,6 +100,7 @@ export default function FocusPage() {
         e.preventDefault();
         setIsRunning((v) => !v);
       } else if (e.key.toLowerCase() === "r") {
+        // reset
         setSecondsLeft(() => {
           if (mode === "work") return settings.workMinutes * 60;
           if (mode === "short") return settings.shortBreakMinutes * 60;
@@ -103,6 +108,7 @@ export default function FocusPage() {
         });
         setIsRunning(false);
       } else if (e.key.toLowerCase() === "s") {
+        // skip
         setSecondsLeft(0);
       }
     }
@@ -135,29 +141,26 @@ export default function FocusPage() {
   return (
     <DefaultLayout>
       <section className="flex flex-col items-center justify-center gap-6 py-8 md:py-10">
-        <div className="w-full max-w-xl p-6 rounded-lg border mb-5">
+        <div className="w-full max-w-xl p-6 rounded-lg border">
           <div className="flex items-center justify-between">
-            <h2 className="text-xl font-semibold">Focus</h2>
-             
+            <h2 className="text-xl font-semibold">Pomodoro</h2>
             <div className="text-sm opacity-80">Mode: {mode === "work" ? "Work" : mode === "short" ? "Short Break" : "Long Break"}</div>
           </div>
-          <div className="flex gap-3 justify-center mt-2">
-              <Link href="/focus/about" underline="always" color="foreground">About</Link>
-              <Link href="/focus/settings" underline="always" color="foreground">Settings</Link>
-            </div>
 
-          <div className="mt-20 flex flex-col items-center gap-4">
+          <div className="mt-6 flex flex-col items-center gap-4">
             <div className="text-6xl font-mono">{String(minutes).padStart(2, "0")}:{String(seconds).padStart(2, "0")}</div>
             <div className="w-full h-2 bg-muted/30 rounded overflow-hidden">
               <div className="h-2 bg-accent" style={{ width: `${Math.max(0, Math.min(1, progress)) * 100}%` }} />
             </div>
-            <div className="flex gap-3 mt-4 ">
+            <div className="flex gap-3 mt-4">
               <Button onPress={handleStartPause} size="sm">{isRunning ? "Pause" : "Start"}</Button>
               <Button onPress={handleReset} size="sm" variant="ghost">Reset</Button>
               <Button onPress={handleSkip} size="sm" variant="flat">Skip</Button>
-              
+             
             </div>
-           
+             <div className="flex gap-3 mt-4">
+                 <Link href="/pomodoro/settings" underline="always" color="foreground">Settings</Link>
+            </div>
             <div className="text-xs opacity-70 mt-2">Shortcuts: Space = start/pause · R = reset · S = skip</div>
           </div>
         </div>

@@ -7,6 +7,7 @@ import { useSelector } from 'react-redux';
 import { selectAuthUser } from '@/features/auth/authSlice';
 import { useLogoutMutation } from '@/services/usersApi';
 import { Button } from '@heroui/button';
+ import { useNavigate } from "react-router-dom";
 
 
 import DashboardPage from "@/pages/dashboard";
@@ -14,12 +15,16 @@ import ForumPage from "@/pages/forum";
 import ProgressPage from "@/pages/progress";
 import ArticlesPage from "@/pages/articles";
 import FocusPage from "@/pages/focus";
+import PomodoroSettingsPage from "@/pages/pomodoroSettings";
+import AboutPage from "@/pages/about";
 
 
 export const Navbar = () => {
+    const nav = useNavigate();
   const { pathname } = useLocation();
   const user = useSelector(selectAuthUser);
   const [logout] = useLogoutMutation();
+ 
 
   return (
     <div className="flex justify-between items-center mt-3 mx-5">
@@ -41,13 +46,15 @@ export const Navbar = () => {
               <Route element={<ForumPage />} path="/forum" />
               <Route element={<ProgressPage />} path="/progress" />
               <Route element={<ArticlesPage />} path="/articles" />
-              <Route element={<FocusPage />} path="/focus" />
+               <Route element={<FocusPage />} path="/focus" />
+              <Route element={<PomodoroSettingsPage />} path="/focus/settings" />
+              <Route element={<AboutPage />} path="/focus/about" />
             </Routes>
         {user && (
           <div className="flex items-center gap-3">
-            <Avatar isBordered src="https://i.pravatar.cc/150?u=a042581f4e29026024d" />
-            <span className="text-sm opacity-80">{user.username}</span>
-            <Button size="sm" variant="flat" onPress={() => logout().catch(()=>{})}>Logout</Button>
+            <Avatar isBordered name={user.username} src="" onClick={() => nav("/profile")}/>
+            {/* <span className="text-sm opacity-80">{user.username}</span>
+            <Button size="sm" variant="flat" onPress={() => logout().catch(()=>{})}>Logout</Button> */}
           </div>
         )}
     </div>
