@@ -20,7 +20,7 @@ export default function ForumPage() {
 
   async function handleCreatePost(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    if (!user) return; // guarded routes should prevent this, but safe check
+    if (!user?.id) return; // guarded routes should prevent this, but safe check
     const t = title.trim();
     const c = content.trim();
     if (!t || !c) return;
