@@ -29,15 +29,42 @@ router.post('/users', async (req, res, next) => {
 
 // Posts
 router.get('/posts', async (req, res, next) => {
-    try {
-        const q = `SELECT p.id, p.title, p.content, p.dateposted, p.userid,
-            u.username
-            FROM posts p
-            LEFT JOIN users u ON u.id = p.userid
-            ORDER BY p.dateposted DESC, p.id DESC`;
-        const result = await db.query(q);
-        res.json(result.rows);
-    } catch (err) { next(err); }
+  try {
+    const offset = Number(req.query.offset || 0);
+    const limit = Number(req.query.limit || 20);
+
+    const q = `
+      SELECT
+        p.id,
+        p.title,
+        p.content,
+        p.dateposted,
+        p.userid,
+        u.username,
+        COALESCE(
+          json_agg(
+            jsonb_build_object(
+              'id', c.id,
+              'userid', c.userid,
+              'postid', c.postid,
+              'content', c.content,
+              'dateposted', c.dateposted,
+              'username', cu.username
+            )
+          ) FILTER (WHERE c.id IS NOT NULL),
+          '[]'
+        ) AS comments
+      FROM posts p
+      LEFT JOIN users u ON u.id = p.userid
+      LEFT JOIN comments c ON c.postid = p.id
+      LEFT JOIN users cu ON cu.id = c.userid
+      GROUP BY p.id, u.username
+      ORDER BY p.dateposted DESC, p.id DESC
+      OFFSET $1 LIMIT $2;
+    `;
+    const result = await db.query(q, [offset, limit]);
+    res.json(result.rows);
+  } catch (err) { next(err); }
 });
 
 router.get('/posts/:id', async (req, res, next) => {
@@ -74,6 +101,34 @@ router.post('/posts/:id/comments', async (req, res, next) => {
         const result = await db.query(q, [userId, postId, content, datePosted]);
         res.status(201).json(result.rows[0]);
     } catch (err) { next(err); }
+});
+
+// Comments list (paginated)
+router.get('/posts/:id/comments', async (req, res, next) => {
+  try {
+    const postId = Number(req.params.id);
+    if (Number.isNaN(postId)) return res.status(400).json({ error: 'Invalid post id' });
+
+    const offset = Number(req.query.offset || 0);
+    const limit = Number(req.query.limit || 20);
+
+    const q = `
+      SELECT
+        c.id,
+        c.userid,
+        c.postid,
+        c.content,
+        c.dateposted,
+        u.username
+      FROM comments c
+      LEFT JOIN users u ON u.id = c.userid
+      WHERE c.postid = $1
+      ORDER BY c.dateposted ASC, c.id ASC
+      OFFSET $2 LIMIT $3;
+    `;
+    const result = await db.query(q, [postId, offset, limit]);
+    res.json(result.rows);
+  } catch (err) { next(err); }
 });
 
 // Checkins

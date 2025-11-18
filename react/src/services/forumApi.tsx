@@ -1,12 +1,6 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 
 // Types
-export interface User {
-	id: number;
-	username: string;
-	email: string;
-}
-
 export interface Post {
 	id: number;
 	userid: number;
@@ -46,18 +40,8 @@ const baseUrl = `${import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000'}
 export const forumApi = createApi({
 	reducerPath: 'forumApi',
 	baseQuery: fetchBaseQuery({ baseUrl }),
-	tagTypes: ['Users', 'Posts', 'Post', 'Comments', 'Checkins'],
+	tagTypes: ['Posts', 'Post', 'Comments', 'Checkins'],
 	endpoints: (builder) => ({
-		// Users
-		getUsers: builder.query<User[], void>({
-			query: () => '/users',
-			providesTags: ['Users'],
-		}),
-		addUser: builder.mutation<User, { username: string; password: string; email: string }>({
-			query: (body: { username: string; password: string; email: string }) => ({ url: '/users', method: 'POST', body }),
-			invalidatesTags: ['Users'],
-		}),
-
 		// Posts
 		getPosts: builder.query<Post[], void>({
 			query: () => '/posts',
@@ -65,23 +49,31 @@ export const forumApi = createApi({
 		}),
 		getPost: builder.query<PostWithComments, number>({
 			query: (id: number) => `/posts/${id}`,
-			providesTags: (_result: PostWithComments | undefined, _error: unknown, id: number) => [
-				{ type: 'Post', id },
-				{ type: 'Comments', id },
+			providesTags: (_result, _error, id) => [
+				{ type: 'Post' as const, id },
+				{ type: 'Comments' as const, id },
 			],
 		}),
 		addPost: builder.mutation<Post, { userId: number; title: string; content: string }>({
-			query: (body: { userId: number; title: string; content: string }) => ({ url: '/posts', method: 'POST', body }),
+			query: (body) => ({ url: '/posts', method: 'POST', body }),
 			invalidatesTags: ['Posts'],
 		}),
 
 		// Comments
 		addComment: builder.mutation<Comment, { postId: number; userId: number; content: string }>({
-			query: ({ postId, ...rest }: { postId: number; userId: number; content: string }) => ({ url: `/posts/${postId}/comments`, method: 'POST', body: rest }),
-			invalidatesTags: (_result: Comment | undefined, _error: unknown, { postId }: { postId: number }) => [
-				{ type: 'Post', id: postId },
-				{ type: 'Comments', id: postId },
+			query: ({ postId, ...rest }) => ({
+				url: `/posts/${postId}/comments`,
+				method: 'POST',
+				body: rest,
+			}),
+			invalidatesTags: (_result, _error, { postId }) => [
+				{ type: 'Post' as const, id: postId },
+				{ type: 'Comments' as const, id: postId },
 			],
+		}),
+		getComments: builder.query<Comment[], { postId: number; offset?: number; limit?: number }>({
+		query: ({ postId, offset = 0, limit = 20 }) =>
+			`/posts/${postId}/comments?offset=${offset}&limit=${limit}`,
 		}),
 
 		// Checkins
@@ -89,8 +81,11 @@ export const forumApi = createApi({
 			query: () => '/checkins',
 			providesTags: ['Checkins'],
 		}),
-		addCheckin: builder.mutation<Checkin, { userId: number; stress: number; energy: number; description: string }>({
-			query: (body: { userId: number; stress: number; energy: number; description: string }) => ({ url: '/checkins', method: 'POST', body }),
+		addCheckin: builder.mutation<
+			Checkin,
+			{ userId: number; stress: number; energy: number; description: string }
+		>({
+			query: (body) => ({ url: '/checkins', method: 'POST', body }),
 			invalidatesTags: ['Checkins'],
 		}),
 	}),
@@ -98,12 +93,11 @@ export const forumApi = createApi({
 
 // Hooks
 export const {
-	useGetUsersQuery,
-	useAddUserMutation,
 	useGetPostsQuery,
 	useGetPostQuery,
 	useAddPostMutation,
 	useAddCommentMutation,
+	useGetCommentsQuery,
 	useGetCheckinsQuery,
 	useAddCheckinMutation,
 } = forumApi;
