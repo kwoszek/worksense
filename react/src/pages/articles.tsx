@@ -25,9 +25,9 @@ export default function ArticlesPage() {
   return (
     <DefaultLayout>
       
-     <Card className="w-8/10 m-auto">
+     <Card className="w-8/10 m-auto px-5">
       <CardHeader>
-        <h2 className="text-5xl opacity-60">Articles Page</h2>
+        <h2 className="text-6xl opacity-60 mt-3">Helpful articles</h2>
       </CardHeader>
      <Divider/>
       <CardBody>{

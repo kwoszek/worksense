@@ -23,7 +23,7 @@ export default function ProgressPage() {
       </Card>
     </div>
     <div className="flex flex-col gap-5 w-3/10">
-      <Card>
+      <Card className="p-3">
         <CardHeader>
           <h2 className="text-2xl opacity-60">Hello User!</h2>
         </CardHeader>

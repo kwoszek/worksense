@@ -5,8 +5,10 @@ function Article(props){
     return (
         <article className="mt-5">
         
-        <Link to={props.href} className="text-2xl underline ">{props.tittle}</Link>
-        <p className="opacity-60 my-3">{props.summary}</p>
+        <Link to={props.href} className="text-2xl underline ">{props.tittle}
+         <p className="opacity-60 my-3">{props.summary}</p>
+        </Link>
+       
         <Divider />
         </article>
 

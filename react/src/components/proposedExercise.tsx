@@ -2,7 +2,7 @@ import {Card, CardHeader, CardBody} from "@heroui/card";
 
 function ProposedExercise() {
     return (
-        <Card>
+        <Card className="p-3">
         <CardHeader>
             <h2 className="text-2xl opacity-60">Proposed Exercise</h2>
         </CardHeader>

@@ -8,7 +8,7 @@ export default function DefaultLayout({ children }: { children: React.ReactNode 
       <main className="mt-15 flex-1">
         {children}
       </main>
-      <footer className="w-full flex items-center justify-center py-3 p-5 m-5 divide-x-1 divide-solid divide-amber-50" >
+      <footer className="w-full flex items-center justify-center py-3 p-5 m-5 divide-x-1 divide-solid divide-foreground" >
         <div className="flex items-center justify-center py-3 gap-5 p-5 m-5 w-1/3" >
         <div className="p-5">
           <ul className="list-disc">

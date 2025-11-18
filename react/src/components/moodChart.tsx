@@ -18,19 +18,19 @@ import HeatMap from '@uiw/react-heat-map';
 function MoodChart() {
   return (
     <>
-     <Card>
+     <Card className="p-3">
       <CardBody>
         <p className="text-2xl opacity-60">Your wellness streak is <strong className="opacity-100">50 days</strong> </p>
       </CardBody>
     </Card>
-    <Card>
+    <Card className="p-3">
         <CardHeader>
           <h2 className="text-2xl opacity-60">Your mood chart</h2>
         </CardHeader>
       <CardBody>
          <HeatMap
         value={value}
-        style={{ color: '#ffffff'}}
+        style={{ color: '#22c55e' }}
         weekLabels={['', 'Mon', '', 'Wed', '', 'Fri', '']}
         startDate={new Date('2016/01/01')}
       />
