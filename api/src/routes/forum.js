@@ -134,7 +134,18 @@ router.get('/posts/:id/comments', async (req, res, next) => {
 // Checkins
 router.get('/checkins', async (req, res, next) => {
     try {
-      const q = 'SELECT c.id, c."userId" AS userid, c.stress, c.energy, c.description, c.date, u.username FROM checkins c LEFT JOIN users u ON u.id = c."userId" ORDER BY c.date DESC';
+      // Explicitly format the `date` column as YYYY-MM-DD in the database to avoid
+      // any client-side timezone/Date parsing issues in Node/pg.
+      const q = `SELECT c.id,
+                        c."userId" AS userid,
+                        c.stress,
+                        c.energy,
+                        c.description,
+                        to_char(c.date, 'YYYY-MM-DD') AS date,
+                        u.username
+                 FROM checkins c
+                 LEFT JOIN users u ON u.id = c."userId"
+                 ORDER BY c.date DESC`;
       const result = await db.query(q);
       res.json(result.rows);
     } catch (err) { next(err); }
@@ -143,7 +154,7 @@ router.get('/checkins', async (req, res, next) => {
 router.post('/checkins', async (req, res, next) => {
     try {
       const { userId, stress, energy, description } = req.body;
-      const date = new Date().toISOString().slice(0,10);
+      const date = new Date();
       const q = 'INSERT INTO checkins("userId", stress, energy, description, date) VALUES($1,$2,$3,$4,$5) RETURNING id, "userId" AS userid, stress, energy, description, date';
       const result = await db.query(q, [userId, stress, energy, description, date]);
       res.status(201).json(result.rows[0]);
