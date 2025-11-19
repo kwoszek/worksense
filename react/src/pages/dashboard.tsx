@@ -8,18 +8,25 @@ import MoodChart from "@/components/moodChart";
 import { useGetCheckinsQuery } from "@/services/forumApi";
 import { useSelector } from "react-redux";
 import { selectAuthUser } from "@/features/auth/authSlice";
-import ProposedExercise from "@/components/proposedExercise";
 import { useGetPostsQuery } from "@/services/forumApi";
+import { useGetAnalysesQuery } from "@/services/analysisApi";
 
 export default function DashboardPage() {
   const today = new Date().toISOString().slice(0, 10);
   const { data: checkins } = useGetCheckinsQuery();
   const user = useSelector(selectAuthUser);
+  const { data: analyses } = useGetAnalysesQuery();
+  const latestAnalysis = analyses && analyses.length ? analyses[0] : null;
    const hasToday = !!checkins?.find((c) => c.userid === user?.id && c.date.slice(0,10) === today);
 
   const chartCheckins = checkins
     ?.filter((c: any) => c.userid === user?.id)
-    .map((c: any) => ({ date: c.createdAt ?? c.date, stress: c.stress ?? 5, energy: c.energy ?? 5 }));
+    .map((c: any) => ({
+      date: c.createdAt ?? c.date,
+      stress: c.stress ?? 5,
+      energy: c.energy ?? 5,
+      moodScore: c.moodScore ?? undefined,
+    }));
   const {data: popularPosts, isLoading: isLoadingPopularPosts} = useGetPostsQuery({ limit: 5, offset: 0, orderBy: 'likes', direction: 'DESC' });
   const articles = [
   { tittle: "How to Prevent and Overcome Burnout (APS)", summary: "Guidelines on preventing burnout through self-care and reflection.", href: "https://psychology.org.au/getmedia/85f586e3-a856-47f2-a306-d0568e318193/aps-burnout-community-resource.pdf" },
@@ -45,17 +52,13 @@ export default function DashboardPage() {
       <MoodChart checkins={chartCheckins} />
     <Card className="p-5 hidden sm:block">
       <CardHeader>
-        <h2 className="opacity-60 text-2xl">Popular posts</h2>
+        <h2 className="opacity-60 text-2xl">Popularne posty</h2>
 
       </CardHeader>
-      <Divider />
       <CardBody>
          {!isLoadingPopularPosts ? (
               popularPosts?.map((post) => (
-                <div key={post.id} className="mb-4">
-                  <h3>{post.title}</h3>
-                  <Divider />
-                </div>
+                <Post key={post.id} {...post} />
               ))
             ) : (
               <></>
@@ -68,17 +71,26 @@ export default function DashboardPage() {
     <div className="flex flex-col gap-5 w-full sm:w-1/3 min-w-0">
       <Card className="p-3">
         <CardHeader>
-          <h2 className="text-2xl opacity-60">Hello {user?.username}!</h2>
+          <h2 className="text-2xl opacity-60">Cześć {user?.username}!</h2>
         </CardHeader>
       <CardBody>
-         {hasToday ? <div className="text-sm opacity-70">Thank you for checking-in today</div>:<Link  to="/progress" className="text-3xl opacity-80 text-success underline" state="open">Do a daily check-in</Link>}
+         {hasToday ? <div className="text-sm opacity-70">Check-in na dzisiaj zrobiony!!</div>:<Link  to="/progress" className="text-3xl opacity-80 text-success underline" state="open">Zrób codzienny check-in</Link>}
         
       </CardBody>
     </Card>
-     <ProposedExercise/>
+     {latestAnalysis && (
+      <Card className="p-3">
+        <CardHeader>
+          <h2 className="text-2xl opacity-60">Twój najnowszy check-in</h2>
+        </CardHeader>
+        <CardBody>
+          <p className="text-sm opacity-80">{latestAnalysis.message}</p>
+        </CardBody>
+      </Card>
+     )}
      <Card>
       <CardHeader>
-        <h2 className="text-2xl opacity-60">Selected articles</h2>
+        <h2 className="text-2xl opacity-60">Wybrane artykuły</h2>
       </CardHeader>
       <Divider />
       <CardBody>{

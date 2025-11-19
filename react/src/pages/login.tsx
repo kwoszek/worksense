@@ -22,7 +22,7 @@ export default function LoginPage() {
     // If already authenticated, redirect to dashboard
     if (authedUser) {
         
-        return <DefaultLayout>{}<div className="min-h-full flex items-center justify-center"><p>You are already logged in.</p></div></DefaultLayout>;
+        return <DefaultLayout>{}<div className="min-h-full flex items-center justify-center"><p>Jesteś już zalogowany</p></div></DefaultLayout>;
     }
 
    
@@ -62,7 +62,7 @@ export default function LoginPage() {
                     <CardHeader className="flex justify-between w-full">
                         <ButtonGroup className="w-full">
                             <Button disabled={mode==='login'} onPress={() => setMode('login')} color={mode=="login"?"success":"default"} className="w-1/2 opacity-80">Login</Button>
-                            <Button disabled={mode==='register'} onPress={() => setMode('register')} className="w-1/2 opacity-80" color={mode=="register"?"success":"default"} >Register</Button>
+                            <Button disabled={mode==='register'} onPress={() => setMode('register')} className="w-1/2 opacity-80" color={mode=="register"?"success":"default"} >Rejestracja</Button>
                         </ButtonGroup>
                     </CardHeader>
                     <Divider />
@@ -71,18 +71,18 @@ export default function LoginPage() {
                             <Form className="flex flex-col gap-4" onSubmit={handleLogin}>
                                 <Input
                                     isRequired
-                                    label="Email or Username"
+                                    label="Email lub nazwa użytkownika"
                                     labelPlacement="outside"
                                     name="identifier"
-                                    placeholder="Enter email or username"
+                                    placeholder="Wprowadź email lub nazwę użytkownika"
                                     type="text"
                                 />
                                 <Input
                                     isRequired
-                                    label="Password"
+                                    label="Hasło"
                                     labelPlacement="outside"
                                     name="password"
-                                    placeholder="Enter password"
+                                    placeholder="Wprowadź hasło"
                                     type="password"
                                 />
                                 {loginError && <p className="text-sm text-red-600">Login failed</p>}
@@ -97,10 +97,10 @@ export default function LoginPage() {
                             <Form className="flex flex-col gap-4" onSubmit={handleRegister}>
                                 <Input
                                     isRequired
-                                    label="Username"
+                                    label="Nazwa użytkownika"
                                     labelPlacement="outside"
                                     name="username"
-                                    placeholder="Choose a username"
+                                    placeholder="Wybierz nazwę użytkownika"
                                     type="text"
                                 />
                                 <Input
@@ -108,22 +108,22 @@ export default function LoginPage() {
                                     label="Email"
                                     labelPlacement="outside"
                                     name="email"
-                                    placeholder="Enter email"
+                                    placeholder="Wprowadź email"
                                     type="email"
                                 />
                                 <Input
                                     isRequired
-                                    label="Password"
+                                    label="Hasło"
                                     labelPlacement="outside"
                                     name="password"
-                                    placeholder="Create password"
+                                    placeholder="Stwórz hasło"
                                     type="password"
                                     isInvalid={passError}
-                                    errorMessage="Password must be at least 5 characters long, contain at least one uppercase letter and one number."
+                                    errorMessage="Hasło musi mieć co najmniej 5 znaków, zawierać dużą literę i cyfrę"
                                 />
-                                {registerError && <p className="text-sm text-red-600">Registration failed</p>}
+                                {registerError && <p className="text-sm text-red-600">Rejestracja nie powiodła się</p>}
                                 <div className="flex gap-2 w-full justify-center">
-                                    <Button className="w-1/2" color="success" type="submit" isDisabled={registering} isLoading={registering}>Create Account</Button>
+                                    <Button className="w-1/2" color="success" type="submit" isDisabled={registering} isLoading={registering}>Zarejestruj się</Button>
                                     <Button type="reset" className="w-1/2" variant="flat" isDisabled={registering} onPress={()=>setPassError(false)}>Reset</Button>
                                 </div>
                             </Form>

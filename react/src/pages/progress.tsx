@@ -2,7 +2,6 @@ import {Card, CardHeader, CardBody} from "@heroui/card";
 import DefaultLayout from "@/layouts/default";
 import { Link } from "@heroui/link";
 import MoodChart from "@/components/moodChart";
-import ProposedExercise from "@/components/proposedExercise";
 import React, { useState } from "react";
 // Card and Divider not needed here; chart component renders its own cards
 import { useGetCheckinsQuery, useAddCheckinMutation } from "@/services/forumApi";
@@ -14,11 +13,13 @@ import { selectAuthUser } from "@/features/auth/authSlice";
 import { useLocation } from 'react-router-dom';
 import { Slider } from "@heroui/slider";
 import { Divider } from "@heroui/divider";
+import { useGetLatestAnalysisQuery } from "@/services/analysisApi";
 
 
 export default function ProgressPage() {
   const location = useLocation();
    const { data: checkins } = useGetCheckinsQuery();
+    const { data: latestAnalysis } = useGetLatestAnalysisQuery();
     const [addCheckin, { isLoading: creating }] = useAddCheckinMutation();
     const user = useSelector(selectAuthUser);
     const state = location.state
@@ -30,7 +31,7 @@ export default function ProgressPage() {
     const today = new Date().toISOString().slice(0, 10);
     const hasToday = !!checkins?.find((c) => c.userid === user?.id && c.date.slice(0,10) === today);
   
-  
+    console.log(latestAnalysis);
     // transform API checkins to the shape expected by MoodChart
     const chartCheckins = checkins
       ?.filter((c: any) => c.userid === user?.id)
@@ -38,6 +39,7 @@ export default function ProgressPage() {
         date: c.createdAt ?? c.date,
         stress: c.stress ?? 5,
         energy: c.energy ?? 5,
+        moodScore: c.moodScore ?? undefined,
       }));
   
     async function handleCreate(e: React.FormEvent) {
@@ -69,37 +71,46 @@ export default function ProgressPage() {
         <h2 className="opacity-60 text-2xl">Your Progress Details</h2>
       </CardHeader>
       <CardBody>
-         <p className="text-lg ">Here you can track your wellness and mood over time. Keep up the great work!</p>
+         {latestAnalysis?.progresssummary || latestAnalysis?.progressSummary ? (
+          <p className="text-md opacity-80">{latestAnalysis.progresssummary || latestAnalysis.progressSummary}</p>
+         ) :          <p className="text-lg mb-3">Tu możesz śledzić swoje samopoczucie i postępy w dbaniu o siebie. Trzymaj tak dalej!</p>
+}
       </CardBody>
       </Card>
     </div>
     <div className="flex flex-col gap-5 w-3/10">
       <Card className="p-3">
         <CardHeader>
-          <h2 className="text-2xl opacity-60">Daily Check-ins</h2>
+          <h2 className="text-2xl opacity-60">Codzienny Check-in</h2>
         </CardHeader>
       <CardBody>
-        
-                  <div className="flex items-center gap-3">
-                    {hasToday && <div className="text-sm opacity-70">You've already checked in today.</div>}
-                    <Button onPress={() => setIsOpen(true)} isDisabled={hasToday}>New Check-in</Button>
+                  <div className="flex flex-col gap-3">
+                    <div className="flex items-center gap-3">
+                      {hasToday && <div className="text-sm opacity-70">Już zrobiłeś dzisiaj check-in.</div>}
+                      <Button onPress={() => setIsOpen(true)} isDisabled={hasToday}>Nowy Check-in</Button>
                     </div>
+                    {latestAnalysis && (
+                      <div className="mt-3 text-sm opacity-80">
+                        <p className="font-semibold mb-1">Najnowszy przegląd check-in</p>
+                        <p>{latestAnalysis.message}</p>
+                      </div>
+                    )}
+                  </div>
       </CardBody>
     </Card>
-    <ProposedExercise/>
     </div>
     </div>
     <Modal isOpen={isOpen} placement="top-center" onOpenChange={setIsOpen}>
               <ModalContent>
                 {(onClose) => (
                   <>
-                    <ModalHeader className="flex flex-col gap-1 text-2xl">Create Check-in</ModalHeader>
+                    <ModalHeader className="flex flex-col gap-1 text-2xl">Zrób Check-in</ModalHeader>
                     <Divider/>
 
                     <ModalBody>
                       <form className="flex flex-col gap-10 px-5" onSubmit={handleCreate}>
                         <div className="mt-5">
-                          <label className="text-md opacity-80">Stress: {stress}</label>
+                          <label className="text-md opacity-80">Poziom stresu: {stress}</label>
                          
                            <Slider
                            minValue={0}
@@ -115,7 +126,7 @@ export default function ProgressPage() {
                           />
                         </div>
                         <div>
-                          <label className="text-md opacity-80">Energy: {energy}</label>
+                          <label className="text-md opacity-80">Poziom energii: {energy}</label>
                           <Slider
                            minValue={0}
                             maxValue={10}
@@ -130,12 +141,12 @@ export default function ProgressPage() {
                           />
                         </div>
                         <div className="flex flex-col gap-2">
-                          <label className="text-sm opacity-70" htmlFor="desc">Notes</label>
+                          <label className="text-sm opacity-70" htmlFor="desc">Notatki</label>
                           <textarea id="desc" name="description" className="min-h-24 rounded-medium border p-3" value={description} onChange={(e) => setDescription(e.target.value)} />
                         </div>
                         <div className="flex gap-2 justify-end">
-                          <Button color="danger" variant="flat" onPress={onClose}>Cancel</Button>
-                          <Button color="success" type="submit" isDisabled={creating} isLoading={creating}>Save</Button>
+                          <Button color="danger" variant="flat" onPress={onClose}>Anuluj</Button>
+                          <Button color="success" type="submit" isDisabled={creating} isLoading={creating}>Zapisz</Button>
                         </div>
                       </form>
                     </ModalBody>
@@ -144,7 +155,7 @@ export default function ProgressPage() {
                 )}
               </ModalContent>
             </Modal>
-            
+
     </DefaultLayout>
   );
 }

@@ -11,10 +11,8 @@ CREATE TABLE IF NOT EXISTS users (
   email VARCHAR(100) NOT NULL
 );
 
--- additional profile fields
 ALTER TABLE users
   ADD COLUMN IF NOT EXISTS avatar BYTEA,
-  ADD COLUMN IF NOT EXISTS badges TEXT[] DEFAULT '{}'::text[],
   ADD COLUMN IF NOT EXISTS streak INTEGER NOT NULL DEFAULT 0;
 
 -- uniqueness for login
@@ -55,7 +53,8 @@ CREATE TABLE IF NOT EXISTS checkins (
   stress INTEGER NOT NULL,
   energy INTEGER NOT NULL,
   description TEXT,
-  date DATE NOT NULL
+  date DATE NOT NULL,
+  moodScore INTEGER               -- nowa kolumna na ocenę z AI (może być NULL)
 );
 
 -- refresh tokens for auth
@@ -104,4 +103,47 @@ CREATE TABLE IF NOT EXISTS comment_likes (
   commentId INTEGER NOT NULL REFERENCES comments(id) ON DELETE CASCADE,
   createdAt TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   UNIQUE(userId, commentId)
+);
+
+-- Badge (advancement) definitions
+CREATE TABLE IF NOT EXISTS badges (
+  id SERIAL PRIMARY KEY,
+  key TEXT NOT NULL UNIQUE, -- stable identifier e.g. 'streak'
+  name TEXT NOT NULL,
+  description TEXT,
+  maxLevel INTEGER NOT NULL DEFAULT 1
+);
+
+-- User badges with level tracking
+CREATE TABLE IF NOT EXISTS user_badges (
+  id SERIAL PRIMARY KEY,
+  userId INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  badgeId INTEGER NOT NULL REFERENCES badges(id) ON DELETE CASCADE,
+  level INTEGER NOT NULL DEFAULT 1,
+  createdAt TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  updatedAt TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  UNIQUE(userId, badgeId)
+);
+
+-- Seed core badge definitions if absent
+DO $$
+DECLARE
+  need_streak BOOLEAN := NOT EXISTS (SELECT 1 FROM badges WHERE key = 'streak');
+BEGIN
+  IF need_streak THEN
+    INSERT INTO badges(key, name, description, maxLevel) VALUES
+      ('streak', 'Streaker', 'Awarded for maintaining an activity streak. Levels increase at 1,7,30,100 days.', 4);
+  END IF;
+END$$;
+
+-- AI analysis results for checkins
+CREATE TABLE IF NOT EXISTS checkin_ai_analysis (
+  id SERIAL PRIMARY KEY,
+  userId INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  checkinId INTEGER NOT NULL REFERENCES checkins(id) ON DELETE CASCADE,
+  moodScore INTEGER NOT NULL,
+  message TEXT NOT NULL,
+  progressSummary TEXT,
+  createdAt TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  UNIQUE(userId, checkinId)
 );

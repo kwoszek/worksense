@@ -8,6 +8,7 @@ const cookieParser = require('cookie-parser');
 const { checkDb } = require('./database/db');
 const forumRouter = require('./routes/forum');
 const usersRouter = require('./routes/users');
+const analysisRouter = require('./routes/analysis');
 
 const app = express();
 const PORT = process.env.PORT ? Number(process.env.PORT) : 3000;
@@ -24,6 +25,7 @@ app.use(morgan('dev'));
 
 app.use('/api/forum', forumRouter);
 app.use('/api/users', usersRouter);
+app.use('/api/analysis', analysisRouter);
 
 app.get('/', (_req, res) => res.json({ ok: true }));
 
