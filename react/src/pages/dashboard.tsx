@@ -81,7 +81,7 @@ export default function DashboardPage() {
      {latestAnalysis && (
       <Card className="p-3">
         <CardHeader>
-          <h2 className="text-2xl opacity-60">Your latest check-in</h2>
+          <h2 className="text-2xl opacity-60">Twój najnowszy check-in</h2>
         </CardHeader>
         <CardBody>
           <p className="text-sm opacity-80">{latestAnalysis.message}</p>

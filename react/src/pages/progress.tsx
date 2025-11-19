@@ -73,7 +73,7 @@ export default function ProgressPage() {
       <CardBody>
          {latestAnalysis?.progresssummary || latestAnalysis?.progressSummary ? (
           <p className="text-md opacity-80">{latestAnalysis.progresssummary || latestAnalysis.progressSummary}</p>
-         ) :          <p className="text-lg mb-3">Here you can track your wellness and mood over time. Keep up the great work!</p>
+         ) :          <p className="text-lg mb-3">Tu możesz śledzić swoje samopoczucie i postępy w dbaniu o siebie. Trzymaj tak dalej!</p>
 }
       </CardBody>
       </Card>
@@ -81,17 +81,17 @@ export default function ProgressPage() {
     <div className="flex flex-col gap-5 w-3/10">
       <Card className="p-3">
         <CardHeader>
-          <h2 className="text-2xl opacity-60">Daily Check-ins</h2>
+          <h2 className="text-2xl opacity-60">Codzienny Check-in</h2>
         </CardHeader>
       <CardBody>
                   <div className="flex flex-col gap-3">
                     <div className="flex items-center gap-3">
-                      {hasToday && <div className="text-sm opacity-70">You've already checked in today.</div>}
-                      <Button onPress={() => setIsOpen(true)} isDisabled={hasToday}>New Check-in</Button>
+                      {hasToday && <div className="text-sm opacity-70">Już zrobiłeś dzisiaj check-in.</div>}
+                      <Button onPress={() => setIsOpen(true)} isDisabled={hasToday}>Nowy Check-in</Button>
                     </div>
                     {latestAnalysis && (
                       <div className="mt-3 text-sm opacity-80">
-                        <p className="font-semibold mb-1">Latest check-in overview</p>
+                        <p className="font-semibold mb-1">Najnowszy przegląd check-in</p>
                         <p>{latestAnalysis.message}</p>
                       </div>
                     )}
