@@ -37,7 +37,20 @@ export interface Checkin {
 	energy: number;
 	description: string;
 	date: string;
+	moodScore?: number;
 	username?: string;
+}
+
+export interface Analysis {
+	id: number;
+	checkinId: number;
+	moodScore: number;
+	message: string;
+	progressSummary?: string;
+	createdAt: string;
+	date?: string;
+	stress?: number;
+	energy?: number;
 }
 
 interface PostWithComments {

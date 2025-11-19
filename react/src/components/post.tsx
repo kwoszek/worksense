@@ -27,17 +27,25 @@ function Post(data: Posttype) {
     const [likePost, { isLoading: liking }] = useLikePostMutation();
     const [unlikePost, { isLoading: unliking }] = useUnlikePostMutation();
 
-        async function handleAddComment(e: React.FormEvent<HTMLFormElement>) {
+    async function handleAddComment(e: React.FormEvent<HTMLFormElement>) {
       e.preventDefault();
       if (!user) return;
       const content = commentText.trim();
       if (!content) return;
       try {
                 const newComment = await addComment({ postId: data.id, userId: user.id, content }).unwrap();
-                // Prepend new comment locally without refetch jitter
-                setLoadedComments(prev => [newComment, ...prev]);
-                setTotalComments(t => t + 1);
-                setLastChunkCount(c => (c === 0 ? 1 : c));
+                // Enrich with user display data (backend may not return username/avatar immediately)
+                const enrichedComment: CommentType = {
+                    ...newComment,
+                    username: user.username,
+                    avatar: user.avatar || undefined,
+                    likes: newComment.likes || 0,
+                    liked: false,
+                };
+                // Append new comment locally without refetch jitter
+                setLoadedComments(prev => [...prev, enrichedComment]);
+        setTotalComments(t => t + 1);
+        setLastChunkCount(c => (c === 0 ? 1 : c));
         setCommentText("");
         setShowReply(false);
       } catch {}

@@ -6,8 +6,14 @@ export interface AuthUser {
   username: string;
   email: string;
   avatar?: string | null;
-  badges?: string[];
   streak?: number;
+  advancements?: UserAdvancement[]; // computed backend advancements (badge levels)
+}
+export interface UserAdvancement {
+  key: string;
+  name: string;
+  description?: string;
+  level: number;
 }
 export interface LoginRequest {
   identifier: string; // email or username
@@ -65,7 +71,7 @@ export const usersApi = createApi({
     register: builder.mutation<AuthResponse, RegisterRequest>({
       query: (body) => ({ url: '/register', method: 'POST', body }),
       invalidatesTags: ['Me'],
-      async onQueryStarted(arg, { queryFulfilled, dispatch }) {
+      async onQueryStarted(_arg, { queryFulfilled, dispatch }) {
         try {
           const { data } = await queryFulfilled;
           setAccessToken(data.accessToken);
@@ -76,7 +82,7 @@ export const usersApi = createApi({
     login: builder.mutation<AuthResponse, LoginRequest>({
       query: (body) => ({ url: '/login', method: 'POST', body }),
       invalidatesTags: ['Me'],
-      async onQueryStarted(arg, { queryFulfilled, dispatch }) {
+      async onQueryStarted(_arg, { queryFulfilled, dispatch }) {
         try {
           const { data } = await queryFulfilled;
           setAccessToken(data.accessToken);
@@ -87,7 +93,7 @@ export const usersApi = createApi({
     logout: builder.mutation<void, void>({
       query: () => ({ url: '/logout', method: 'POST' }),
       invalidatesTags: ['Me'],
-      async onQueryStarted(arg, { queryFulfilled, dispatch }) {
+      async onQueryStarted(_arg, { queryFulfilled, dispatch }) {
         try { await queryFulfilled; } catch {}
         clearAccessToken();
         dispatch(clearAuth());
@@ -96,7 +102,7 @@ export const usersApi = createApi({
     me: builder.query<AuthUser, void>({
       query: () => ({ url: '/me' }),
       providesTags: ['Me'],
-      async onQueryStarted(arg, { queryFulfilled, dispatch }) {
+      async onQueryStarted(_arg, { queryFulfilled, dispatch }) {
         try {
           const { data } = await queryFulfilled;
           const token = getAccessToken();
@@ -108,7 +114,7 @@ export const usersApi = createApi({
     }),
     refresh: builder.mutation<AuthResponse, void>({
       query: () => ({ url: '/refresh', method: 'POST' }),
-      async onQueryStarted(arg, { queryFulfilled, dispatch }) {
+      async onQueryStarted(_arg, { queryFulfilled, dispatch }) {
         try {
           const { data } = await queryFulfilled;
           if (data.accessToken) {

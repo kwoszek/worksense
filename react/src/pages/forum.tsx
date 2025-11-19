@@ -80,7 +80,7 @@ export default function ForumPage() {
             <Select selectedKeys={[orderBy]} onChange={(e) => {setOrderBy(e.target.value)}}
               defaultSelectedKeys={["dateposted"]}
               radius="full"
-              className="max-w-1/6"
+              className="w-45"
               classNames={{endContent: "mb-3"}}
               label="Sort by"
               endContent={

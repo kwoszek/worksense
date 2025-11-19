@@ -8,18 +8,25 @@ import MoodChart from "@/components/moodChart";
 import { useGetCheckinsQuery } from "@/services/forumApi";
 import { useSelector } from "react-redux";
 import { selectAuthUser } from "@/features/auth/authSlice";
-import ProposedExercise from "@/components/proposedExercise";
 import { useGetPostsQuery } from "@/services/forumApi";
+import { useGetAnalysesQuery } from "@/services/analysisApi";
 
 export default function DashboardPage() {
   const today = new Date().toISOString().slice(0, 10);
   const { data: checkins } = useGetCheckinsQuery();
   const user = useSelector(selectAuthUser);
+  const { data: analyses } = useGetAnalysesQuery();
+  const latestAnalysis = analyses && analyses.length ? analyses[0] : null;
    const hasToday = !!checkins?.find((c) => c.userid === user?.id && c.date.slice(0,10) === today);
 
   const chartCheckins = checkins
     ?.filter((c: any) => c.userid === user?.id)
-    .map((c: any) => ({ date: c.createdAt ?? c.date, stress: c.stress ?? 5, energy: c.energy ?? 5 }));
+    .map((c: any) => ({
+      date: c.createdAt ?? c.date,
+      stress: c.stress ?? 5,
+      energy: c.energy ?? 5,
+      moodScore: c.moodScore ?? undefined,
+    }));
   const {data: popularPosts, isLoading: isLoadingPopularPosts} = useGetPostsQuery({ limit: 5, offset: 0, orderBy: 'likes', direction: 'DESC' });
   const articles = [
   { tittle: "How to Prevent and Overcome Burnout (APS)", summary: "Guidelines on preventing burnout through self-care and reflection.", href: "https://psychology.org.au/getmedia/85f586e3-a856-47f2-a306-d0568e318193/aps-burnout-community-resource.pdf" },
@@ -48,14 +55,10 @@ export default function DashboardPage() {
         <h2 className="opacity-60 text-2xl">Popular posts</h2>
 
       </CardHeader>
-      <Divider />
       <CardBody>
          {!isLoadingPopularPosts ? (
               popularPosts?.map((post) => (
-                <div key={post.id} className="mb-4">
-                  <h3>{post.title}</h3>
-                  <Divider />
-                </div>
+                <Post key={post.id} {...post} />
               ))
             ) : (
               <></>
@@ -75,7 +78,16 @@ export default function DashboardPage() {
         
       </CardBody>
     </Card>
-     <ProposedExercise/>
+     {latestAnalysis && (
+      <Card className="p-3">
+        <CardHeader>
+          <h2 className="text-2xl opacity-60">Your latest check-in</h2>
+        </CardHeader>
+        <CardBody>
+          <p className="text-sm opacity-80">{latestAnalysis.message}</p>
+        </CardBody>
+      </Card>
+     )}
      <Card>
       <CardHeader>
         <h2 className="text-2xl opacity-60">Selected articles</h2>
