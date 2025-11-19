@@ -1,6 +1,6 @@
 import {Card, CardHeader, CardBody} from "@heroui/card";
 import DefaultLayout from "@/layouts/default";
-import { Link } from "@heroui/link";
+import { Link } from "react-router-dom";
 
 import { Divider } from "@heroui/divider";
 import Post from "@/components/post";
@@ -12,8 +12,10 @@ import ProposedExercise from "@/components/proposedExercise";
 import { useGetPostsQuery } from "@/services/forumApi";
 
 export default function DashboardPage() {
+  const today = new Date().toISOString().slice(0, 10);
   const { data: checkins } = useGetCheckinsQuery();
   const user = useSelector(selectAuthUser);
+   const hasToday = !!checkins?.find((c) => c.userid === user?.id && c.date.slice(0,10) === today);
 
   const chartCheckins = checkins
     ?.filter((c: any) => c.userid === user?.id)
@@ -69,7 +71,8 @@ export default function DashboardPage() {
           <h2 className="text-2xl opacity-60">Hello {user?.username}!</h2>
         </CardHeader>
       <CardBody>
-        <Link underline="always" color="success" href="/progress" className="text-3xl opacity-80">Do a daily check-in</Link>
+         {hasToday ? <div className="text-sm opacity-70">Thank you for checking-in today</div>:<Link  to="/progress" className="text-3xl opacity-80 text-success underline" state="open">Do a daily check-in</Link>}
+        
       </CardBody>
     </Card>
      <ProposedExercise/>

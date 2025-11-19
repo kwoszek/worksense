@@ -21,7 +21,7 @@ export const Navbar = () => {
   return (
     <header className="w-full">
       <div className="flex items-center justify-between mt-8 px-4 sm:px-6 lg:px-8">
-        <h1 className="text-3xl cursor-pointer" onClick={() => nav("/")}>WorkSense</h1>
+        <h1 className="text-3xl cursor-pointer underline" onClick={() => nav("/")}>WorkSense</h1>
 
         <div className="flex items-center gap-4">
           <ThemeSwitch />

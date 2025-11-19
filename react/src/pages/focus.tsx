@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import DefaultLayout from "@/layouts/default";
 import { Button } from "@heroui/button";
 import { Link } from "@heroui/link";
+import {Card, CardBody} from "@heroui/card";
 
 type Mode = "work" | "short" | "long";
 
@@ -135,7 +136,7 @@ export default function FocusPage() {
   return (
     <DefaultLayout>
       <section className="flex flex-col items-center justify-center gap-6 py-8 md:py-10">
-        <div className="w-full max-w-xl p-6 rounded-lg border mb-5">
+        <Card className="w-full max-w-xl p-6  mb-5">
           <div className="flex items-center justify-between">
             <h2 className="text-xl font-semibold">Focus</h2>
              
@@ -152,7 +153,7 @@ export default function FocusPage() {
               <div className="h-2 bg-accent" style={{ width: `${Math.max(0, Math.min(1, progress)) * 100}%` }} />
             </div>
             <div className="flex gap-3 mt-4 ">
-              <Button onPress={handleStartPause} size="sm">{isRunning ? "Pause" : "Start"}</Button>
+              <Button onPress={handleStartPause} size="sm" color={isRunning ? "danger" : "success"} className="opacity-80">{isRunning ? "Pause" : "Start"}</Button>
               <Button onPress={handleReset} size="sm" variant="ghost">Reset</Button>
               <Button onPress={handleSkip} size="sm" variant="flat">Skip</Button>
               
@@ -160,7 +161,7 @@ export default function FocusPage() {
            
             <div className="text-xs opacity-70 mt-2">Shortcuts: Space = start/pause · R = reset · S = skip</div>
           </div>
-        </div>
+        </Card>
       </section>
     </DefaultLayout>
   );

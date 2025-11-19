@@ -4,7 +4,7 @@ import { Form } from "@heroui/form";
 import { Input } from "@heroui/input";
 import { Button, ButtonGroup } from "@heroui/button";
 import DefaultLayout from "@/layouts/default";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useLoginMutation, useRegisterMutation } from "@/services/usersApi";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useSelector } from 'react-redux';
@@ -21,10 +21,11 @@ export default function LoginPage() {
 
     // If already authenticated, redirect to dashboard
     if (authedUser) {
-        navigate('/dashboard', { replace: true });
-        return <DefaultLayout><div className="min-h-full flex items-center justify-center"><p>You are already logged in.</p></div></DefaultLayout>;
+        
+        return <DefaultLayout>{}<div className="min-h-full flex items-center justify-center"><p>You are already logged in.</p></div></DefaultLayout>;
     }
 
+   
     const from = (location.state as any)?.from?.pathname || '/dashboard';
 
     async function handleLogin(e: React.FormEvent<HTMLFormElement>) {

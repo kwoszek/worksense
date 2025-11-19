@@ -11,15 +11,18 @@ import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter } from "@herou
 import { Input } from "@heroui/input";
 import { useSelector } from "react-redux";
 import { selectAuthUser } from "@/features/auth/authSlice";
+import { useLocation } from 'react-router-dom';
+import { Slider } from "@heroui/slider";
+import { Divider } from "@heroui/divider";
 
 
 export default function ProgressPage() {
-
+  const location = useLocation();
    const { data: checkins } = useGetCheckinsQuery();
     const [addCheckin, { isLoading: creating }] = useAddCheckinMutation();
     const user = useSelector(selectAuthUser);
-  
-    const [isOpen, setIsOpen] = useState(false);
+    const state = location.state
+    const [isOpen, setIsOpen] = useState(state === 'open' ? true :false);
     const [stress, setStress] = useState(5);
     const [energy, setEnergy] = useState(5);
     const [description, setDescription] = useState("");
@@ -90,33 +93,40 @@ export default function ProgressPage() {
               <ModalContent>
                 {(onClose) => (
                   <>
-                    <ModalHeader className="flex flex-col gap-1">Create Check-in</ModalHeader>
+                    <ModalHeader className="flex flex-col gap-1 text-2xl">Create Check-in</ModalHeader>
+                    <Divider/>
+
                     <ModalBody>
-                      <form className="flex flex-col gap-4" onSubmit={handleCreate}>
-                        <div>
-                          <label className="text-sm opacity-80">Stress: {stress}</label>
-                          <Input
+                      <form className="flex flex-col gap-10 px-5" onSubmit={handleCreate}>
+                        <div className="mt-5">
+                          <label className="text-md opacity-80">Stress: {stress}</label>
+                         
+                           <Slider
+                           minValue={0}
+                            maxValue={10}
                             isRequired
                             labelPlacement="outside"
                             name="stress"
-                            value={String(stress)}
-                            onValueChange={(v: any) => setStress(Number(v))}
-                            type="range"
-                            min={0}
-                            max={10}
+                            value={stress}
+                            onChange={setStress}
+                           color="success"
+                           size="sm"
+                            
                           />
                         </div>
                         <div>
-                          <label className="text-sm opacity-80">Energy: {energy}</label>
-                          <Input
+                          <label className="text-md opacity-80">Energy: {energy}</label>
+                          <Slider
+                           minValue={0}
+                            maxValue={10}
                             isRequired
                             labelPlacement="outside"
                             name="energy"
-                            value={String(energy)}
-                            onValueChange={(v: any) => setEnergy(Number(v))}
-                            type="range"
-                            min={0}
-                            max={10}
+                            value={energy}
+                            onChange={setEnergy}
+                           color="success"
+                           size="sm"
+                            
                           />
                         </div>
                         <div className="flex flex-col gap-2">
@@ -125,7 +135,7 @@ export default function ProgressPage() {
                         </div>
                         <div className="flex gap-2 justify-end">
                           <Button color="danger" variant="flat" onPress={onClose}>Cancel</Button>
-                          <Button color="primary" type="submit" isDisabled={creating} isLoading={creating}>Save</Button>
+                          <Button color="success" type="submit" isDisabled={creating} isLoading={creating}>Save</Button>
                         </div>
                       </form>
                     </ModalBody>
@@ -134,6 +144,7 @@ export default function ProgressPage() {
                 )}
               </ModalContent>
             </Modal>
+            
     </DefaultLayout>
   );
 }

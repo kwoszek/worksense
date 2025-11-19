@@ -2,7 +2,8 @@ import { useState } from "react";
 import DefaultLayout from "@/layouts/default";
 import { Button } from "@heroui/button";
 import { useNavigate } from "react-router-dom";
-
+import {NumberInput} from "@heroui/react";
+import {CheckboxGroup, Checkbox} from "@heroui/react";
 const KEY = "pomodoroSettings";
 
 export default function PomodoroSettingsPage() {
@@ -26,34 +27,33 @@ export default function PomodoroSettingsPage() {
   return (
     <DefaultLayout>
       <section className="max-w-xl mx-auto p-6">
-        <h2 className="text-2xl mb-4">Pomodoro Settings</h2>
-        <div className="grid gap-3">
-          <label>
-            Work minutes
-            <input className="ml-2 p-1 border rounded w-20" type="number" value={workMinutes} onChange={(e) => setWorkMinutes(Number(e.target.value))} />
-          </label>
-          <label>
-            Short break minutes
-            <input className="ml-2 p-1 border rounded w-20" type="number" value={shortBreakMinutes} onChange={(e) => setShortBreakMinutes(Number(e.target.value))} />
-          </label>
-          <label>
-            Long break minutes
-            <input className="ml-2 p-1 border rounded w-20" type="number" value={longBreakMinutes} onChange={(e) => setLongBreakMinutes(Number(e.target.value))} />
-          </label>
-          <label>
-            Long break every (cycles)
-            <input className="ml-2 p-1 border rounded w-20" type="number" value={longBreakInterval} onChange={(e) => setLongBreakInterval(Number(e.target.value))} />
-          </label>
-          <label className="flex items-center gap-2">
-            <input type="checkbox" checked={autoStartNext} onChange={(e) => setAutoStartNext(e.target.checked)} />
-            Auto start next session
-          </label>
-          <label className="flex items-center gap-2">
-            <input type="checkbox" checked={sound} onChange={(e) => setSound(e.target.checked)} />
-            Play sound when session ends
-          </label>
+        <h2 className="text-4xl mb-4">Pomodoro Settings</h2>
+        <div className="grid grid-cols-2 gap-5 m-10">
+         
+            
+            <NumberInput size="lg" labelPlacement="outside" type="number" minValue={1} label="Work minutes" value={workMinutes} onValueChange={setWorkMinutes}  endContent={<span className="text-default-400 text-small mr-2">min</span>}/>
+       
+        
+           
+            <NumberInput  size="lg" labelPlacement="outside" type="number" minValue={1}  label=" Short break minutes" value={shortBreakMinutes} onValueChange={setShortBreakMinutes} endContent={<span className="text-default-400 text-small mr-2">min</span>} />
+          
+           
+            <NumberInput  size="lg" labelPlacement="outside" type="number"minValue={1}  label=" Long break minutes" value={longBreakMinutes} onValueChange={setLongBreakMinutes} endContent={<span className="text-default-400 text-small mr-2">min</span>}/>
+         
+            
+            <NumberInput  size="lg" labelPlacement="outside" type="number" minValue={1}  label="Long break every" value={longBreakInterval} onValueChange={setLongBreakInterval} endContent={<span className="text-default-400 text-small mr-2">min</span>}/>
+         
+          
+          
+
+            <Checkbox color="success" isSelected={autoStartNext} onValueChange={setAutoStartNext} > Auto start next session</Checkbox>        
+            <Checkbox isSelected={sound} color="success" onValueChange={setSound} > Play sound when session ends</Checkbox>
+         
+            
+           
+          
           <div className="flex gap-3">
-            <Button onPress={save}>Save</Button>
+            <Button onPress={save} color="success">Save</Button>
             <Button onPress={() => nav("/focus")} variant="ghost">Cancel</Button>
           </div>
         </div>
