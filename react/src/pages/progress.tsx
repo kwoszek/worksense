@@ -18,8 +18,8 @@ import { useGetLatestAnalysisQuery } from "@/services/analysisApi";
 
 export default function ProgressPage() {
   const location = useLocation();
-   const { data: checkins } = useGetCheckinsQuery();
-    const { data: latestAnalysis } = useGetLatestAnalysisQuery();
+   const { data: checkins, refetch: checkinRefetch } = useGetCheckinsQuery();
+    const { data: latestAnalysis, refetch: analysisRefetch } = useGetLatestAnalysisQuery();
     const [addCheckin, { isLoading: creating }] = useAddCheckinMutation();
     const user = useSelector(selectAuthUser);
     const state = location.state
@@ -52,6 +52,8 @@ export default function ProgressPage() {
         setEnergy(5);
         setDescription("");
         setIsOpen(false);
+        await checkinRefetch();
+        await analysisRefetch();
       } catch (err) {
         // swallow — UI will keep modal open
       }

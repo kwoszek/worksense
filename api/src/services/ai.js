@@ -20,7 +20,7 @@ async function analyzeCheckinAndProgress({ energy, stress, description, moodScor
   const prompt = buildCombinedPrompt({ energy, stress, description, moodScores });
 
   const response = await openai.responses.create({
-    model: "gpt-4.1",
+    model: "gpt-4.1-mini",
     input: prompt,
   });
 
