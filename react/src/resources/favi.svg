@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   width="47.648041mm"
+   height="47.648041mm"
+   viewBox="0 0 47.648041 47.648041"
+   version="1.1"
+   id="svg1"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <defs
+     id="defs1" />
+  <g
+     id="layer1"
+     transform="translate(-18.651865,-9.7481248)">
+    <rect
+       style="fill:#000000;fill-opacity:1;stroke:none;stroke-width:2.35196;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:0"
+       id="rect1"
+       width="47.648041"
+       height="47.648041"
+       x="18.651865"
+       y="9.7481251"
+       ry="11.989829"
+       rx="11.900388" />
+    <text
+       xml:space="preserve"
+       style="font-weight:bold;font-size:36.5863px;line-height:31.9476px;letter-spacing:1.04042px;fill:#ffffff;fill-opacity:1;stroke:none;stroke-width:0.649623;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:0;stroke-opacity:1"
+       x="27.54697"
+       y="44.459736"
+       id="text1"
+       transform="scale(0.92787498,1.0777314)"><tspan
+         id="tspan1"
+         style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:36.5863px;line-height:31.9476px;font-family:Inter;-inkscape-font-specification:'Inter Bold';fill:#ffffff;fill-opacity:1;stroke:none;stroke-width:0.649623;stroke-opacity:1"
+         x="27.54697"
+         y="44.459736">W</tspan></text>
+  </g>
+</svg>

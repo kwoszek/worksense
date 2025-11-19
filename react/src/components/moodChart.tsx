@@ -39,24 +39,30 @@ function MoodChart({ checkins }: Props) {
     <>
      <Card className="p-3">
       <CardBody>
-        <p className="text-2xl opacity-60">Your wellness streak is <strong className="opacity-100">{streak} day{streak > 1 ? "s" : ""}</strong></p>
+        <p className="text-2xl opacity-60">Twoja seria dbania o siebie: <strong className="opacity-100">{streak} dzień{streak > 1 ? "dni" : ""}</strong></p>
       </CardBody>
     </Card>
     <Card className="p-3">
         <CardHeader>
-          <h2 className="text-2xl opacity-60">Your mood chart</h2>
+          <h2 className="text-2xl opacity-60">Wykres nastroju</h2>
         </CardHeader>
       <CardBody>
          <HeatMap
           value={value}
           style={{ color: '#22c55e' }}
-          weekLabels={['', 'Mon', '', 'Wed', '', 'Fri', '']}
+          weekLabels={['', 'Pn', '', 'Śr', '', 'Pt', '']}
           startDate={startDate}
         />
       </CardBody>
     </Card>
     </>
   );
+}
+
+function dayLabel(n: number) {
+  if (!n) return '0 dni';
+  if (n === 1) return '1 dzień';
+  return `${n} dni`;
 }
 
 export default MoodChart;

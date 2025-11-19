@@ -136,7 +136,7 @@ function Post(data: Posttype) {
             <div className="mx-5">
                                 {!isLoadingComments && loadedComments && (
                                     <>
-                                        <h2>{totalComments === 1 ? '1 comment' : `${totalComments} comments`}</h2>
+                                        <h2>{commentsLabel(totalComments)}</h2>
                                         {loadedComments.map((comment) => (
                                             <Comment key={comment.id} {...comment} />
                                         ))}
@@ -149,7 +149,7 @@ function Post(data: Posttype) {
                                                     onPress={handleLoadMoreComments}
                                                     isDisabled={isLoadingComments}
                                                 >
-                                                    Load more comments
+                                                    Załaduj więcej komentarzy
                                                 </Button>
                                             </div>
                                         )}
@@ -159,20 +159,20 @@ function Post(data: Posttype) {
                 <Form className="flex flex-col gap-2" onSubmit={handleAddComment}>
                     <Textarea
                     className="mt-3"
-                    placeholder={user ? "Write your comment..." : "You must be logged in to comment"}
+                    placeholder={user ? "Napisz komentarz..." : "Musisz być zalogowany, aby dodać komentarz"}
                     value={commentText}
                     onChange={(e) => setCommentText(e.target.value)}
                     disabled={!user || addingComment}
                     />
                     {addError && (
-                    <p className="text-sm text-danger-600">Failed to add comment.</p>
+                    <p className="text-sm text-danger-600">Nie udało się załadować komentarzy.</p>
                     )}
                     <div className="flex gap-2 justify-end">
                     <Button variant="flat" onPress={() => { setShowReply(false); setCommentText(""); }}>
-                        Cancel
+                        Anuluj
                     </Button>
                     <Button color="primary" type="submit" isDisabled={!user || addingComment} isLoading={addingComment}>
-                        Post
+                        Opublikuj
                     </Button>
                     </div>
                 </Form>
@@ -184,3 +184,12 @@ function Post(data: Posttype) {
 }
 
 export default Post;
+
+function commentsLabel(n: number) {
+    if (!n) return '0 komentarzy';
+    if (n === 1) return '1 komentarz';
+    const mod10 = n % 10;
+    const mod100 = n % 100;
+    if (mod10 >= 2 && mod10 <= 4 && !(mod100 >= 12 && mod100 <= 14)) return `${n} komentarze`;
+    return `${n} komentarzy`;
+}
