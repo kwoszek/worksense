@@ -66,10 +66,10 @@ export default function DashboardPage() {
     <div className="flex flex-col gap-5 w-full sm:w-1/3 min-w-0">
       <Card className="p-3">
         <CardHeader>
-          <h2 className="text-2xl opacity-60">Hello User!</h2>
+          <h2 className="text-2xl opacity-60">Hello {user?.username}!</h2>
         </CardHeader>
       <CardBody>
-        <Link underline="always" color="success" href="#" className="text-3xl opacity-80">Tell me about your day</Link>
+        <Link underline="always" color="success" href="/progress" className="text-3xl opacity-80">Do a daily check-in</Link>
       </CardBody>
     </Card>
      <ProposedExercise/>

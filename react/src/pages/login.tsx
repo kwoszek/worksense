@@ -21,6 +21,7 @@ export default function LoginPage() {
 
     // If already authenticated, redirect to dashboard
     if (authedUser) {
+        navigate('/dashboard', { replace: true });
         return <DefaultLayout><div className="min-h-full flex items-center justify-center"><p>You are already logged in.</p></div></DefaultLayout>;
     }
 

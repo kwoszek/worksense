@@ -20,7 +20,7 @@ export const Navbar = () => {
 
   return (
     <header className="w-full">
-      <div className="flex items-center justify-between mt-3 px-4 sm:px-6 lg:px-8">
+      <div className="flex items-center justify-between mt-8 px-4 sm:px-6 lg:px-8">
         <h1 className="text-3xl cursor-pointer" onClick={() => nav("/")}>WorkSense</h1>
 
         <div className="flex items-center gap-4">
@@ -31,7 +31,6 @@ export const Navbar = () => {
             <div className="hidden sm:block">
               <Tabs aria-label="Tabs" radius="full" selectedKey={pathname} variant="bordered">
                 <Tab key="/dashboard" title="Dashboard" href="/dashboard" />
-                <Tab key="/checkin" title="Check-ins" href="/checkin" />
                 <Tab key="/forum" title="Forum" href="/forum" />
                 <Tab key="/articles" title="Articles" href="/articles" />
                 <Tab key="/progress" title="Progress" href="/progress" />
