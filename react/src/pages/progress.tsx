@@ -93,13 +93,13 @@ export default function ProgressPage() {
               <ModalContent>
                 {(onClose) => (
                   <>
-                    <ModalHeader className="flex flex-col gap-1 text-2xl">Create Check-in</ModalHeader>
+                    <ModalHeader className="flex flex-col gap-1 text-2xl">Zrób Check-in</ModalHeader>
                     <Divider/>
 
                     <ModalBody>
                       <form className="flex flex-col gap-10 px-5" onSubmit={handleCreate}>
                         <div className="mt-5">
-                          <label className="text-md opacity-80">Stress: {stress}</label>
+                          <label className="text-md opacity-80">Poziom stresu: {stress}</label>
                          
                            <Slider
                            minValue={0}
@@ -115,7 +115,7 @@ export default function ProgressPage() {
                           />
                         </div>
                         <div>
-                          <label className="text-md opacity-80">Energy: {energy}</label>
+                          <label className="text-md opacity-80">Poziom energii: {energy}</label>
                           <Slider
                            minValue={0}
                             maxValue={10}
@@ -130,12 +130,12 @@ export default function ProgressPage() {
                           />
                         </div>
                         <div className="flex flex-col gap-2">
-                          <label className="text-sm opacity-70" htmlFor="desc">Notes</label>
+                          <label className="text-sm opacity-70" htmlFor="desc">Notatki</label>
                           <textarea id="desc" name="description" className="min-h-24 rounded-medium border p-3" value={description} onChange={(e) => setDescription(e.target.value)} />
                         </div>
                         <div className="flex gap-2 justify-end">
-                          <Button color="danger" variant="flat" onPress={onClose}>Cancel</Button>
-                          <Button color="success" type="submit" isDisabled={creating} isLoading={creating}>Save</Button>
+                          <Button color="danger" variant="flat" onPress={onClose}>Anuluj</Button>
+                          <Button color="success" type="submit" isDisabled={creating} isLoading={creating}>Zapisz</Button>
                         </div>
                       </form>
                     </ModalBody>
@@ -144,7 +144,7 @@ export default function ProgressPage() {
                 )}
               </ModalContent>
             </Modal>
-            
+
     </DefaultLayout>
   );
 }

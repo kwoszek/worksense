@@ -17,7 +17,7 @@ function buildValueFromCheckins(checkins?: Checkin[]) {
       const count = energy + (10 - stress);
       // ensure date is YYYY-MM-DD
       const date = v.date?.slice(0, 10) ?? new Date().toISOString().slice(0, 10);
-      return { date, count, content: `Stress: ${stress} | Energy: ${energy}` };
+      return { date, count, content: `Stres: ${stress} | Energia: ${energy}` };
     });
   }
 
@@ -27,7 +27,7 @@ function buildValueFromCheckins(checkins?: Checkin[]) {
     { date: '2016/01/12', stress: 2, energy: 9 },
     { date: '2016/01/13', stress: 4, energy: 6 },
   ];
-  return sample.map((v) => ({ date: v.date, count: (v.energy ?? 0) + (10 - (v.stress ?? 0)), content: `Stress: ${v.stress} | Energy: ${v.energy}` }));
+  return sample.map((v) => ({ date: v.date, count: (v.energy ?? 0) + (10 - (v.stress ?? 0)), content: `Stres: ${v.stress} | Energia: ${v.energy}` }));
 }
 
 function MoodChart({ checkins }: Props) {
@@ -80,24 +80,30 @@ function MoodChart({ checkins }: Props) {
     <>
      <Card className="p-3">
       <CardBody>
-        <p className="text-2xl opacity-60">Your wellness streak is <strong className="opacity-100">{streak} day{streak > 1 ? "s" : ""}</strong> </p>
+        <p className="text-2xl opacity-60">Twoja seria dbania o siebie: <strong className="opacity-100">{dayLabel(streak)}</strong></p>
       </CardBody>
     </Card>
     <Card className="p-3">
         <CardHeader>
-          <h2 className="text-2xl opacity-60">Your mood chart</h2>
+          <h2 className="text-2xl opacity-60">Wykres nastroju</h2>
         </CardHeader>
       <CardBody>
          <HeatMap
           value={value}
           style={{ color: '#22c55e' }}
-          weekLabels={['', 'Mon', '', 'Wed', '', 'Fri', '']}
+          weekLabels={['', 'Pn', '', 'Śr', '', 'Pt', '']}
           startDate={startDate}
         />
       </CardBody>
     </Card>
     </>
   );
+}
+
+function dayLabel(n: number) {
+  if (!n) return '0 dni';
+  if (n === 1) return '1 dzień';
+  return `${n} dni`;
 }
 
 export default MoodChart;

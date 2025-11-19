@@ -32,7 +32,7 @@ export const Navbar = () => {
               <Tabs aria-label="Tabs" radius="full" selectedKey={pathname} variant="bordered">
                 <Tab key="/dashboard" title="Dashboard" href="/dashboard" />
                 <Tab key="/forum" title="Forum" href="/forum" />
-                <Tab key="/articles" title="Articles" href="/articles" />
+                <Tab key="/articles" title="Artykuły" href="/articles" />
                 <Tab key="/progress" title="Progress" href="/progress" />
                 <Tab key="/focus" title="Focus" href="/focus" />
               </Tabs>
@@ -73,11 +73,11 @@ export const Navbar = () => {
               <>
                 <button onClick={() => { nav('/dashboard'); setMobileOpen(false); }} className="w-full text-left">Dashboard</button>
                 <button onClick={() => { nav('/forum'); setMobileOpen(false); }} className="w-full text-left">Forum</button>
-                <button onClick={() => { nav('/articles'); setMobileOpen(false); }} className="w-full text-left">Articles</button>
+                <button onClick={() => { nav('/articles'); setMobileOpen(false); }} className="w-full text-left">Artykuły</button>
                 <button onClick={() => { nav('/progress'); setMobileOpen(false); }} className="w-full text-left">Progress</button>
                 <button onClick={() => { nav('/focus'); setMobileOpen(false); }} className="w-full text-left">Focus</button>
                 <div className="pt-2">
-                  <button onClick={() => { nav('/profile'); setMobileOpen(false); }} className="w-full text-left">Profile</button>
+                  <button onClick={() => { nav('/profile'); setMobileOpen(false); }} className="w-full text-left">Profil</button>
                 </div>
               </>
             ) : (

@@ -45,7 +45,7 @@ export default function DashboardPage() {
       <MoodChart checkins={chartCheckins} />
     <Card className="p-5 hidden sm:block">
       <CardHeader>
-        <h2 className="opacity-60 text-2xl">Popular posts</h2>
+        <h2 className="opacity-60 text-2xl">Popularne posty</h2>
 
       </CardHeader>
       <Divider />
@@ -68,17 +68,17 @@ export default function DashboardPage() {
     <div className="flex flex-col gap-5 w-full sm:w-1/3 min-w-0">
       <Card className="p-3">
         <CardHeader>
-          <h2 className="text-2xl opacity-60">Hello {user?.username}!</h2>
+          <h2 className="text-2xl opacity-60">Cześć {user?.username}!</h2>
         </CardHeader>
       <CardBody>
-         {hasToday ? <div className="text-sm opacity-70">Thank you for checking-in today</div>:<Link  to="/progress" className="text-3xl opacity-80 text-success underline" state="open">Do a daily check-in</Link>}
+         {hasToday ? <div className="text-sm opacity-70">Check-in na dzisiaj zrobiony!!</div>:<Link  to="/progress" className="text-3xl opacity-80 text-success underline" state="open">Zrób codzienny check-in</Link>}
         
       </CardBody>
     </Card>
      <ProposedExercise/>
      <Card>
       <CardHeader>
-        <h2 className="text-2xl opacity-60">Selected articles</h2>
+        <h2 className="text-2xl opacity-60">Wybrane artykuły</h2>
       </CardHeader>
       <Divider />
       <CardBody>{

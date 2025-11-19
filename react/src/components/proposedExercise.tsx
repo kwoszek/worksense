@@ -4,10 +4,10 @@ function ProposedExercise() {
     return (
         <Card className="p-3">
         <CardHeader>
-            <h2 className="text-2xl opacity-60">Proposed Exercise</h2>
+            <h2 className="text-2xl opacity-60">Proponowane ćwiczenie</h2>
         </CardHeader>
         <CardBody>
-            <h2   className="text-5xl opacity-80">🧘🏿‍️ Meditate for 10 minutes</h2>
+            <h2   className="text-5xl opacity-80">🧘🏿‍️ Medytuj przez 10 minut</h2>
         </CardBody>
         </Card>
     );

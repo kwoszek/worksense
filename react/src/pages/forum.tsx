@@ -82,11 +82,11 @@ export default function ForumPage() {
               radius="full"
               className="max-w-1/6"
               classNames={{endContent: "mb-3"}}
-              label="Sort by"
+              label="Sortowanie"
               endContent={
                 <button
                   type="button"
-                  aria-label={direction === "DESC" ? "Sort ascending" : "Sort descending"}
+                  aria-label={direction === "DESC" ? "Sortuj rosnąco" : "Sortuj malejąco"}
                   onClick={(e) => {
                     e.stopPropagation();
                     setDirection(direction === "DESC" ? "ASC" : "DESC");
@@ -113,19 +113,19 @@ export default function ForumPage() {
                 </button>
               }
               >
-              <SelectItem key="dateposted">Date Posted</SelectItem>
-              <SelectItem key="likes">Likes</SelectItem>
+              <SelectItem key="dateposted">Data publikacji</SelectItem>
+              <SelectItem key="likes">Polubienia</SelectItem>
             </Select>
-            <Button onPress={() => setIsOpen(true)}>New Post</Button>
+            <Button onPress={() => setIsOpen(true)}>Nowy post</Button>
         </div>
         <div className="flex flex-col sm:flex-row gap-5 items-start">
           <Card className="flex-1 min-w-0 sm:basis-2/3 w-full">
           <CardHeader className="pb-0">
-            <h2 className="opacity-60 text-2xl ml-5 mt-3">Posts</h2>
+            <h2 className="opacity-60 text-2xl ml-5 mt-3">Posty</h2>
           </CardHeader>
           <CardBody>
             {isInitialLoading && loadedPosts.length === 0 ? (
-              <div className="py-6 text-center text-sm opacity-60">Loading posts...</div>
+              <div className="py-6 text-center text-sm opacity-60">Ładowanie postów...</div>
             ) : (
               loadedPosts.map(post => (
                 <Post key={post.id} {...post} />
@@ -143,7 +143,7 @@ export default function ForumPage() {
         </Card>
         <Card className="min-w-0 sm:basis-1/3 hidden sm:block">
           <CardHeader>
-            <h2 className="opacity-60 text-2xl">Popular posts</h2>
+            <h2 className="opacity-60 text-2xl">Popularne posty</h2>
           </CardHeader>
           <Divider />
           <CardBody>
@@ -166,38 +166,38 @@ export default function ForumPage() {
         <ModalContent>
           {(onClose) => (
             <>
-              <ModalHeader className="flex flex-col gap-1">Create New Post</ModalHeader>
+              <ModalHeader className="flex flex-col gap-1">Stwórz nowy post</ModalHeader>
               <ModalBody>
                 <form className="flex flex-col gap-4" onSubmit={handleCreatePost}>
                   <Input
                     isRequired
-                    label="Title"
+                    label="Tytuł"
                     labelPlacement="outside"
                     name="title"
-                    placeholder="Enter a concise title"
+                    placeholder="Wpisz zwięzły tytuł"
                     value={title}
                     onValueChange={setTitle}
                   />
                   <div className="flex flex-col gap-2">
-                    <label className="text-sm opacity-70" htmlFor="content">Content</label>
+                    <label className="text-sm opacity-70" htmlFor="content">Treść</label>
                     <textarea
                       id="content"
                       name="content"
                       className="min-h-32 rounded-medium border border-default-200 bg-transparent p-3 outline-none"
-                      placeholder="Write your post content..."
+                      placeholder="Wpisz treść posta tutaj..."
                       value={content}
                       onChange={(e) => setContent(e.target.value)}
                     />
                   </div>
                   {createError && (
-                    <p className="text-sm text-danger-600">Failed to create post.</p>
+                    <p className="text-sm text-danger-600">Nie byliśmy w stanie stworzyć posta</p>
                   )}
                   <div className="flex gap-2 justify-end">
                     <Button color="danger" variant="flat" onPress={onClose}>
-                      Cancel
+                      Anuluj
                     </Button>
                     <Button color="primary" type="submit" isDisabled={creating} isLoading={creating}>
-                      Publish
+                      Opublikuj
                     </Button>
                   </div>
                 </form>
