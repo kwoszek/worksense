@@ -10,6 +10,8 @@ import {
   getAccessToken,
   AuthUser,
 } from '@/services/usersApi';
+import { useDispatch } from 'react-redux';
+import { setCredentials } from '@/features/auth/authSlice';
 
 type AuthContextType = {
   user: AuthUser | null;
@@ -51,15 +53,22 @@ export const AuthProvider: React.FC<React.PropsWithChildren> = ({ children }) =>
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  const dispatch = useDispatch();
+
   useEffect(() => {
-    if (meData) setUser(meData);
-  }, [meData]);
+    if (meData) {
+      setUser(meData);
+      const token = getAccessToken();
+      if (token) dispatch(setCredentials({ user: meData, token }));
+    }
+  }, [meData, dispatch]);
 
   const login = async (identifier: string, password: string) => {
     const res = await loginMut({ identifier, password }).unwrap();
     setAccessToken(res.accessToken);
     setToken(res.accessToken);
     setUser(res.user);
+    dispatch(setCredentials({ user: res.user, token: res.accessToken }));
   };
 
   const register = async (username: string, email: string, password: string) => {
@@ -67,6 +76,7 @@ export const AuthProvider: React.FC<React.PropsWithChildren> = ({ children }) =>
     setAccessToken(res.accessToken);
     setToken(res.accessToken);
     setUser(res.user);
+    dispatch(setCredentials({ user: res.user, token: res.accessToken }));
   };
 
   const logout = async () => {
@@ -74,6 +84,7 @@ export const AuthProvider: React.FC<React.PropsWithChildren> = ({ children }) =>
     clearAccessToken();
     setToken('');
     setUser(null);
+    dispatch(setCredentials({ user: null as any, token: '' }));
   };
 
   const value = useMemo(

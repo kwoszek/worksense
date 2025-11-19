@@ -4,6 +4,8 @@ const { authMiddleware, optionalAuth } = require('../middleware/auth');
 
 const router = Router();
 
+const { checkAndAwardForCheckin, checkAndAwardForPost } = require('../services/badges');
+
 // Health
 router.get('/', (req, res) => {
   res.json({ message: 'forum api' });
@@ -101,6 +103,8 @@ router.post('/posts', async (req, res, next) => {
         const datePosted = new Date().toISOString();
         const q = 'INSERT INTO posts(userId, title, content, datePosted) VALUES($1,$2,$3,$4) RETURNING id, userId AS userid, title, content, datePosted AS dateposted, likes AS likes';
         const result = await db.query(q, [userId, title, content, datePosted]);
+    // award post-related badges
+    try { await checkAndAwardForPost(userId); } catch (e) { /* ignore badge errors */ }
         res.status(201).json(result.rows[0]);
     } catch (err) { next(err); }
 });
@@ -179,6 +183,8 @@ router.post('/checkins', async (req, res, next) => {
       const date = new Date();
       const q = 'INSERT INTO checkins(userId, stress, energy, description, date) VALUES($1,$2,$3,$4,$5) RETURNING id, userId AS userid, stress, energy, description, date';
       const result = await db.query(q, [userId, stress, energy, description, date]);
+      // update streak and award checkin-related badges
+      try { await checkAndAwardForCheckin(userId); } catch (e) { /* ignore badge errors */ }
       res.status(201).json(result.rows[0]);
     } catch (err) { next(err); }
 });
