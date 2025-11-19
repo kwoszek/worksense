@@ -5,6 +5,8 @@ const { analyzeCheckinAndProgress } = require('../services/ai');
 
 const router = Router();
 
+const { checkAndAwardForCheckin, checkAndAwardForPost } = require('../services/badges');
+
 // Compute consecutive daily check-in streak ending today and persist on users.streak
 async function computeAndUpdateStreak(userId) {
   if (!userId) return 0;
@@ -124,6 +126,8 @@ router.post('/posts', async (req, res, next) => {
         const datePosted = new Date().toISOString();
         const q = 'INSERT INTO posts(userId, title, content, datePosted) VALUES($1,$2,$3,$4) RETURNING id, userId AS userid, title, content, datePosted AS dateposted, likes AS likes';
         const result = await db.query(q, [userId, title, content, datePosted]);
+    // award post-related badges
+    try { await checkAndAwardForPost(userId); } catch (e) { /* ignore badge errors */ }
         res.status(201).json(result.rows[0]);
     } catch (err) { next(err); }
 });

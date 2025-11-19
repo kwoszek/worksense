@@ -180,6 +180,20 @@ router.get('/me', authMiddleware, async (req, res, next) => {
   } catch (err) { next(err); }
 });
 
+// Get current user's badges with metadata
+router.get('/me/badges', authMiddleware, async (req, res, next) => {
+  try {
+    const q = `
+      SELECT ub.badgeId AS id, b.key, b.name, b.description, ub.level, ub.createdAt, ub.updatedAt
+      FROM user_badges ub
+      JOIN badges b ON b.id = ub.badgeId
+      WHERE ub.userId = $1
+      ORDER BY ub.level DESC, ub.updatedAt DESC`;
+    const r = await db.query(q, [req.user.id]);
+    res.json(r.rows);
+  } catch (err) { next(err); }
+});
+
 router.post('/refresh', async (req, res, next) => {
   try {
     const rt = req.cookies?.rt || req.body?.refreshToken;
