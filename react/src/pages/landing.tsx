@@ -19,8 +19,9 @@ import { useSelector } from "react-redux";
 import { selectAuthUser } from '@/features/auth/authSlice';
 import Group8 from "../resources/Group8.png";
 import {Accordion, AccordionItem} from "@heroui/react";
-import Icon from '../resources/favi.svg?react';
-import Column from '../resources/column.svg?react';
+// Import SVGs as asset URLs instead of React components to avoid InvalidCharacterError
+import IconSrc from '../resources/favi.svg?react';
+import ColumnSrc from '../resources/column.svg?react';
 
 
 
@@ -68,7 +69,7 @@ export default function Landing(){
                 
                 <div className="   md:block ml-auto">
                     
-                    <Icon className="drop-shadow-accent-foreground drop-shadow-xl/55  w-100 m-auto" alt="WorksenseIcon" />
+                    <img src={IconSrc} className="drop-shadow-accent-foreground drop-shadow-xl/55  w-100 m-auto" alt="Worksense icon" />
                 </div>
                 </div>
                 
@@ -277,13 +278,13 @@ export default function Landing(){
                 <div className="flex flex-col sm:flex-row w-full text-center gap-5 opacity-80">
                     
                     <div className="w-full sm:w-1/3 p-10 text-2xl flex flex-col justify-between">
-                     Zmiana nawyków pracy<Column className="text-foreground w-2/3 m-auto"/></div>
+                     Zmiana nawyków pracy<img src={ColumnSrc} className="text-foreground w-2/3 m-auto" alt="Column icon"/></div>
                      <div className="w-full sm:w-1/3 p-10 text-2xl flex flex-col justify-between ">
                     Psychoedukacja o stresie i wypaleniu
-                    <Column className="text-foreground w-2/3 m-auto"/>
+                    <img src={ColumnSrc} className="text-foreground w-2/3 m-auto" alt="Column icon"/>
                     </div>
                     <div className="w-full sm:w-1/3 p-10 text-2xl flex flex-col justify-between"
-                    > Wsparcie społeczne<Column className="text-foreground w-2/3 m-auto"/></div>
+                    > Wsparcie społeczne<img src={ColumnSrc} className="text-foreground w-2/3 m-auto" alt="Column icon"/></div>
                 </div>
             </section>
              <section className=" w-8/10 m-auto mt-50">
