@@ -112,6 +112,10 @@ export const usersApi = createApi({
         } catch {}
       },
     }),
+    myBadges: builder.query<UserAdvancement[], void>({
+      query: () => ({ url: '/me/badges' }),
+      providesTags: ['Me'],
+    }),
     refresh: builder.mutation<AuthResponse, void>({
       query: () => ({ url: '/refresh', method: 'POST' }),
       async onQueryStarted(_arg, { queryFulfilled, dispatch }) {
@@ -132,5 +136,6 @@ export const {
   useLoginMutation,
   useLogoutMutation,
   useMeQuery,
+  useMyBadgesQuery,
   useRefreshMutation,
 } = usersApi;

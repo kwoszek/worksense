@@ -2,6 +2,7 @@ import DefaultLayout from "@/layouts/default";
 import { Button } from '@heroui/button';
 import { Card, CardHeader, CardBody } from '@heroui/card';
 import { Divider } from '@heroui/divider';
+import { useMyBadgesQuery } from '@/services/usersApi';
 import { useSelector } from 'react-redux';
 import { selectAuthUser } from '@/features/auth/authSlice';
 import { useLogoutMutation } from '@/services/usersApi';
@@ -13,6 +14,8 @@ export default function Profile(){
     const [logout] = useLogoutMutation();
 
     const avatarSrc = user?.avatar ? `data:image/png;base64,${user.avatar}` : null;
+
+  const { data: badgeList, isLoading: badgesLoading } = useMyBadgesQuery();
 
     return(
        <DefaultLayout>
@@ -51,13 +54,13 @@ export default function Profile(){
                <div className="mb-4">
                  <h3 className="text-lg opacity-70 mb-2">Badges</h3>
                  <div className="flex flex-wrap gap-2">
-                   {user?.badges && user.badges.length ? (
-                     user.badges.map((b: string) => (
-                       <span key={b} className="px-3 py-1 rounded-full bg-green-50 text-green-700 text-sm">{b}</span>
-                     ))
-                   ) : (
-                     <div className="text-sm opacity-60">No badges yet</div>
-                   )}
+                   {badgesLoading && <div className="text-sm opacity-60">Loading...</div>}
+                   {!badgesLoading && (!badgeList || !badgeList.length) && <div className="text-sm opacity-60">No badges yet</div>}
+                   {!badgesLoading && badgeList && badgeList.map((b: any) => (
+                     <span key={b.id} className="px-3 py-1 rounded-full bg-green-50 text-green-700 text-sm">
+                       {b.name}{b.level && b.level > 1 ? ` • lvl ${b.level}` : ''}
+                     </span>
+                   ))}
                  </div>
                </div>
 
