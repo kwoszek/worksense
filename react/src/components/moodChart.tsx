@@ -77,14 +77,11 @@ function MoodChart({ checkins }: Props) {
 
 10: "#b6ffd1"   // najjaśniejsza, bardzo przyjemna zieleń — „top mood”
       }} rectRender={(props, data) => {
-        if(data.count){
-           console.log('rectRender data:', data);
-        console.log('rectRender props:', props);
-        }
+        
        
         return (
           <>
-        {data.count ? ( <Tooltip placement="top" content={<div className="text-left"><p className="font-bold ">{data.date}</p> <p>nastrój: {data.count}</p> </div>} showArrow={true} offset={5}>
+        {data.count ? ( <Tooltip placement="top" content={<div className="text-left"><p className="font-bold ">{data.date}</p> <p>nastrój: {data.count>10?"10":data.count}</p> </div>} showArrow={true} offset={5}>
             <rect {...props} />
           </Tooltip>):(<rect {...props} />)}
          
