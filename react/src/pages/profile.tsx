@@ -141,7 +141,7 @@ export default function Profile() {
                 <Input label="New Password" size="sm" type="password" value={newPw} onValueChange={setNewPw} />
                 <Input label="Confirm New Password" size="sm" type="password" value={confirmPw} onValueChange={setConfirmPw} />
                 {pwMsg && <div className="text-xs opacity-70">{pwMsg}</div>}
-                <Button size="sm" color="primary" variant="flat" isDisabled={changingPw} onPress={handleChangePassword}>{changingPw ? 'Changing...' : 'Change Password'}</Button>
+                <Button size="sm" color="success" variant="flat" isDisabled={changingPw} onPress={handleChangePassword}>{changingPw ? 'Changing...' : 'Change Password'}</Button>
               </div>
             </div>
 
