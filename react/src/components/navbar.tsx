@@ -27,17 +27,15 @@ export const Navbar = () => {
           <ThemeSwitch />
 
           {/* Desktop tabs - hidden on small screens */}
-          {user && (
-            <div className="hidden sm:block">
-              <Tabs aria-label="Tabs" radius="full" selectedKey={pathname} variant="bordered">
-                <Tab key="/dashboard" title="Dashboard" href="/dashboard" />
-                <Tab key="/forum" title="Forum" href="/forum" />
-                <Tab key="/articles" title="Artykuły" href="/articles" />
-                <Tab key="/progress" title="Progress" href="/progress" />
-                <Tab key="/focus" title="Focus" href="/focus" />
-              </Tabs>
-            </div>
-          )}
+          <div className="hidden sm:block">
+            <Tabs aria-label="Tabs" radius="full" selectedKey={pathname} variant="bordered">
+              {user && <Tab key="/dashboard" title="Dashboard" href="/dashboard" />}
+              <Tab key="/forum" title="Forum" href="/forum" />
+              <Tab key="/articles" title="Artykuły" href="/articles" />                            
+              {user && <Tab key="/progress" title="Progress" href="/progress" />}
+              <Tab key="/focus" title="Focus" href="/focus" />
+            </Tabs>
+          </div>
 
           {/* auth / avatar */}
           {user ? (
@@ -68,22 +66,27 @@ export const Navbar = () => {
       {/* Mobile menu panel */}
       {mobileOpen && (
         <nav className="sm:hidden border-t">
-          <div className="px-4 py-3 space-y-2">
-            {user ? (
-              <>
-                <button onClick={() => { nav('/dashboard'); setMobileOpen(false); }} className="w-full text-left">Dashboard</button>
-                <button onClick={() => { nav('/forum'); setMobileOpen(false); }} className="w-full text-left">Forum</button>
-                <button onClick={() => { nav('/articles'); setMobileOpen(false); }} className="w-full text-left">Artykuły</button>
-                <button onClick={() => { nav('/progress'); setMobileOpen(false); }} className="w-full text-left">Progress</button>
-                <button onClick={() => { nav('/focus'); setMobileOpen(false); }} className="w-full text-left">Focus</button>
-                <div className="pt-2">
-                  <button onClick={() => { nav('/profile'); setMobileOpen(false); }} className="w-full text-left">Profil</button>
-                </div>
-              </>
-            ) : (
-              <button onClick={() => { nav('/login'); setMobileOpen(false); }} className="w-full text-left">Login</button>
-            )}
-          </div>
+            <div className="px-4 py-3 space-y-2">
+              {/* public links */}
+              <button onClick={() => { nav('/forum'); setMobileOpen(false); }} className="w-full text-left">Forum</button>
+              <button onClick={() => { nav('/articles'); setMobileOpen(false); }} className="w-full text-left">Artykuły</button>
+              <button onClick={() => { nav('/focus'); setMobileOpen(false); }} className="w-full text-left">Focus</button>
+
+              {/* protected links */}
+              {user && (
+                <>
+                  <button onClick={() => { nav('/dashboard'); setMobileOpen(false); }} className="w-full text-left">Dashboard</button>
+                  <button onClick={() => { nav('/progress'); setMobileOpen(false); }} className="w-full text-left">Progress</button>
+                  <div className="pt-2">
+                    <button onClick={() => { nav('/profile'); setMobileOpen(false); }} className="w-full text-left">Profil</button>
+                  </div>
+                </>
+              )}
+
+              {!user && (
+                <button onClick={() => { nav('/login'); setMobileOpen(false); }} className="w-full text-left">Login</button>
+              )}
+            </div>
         </nav>
       )}
     </header>

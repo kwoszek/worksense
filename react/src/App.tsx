@@ -17,9 +17,9 @@ function App() {
       <Route path="/" element={<Landing />} />
       <Route path="/login" element={<LoginPage />} />
       <Route path="/dashboard" element={<RequireAuth><DashboardPage /></RequireAuth>} />
-      <Route path="/forum" element={<RequireAuth><ForumPage /></RequireAuth>} />
-      <Route path="/progress" element={<RequireAuth><ProgressPage /></RequireAuth>} />
-      <Route path="/articles" element={<RequireAuth><ArticlesPage /></RequireAuth>} />
+  <Route path="/forum" element={<ForumPage />} />
+  <Route path="/progress" element={<RequireAuth><ProgressPage /></RequireAuth>} />
+  <Route path="/articles" element={<ArticlesPage />} />
      
   <Route path="/focus" element={<FocusPage />} />
   <Route path="/focus/settings" element={<PomodoroSettingsPage />} />

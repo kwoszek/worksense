@@ -50,30 +50,26 @@ export default function Landing(){
                 <img src={Mockup3Devices} alt="image of 3 devices with our website shown on them" className="w-full md:w-1/2" />
 
             </div>
-            <section className="w-full md:w-8/10 mx-auto mt-50 px-4 md:px-0">
-                <h2 className="text-5xl font-bold mb-6">Dlaczego stworzyliśmy WorkSense?</h2>
-                
-                <div className="flex items-center ">
-                    <div className="opacity-80">
-                            <p className="w-full md:w-2/3 text-lg">Wypalenie dotyka coraz młodszych ludzi — zarówno pracujących, jak i uczących się.
-                Presja, przeciążenie informacjami, brak odpoczynku i chaotyczny tryb pracy sprawiają, że:</p>
-                <ul className="list-disc ml-10 my-6">
-                    <li>spada koncentracja,</li>
-                    <li>rośnie stres,</li>
-                    <li>zanika motywacja,</li>
-                    <li>tracimy radość z nauki i pracy.</li>
+            <section className="w-full max-w-screen-lg mx-auto mt-12 px-4 md:px-0">
+                <h2 className="text-4xl md:text-5xl font-bold mb-6">Dlaczego stworzyliśmy WorkSense?</h2>
 
-                </ul>
-                <p className="w-2/3 text-lg">WorkSense powstał, aby temu przeciwdziałać.
-                Nasza misja jest prosta: <b>pomóc Ci zrozumieć siebie, wesprzeć Cię psychologicznie i nauczyć Cię pracować w zdrowy, świadomy sposób.</b></p>
+                <div className="flex flex-col md:flex-row items-center gap-6">
+                    <div className="opacity-80 md:flex-1">
+                        <p className="w-full text-lg">Wypalenie dotyka coraz młodszych ludzi — zarówno pracujących, jak i uczących się. Presja, przeciążenie informacjami, brak odpoczynku i chaotyczny tryb pracy sprawiają, że:</p>
+                        <ul className="list-disc ml-6 my-4">
+                            <li>spada koncentracja,</li>
+                            <li>rośnie stres,</li>
+                            <li>zanika motywacja,</li>
+                            <li>tracimy radość z nauki i pracy.</li>
+                        </ul>
+                        <p className="w-full text-lg">WorkSense powstał, aby temu przeciwdziałać. Nasza misja jest prosta: <b>pomóc Ci zrozumieć siebie, wesprzeć Cię psychologicznie i nauczyć Cię pracować w zdrowy, świadomy sposób.</b></p>
+                    </div>
+
+                    <div className="md:ml-6 md:flex-0">
+                        <IconSrc className="drop-shadow-accent-foreground drop-shadow-xl/55 w-40 md:w-56 mx-auto" alt="Worksense icon" />
+                    </div>
                 </div>
-                
-                <div className="   md:block ml-auto">
-                    
-                    <IconSrc className="drop-shadow-accent-foreground drop-shadow-xl/55  w-100 m-auto" alt="Worksense icon" />
-                </div>
-                </div>
-                
+
             </section>
              <section className="w-full md:w-8/10 mx-auto mt-30 px-4 md:px-0">
                 <h2 className="text-5xl font-bold mb-6">Co oferuje WorkSense?</h2>
@@ -129,168 +125,175 @@ export default function Landing(){
                 </Card>
                 </div>
             </section>
-            <section className="w-8/10 m-auto mt-30">
-                <h2 className="text-5xl font-bold mb-6">Jak działa WorkSense?</h2>
-                 <Carousel className="background-transparent border-0">
-      <CarouselContent id="tutorial">
+                        <section className="w-full max-w-screen-lg mx-auto mt-8 px-4 md:px-0">
+                                <h2 className="text-4xl md:text-5xl font-bold mb-6">Jak działa WorkSense?</h2>
+                                 <Carousel className="background-transparent border-0">
+            <CarouselContent id="tutorial">
         
-          <CarouselItem  >
-            <div className="p-1">
-              <Card shadow="sm" >
-                <CardHeader className="p-5">
-                    <h2 className="text-3xl">1. Wykonaj codzienny check-in</h2>
-                </CardHeader>
-                <Divider />
-                <CardBody className="p-10">
-                    <div className="flex gap-10  justify-center">
-                        <div>
-                         <p className="text-lg opacity-80">Zajmuje mniej niż minutę. <br />
-                         <br />
-                    Zbieramy dane o Twoim stresie, energii, śnie i nastroju.</p>
-                    <br />
-                    <h3 className="text-2xl">Co otrzymujesz</h3>
-                    <ul className="list-disc ml-10 opacity-80 mt-5">
-                        <li>szybkie podsumowanie stanu psychicznego</li>
-                        <li>propozycje dalszych działań</li>
-                        <li>wsparcie w budowaniu samoświadomości</li>
-                    </ul>
+                    <CarouselItem  >
+                        <div className="p-1">
+                            <Card shadow="sm" >
+                                <CardHeader className="p-5">
+                                        <h2 className="text-2xl md:text-3xl">1. Wykonaj codzienny check-in</h2>
+                                </CardHeader>
+                                <Divider />
+                                <CardBody className="p-6 md:p-10">
+                                        <div className="flex flex-col md:flex-row gap-6 md:gap-10 items-center justify-center">
+                                                <div className="md:flex-1">
+                                                 <p className="text-lg opacity-80">Zajmuje mniej niż minutę. <br />
+                                                 <br />
+                                        Zbieramy dane o Twoim stresie, energii, śnie i nastroju.</p>
+                    
+                                        <h3 className="text-2xl mt-4">Co otrzymujesz</h3>
+                                        <ul className="list-disc ml-6 opacity-80 mt-3">
+                                                <li>szybkie podsumowanie stanu psychicznego</li>
+                                                <li>propozycje dalszych działań</li>
+                                                <li>wsparcie w budowaniu samoświadomości</li>
+                                        </ul>
+                                                </div>
+                                                <img src={checkInScr} alt="zdjęcie sekcji check in" className="w-full md:w-3/5 mb-5 shadow-lg/20 shadow-success rounded-lg" />
+                    
+                                        </div>
+                                </CardBody>
+                            </Card>
                         </div>
-                        <img src={checkInScr} alt="zdjęcie sekcji check in" className="w-3/5 mb-5 m-auto shadow-lg/20 shadow-success rounded-lg" />
+                    </CarouselItem>
+                    <CarouselItem  >
+                        <div className="p-1">
+                            <Card shadow="sm" >
+                                <CardHeader className="p-5">
+                                        <h2 className="text-2xl md:text-3xl">2. Otrzymaj zalecenia od sztucznej inteligencji</h2>
+                                </CardHeader>
+                                <Divider />
+                                <CardBody className="p-6 md:p-10">
+                                        <div className="flex flex-col md:flex-row gap-6 md:gap-10 items-center justify-center">
+                                        <div className="md:flex-1">
+                                        <h3 className="text-xl">Na podstawie Twoich odpowiedzi sugerujemy:</h3>
+                                        <ul className="list-disc opacity-80 ml-6 mt-3">
+                                                <li>krótkie przerwy</li>
+                                                <li>techniki oddechowe</li>
+                                                <li>artykuły</li>
+                                                <li>aktywności fizyczne</li>
+                                                <li>zadania na poprawę energii i koncentracji.</li>
+                                        </ul>
+                                        </div>
+                                        <img src={Progress} alt=""  className="w-full md:w-3/5 mb-5 shadow-lg/20 shadow-success rounded-lg"/>
+                                        </div>
+                                </CardBody>
+                            </Card>
+                        </div>
+                    </CarouselItem>
+                    <CarouselItem  >
+                        <div className="p-1">
+                            <Card shadow="sm" >
+                                <CardHeader className="p-5">
+                                        <h2 className="text-2xl md:text-3xl">3. Pracuj lepiej dzięki Trybowi Focus</h2>
+                                </CardHeader>
+                                <Divider />
+                                <CardBody className="p-6 md:p-10 ">
                     
-                    </div>
-                </CardBody>
-              </Card>
-            </div>
-          </CarouselItem>
-          <CarouselItem  >
-            <div className="p-1">
-              <Card shadow="sm" >
-                <CardHeader className="p-5">
-                    <h2 className="text-3xl">2. Otrzymaj zalecenia od sztucznej inteligencji</h2>
-                </CardHeader>
-                <Divider />
-                <CardBody >
-                    <div className="p-10 flex gap-10 justify-center">
-                    <div className="">
-                    <h3 className="text-xl">Na podstawie Twoich odpowiedzi sugerujemy:</h3>
-                    <ul className="list-disc opacity-80 ml-10 mt-5">
-                        <li>krótkie przerwy</li>
-                        <li>techniki oddechowe</li>
-                        <li>artykuły</li>
-                        <li>aktywności fizyczne</li>
-                        <li>zadania na poprawę energii i koncentracji.</li>
-                    </ul>
-                    </div>
-                    <img src={Progress} alt=""  className="w-3/5 mb-5 m-auto shadow-lg/20 shadow-success rounded-lg"/>
-                    </div>
-                </CardBody>
-              </Card>
-            </div>
-          </CarouselItem>
-          <CarouselItem  >
-            <div className="p-1">
-              <Card shadow="sm" >
-                <CardHeader className="p-5">
-                    <h2 className="text-3xl">3. Pracuj lepiej dzięki Trybowi Focus</h2>
-                </CardHeader>
-                <Divider />
-                <CardBody className="p-10 ">
-                    
-                    <div className="flex gap-10  justify-center">
-                    <div>
-                    <h3 className="text-2xl">Proste cykle Pomodoro pomagają:</h3>
-                    <ul className="list-disc opacity-80 mt-10 ml-10">
-                        <li>unikać przeciążenia,</li>
-                        <li>utrzymać rytm,</li>
-                        <li>pracować świadomie,</li>
-                        <li>zachować granice między wysiłkiem a odpoczynkiem.</li>
+                                        <div className="flex flex-col md:flex-row gap-6 md:gap-10 items-center justify-center">
+                                        <div className="md:flex-1">
+                                        <h3 className="text-2xl">Proste cykle Pomodoro pomagają:</h3>
+                                        <ul className="list-disc opacity-80 mt-4 ml-6">
+                                                <li>unikać przeciążenia,</li>
+                                                <li>utrzymać rytm,</li>
+                                                <li>pracować świadomie,</li>
+                                                <li>zachować granice między wysiłkiem a odpoczynkiem.</li>
             
-                    </ul>
-                    </div>
-                    <img src={focusScr} alt="zdjęcie zakładki focus" className="w-3/5 mb-5 m-auto shadow-lg/20 shadow-success rounded-lg" />
-                    </div>
+                                        </ul>
+                                        </div>
+                                        <img src={focusScr} alt="zdjęcie zakładki focus" className="w-full md:w-3/5 mb-5 shadow-lg/20 shadow-success rounded-lg" />
+                                        </div>
                     
-                </CardBody>
-              </Card>
-            </div>
-          </CarouselItem>
-           <CarouselItem  >
-            <div className="p-1">
-              <Card shadow="sm" >
-                <CardHeader className="p-5">
-                    <h2 className="text-3xl">4. dołącz do forum i znajdź wsparcie</h2>
-                </CardHeader>
-                <Divider />
-                <CardBody className="p-10">
-                    <img src={forumScr} alt="zdjęcie naszego forum" className="w-3/5 mb-5 m-auto shadow-lg/20 shadow-success rounded-lg"/>
-                    <Divider className="my-5"/>
-                    <h3 className="text-lg m-5 ">Ludzie, którzy przeszli przez to samo, najlepiej rozumieją Twoją sytuację.
-                        Rozmawiaj, dziel się doświadczeniami, pomagaj innym.</h3>
+                                </CardBody>
+                            </Card>
+                        </div>
+                    </CarouselItem>
+                     <CarouselItem  >
+                        <div className="p-1">
+                            <Card shadow="sm" >
+                                <CardHeader className="p-5">
+                                        <h2 className="text-2xl md:text-3xl">4. dołącz do forum i znajdź wsparcie</h2>
+                                </CardHeader>
+                                <Divider />
+                                <CardBody className="p-6 md:p-10">
+                                        <img src={forumScr} alt="zdjęcie naszego forum" className="w-full md:w-3/5 mb-5 m-auto shadow-lg/20 shadow-success rounded-lg"/>
+                                        <Divider className="my-5"/>
+                                        <h3 className="text-lg m-2 text-center md:text-left">Ludzie, którzy przeszli przez to samo, najlepiej rozumieją Twoją sytuację. Rozmawiaj, dziel się doświadczeniami, pomagaj innym.</h3>
                     
-                </CardBody>
-              </Card>
-            </div>
-          </CarouselItem>
-           <CarouselItem  >
-            <div className="p-1">
-              <Card shadow="sm" >
-                <CardHeader className="p-5">
-                    <h2 className="text-3xl">5. Oglądaj swoje statystyki</h2>
-                </CardHeader>
-                <Divider />
-                <CardBody className="p-10">
+                                </CardBody>
+                            </Card>
+                        </div>
+                    </CarouselItem>
+                     <CarouselItem  >
+                        <div className="p-1">
+                            <Card shadow="sm" >
+                                <CardHeader className="p-5">
+                                        <h2 className="text-2xl md:text-3xl">5. Oglądaj swoje statystyki</h2>
+                                </CardHeader>
+                                <Divider />
+                                <CardBody className="p-6 md:p-10">
                     
-                    <h3 className="text-xl">Twoje dane zmieniają się codziennie — widzisz:</h3>
-                    <ul className="list-disc">
-                        <li>spadek stresu,</li>
-                        <li>poprawę energii,</li>
-                        <li>regularność pracy,</li>
-                        <li>rozwój zdrowych nawyków.</li>
+                                        <h3 className="text-xl">Twoje dane zmieniają się codziennie — widzisz:</h3>
+                                        <ul className="list-disc ml-6">
+                                                <li>spadek stresu,</li>
+                                                <li>poprawę energii,</li>
+                                                <li>regularność pracy,</li>
+                                                <li>rozwój zdrowych nawyków.</li>
                         
-                    </ul>
-                    <p>Motywacja rośnie, gdy widzisz realny progres.</p>
+                                        </ul>
+                                        <p className="mt-3">Motywacja rośnie, gdy widzisz realny progres.</p>
                     
-                </CardBody>
-              </Card>
-            </div>
-          </CarouselItem>
-            <CarouselItem  >
-            <div className="p-1">
-              <Card shadow="sm" >
-                <CardHeader className="p-5">
-                    <h2 className="text-3xl">6. Zdobywaj odznaki i nagrody</h2>
-                </CardHeader>
-                <Divider />
-                <CardBody className="p-10">
+                                </CardBody>
+                            </Card>
+                        </div>
+                    </CarouselItem>
+                        <CarouselItem  >
+                        <div className="p-1">
+                            <Card shadow="sm" >
+                                <CardHeader className="p-5">
+                                        <h2 className="text-2xl md:text-3xl">6. Zdobywaj odznaki i nagrody</h2>
+                                </CardHeader>
+                                <Divider />
+                                <CardBody className="p-6 md:p-10">
                     
-                    <h3 className="text-xl">Dbasz o siebie = zdobywasz punkty.
-                    Nawyki stają się przyjemniejsze dzięki elementom grywalizacji.</h3>
+                                        <h3 className="text-xl">Dbasz o siebie = zdobywasz punkty. Nawyki stają się przyjemniejsze dzięki elementom grywalizacji.</h3>
                     
-                </CardBody>
-              </Card>
-            </div>
-          </CarouselItem>
+                                </CardBody>
+                            </Card>
+                        </div>
+                    </CarouselItem>
           
        
-      </CarouselContent>
-      <CarouselPrevious />
-      <CarouselNext />
-    </Carousel>
-            </section>
+            </CarouselContent>
+            <CarouselPrevious />
+            <CarouselNext />
+        </Carousel>
+                        </section>
             <section className="w-full md:w-8/10 mx-auto mt-20 px-4 md:px-0">
                 <h2 className="text-5xl font-bold mb-6">Dlaczego WorkSense działa</h2>
                 
-                <div className="flex flex-col sm:flex-row w-full text-center gap-5 opacity-80">
+                                <div className="flex flex-col sm:flex-row w-full text-center gap-5 opacity-80 ">
                     
-                    <div className="w-full sm:w-1/3 p-10 text-2xl flex flex-col justify-between">
-                     Zmiana nawyków pracy<ColumnSrc className="text-foreground w-2/3 m-auto" alt="Column icon"/></div>
-                     <div className="w-full sm:w-1/3 p-10 text-2xl flex flex-col justify-between ">
-                    Psychoedukacja o stresie i wypaleniu
-                    <ColumnSrc className="text-foreground w-2/3 m-auto" alt="Column icon"/>
-                    </div>
-                    <div className="w-full sm:w-1/3 p-10 text-2xl flex flex-col justify-between"
-                    > Wsparcie społeczne<ColumnSrc className="text-foreground w-2/3 m-auto" alt="Column icon"/></div>
-                </div>
+                                        <div className="w-full sm:w-1/3 p-10 text-2xl flex flex-col justify-between h-120">
+                                        <p className="mb-4">Zmiana nawyków pracy</p>
+                                         <div className="h-80"> <ColumnSrc className="text-foreground grow-0 shrink-0 w-2/3 m-auto " alt="Column icon"/></div>
+                                         
+                                         </div>
+                    
+                                         <div className="w-full sm:w-1/3 p-10 text-2xl flex flex-col justify-between h-120">
+                                         <p className="mb-4">Psychoedukacja o stresie i wypaleniu</p>
+                                         <div className="h-80"> <ColumnSrc className="text-foreground grow-0 shrink-0 w-2/3 m-auto " alt="Column icon"/></div>
+                                       
+                                        </div>
+                    
+                                        <div className="w-full sm:w-1/3 p-10 text-2xl flex flex-col justify-between h-120"> 
+                                            <p className="mb-4">Wsparcie społeczne</p>
+                                            <div className="h-80"><ColumnSrc className="text-foreground grow-0 shrink-0 w-2/3 m-auto " alt="Column icon"/></div>
+                                            
+                                        </div>
+                                </div>
             </section>
              <section className=" w-8/10 m-auto mt-50">
                 <h2 className="text-5xl font-bold mb-6 ">Plan rozwoju</h2>

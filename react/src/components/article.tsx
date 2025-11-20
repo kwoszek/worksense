@@ -1,7 +1,7 @@
 import { Divider } from "@heroui/divider";
 import { Link } from "react-router-dom";
 
-function Article(props){
+function Article(props: any){
     return (
         <article className="mt-5">
         

@@ -96,8 +96,8 @@ export default function ProgressPage() {
 
   return (
     <DefaultLayout>
-      <div className="flex justify-center gap-5 ">
-      <div className= " flex flex-col gap-5 w-1/2" >
+  <div className="flex flex-col md:flex-row justify-center gap-5 px-4 md:px-0">
+  <div className= "flex flex-col gap-5 w-full md:w-1/2" >
       
             <MoodChart checkins={chartCheckins} />
           
@@ -115,7 +115,7 @@ export default function ProgressPage() {
       </CardBody>
       </Card>
     </div>
-    <div className="flex flex-col gap-5 w-3/10">
+  <div className="flex flex-col gap-5 w-full md:w-3/10">
       <Card className="p-3">
         <CardHeader>
           <h2 className="text-2xl opacity-80">Codzienny Check-in</h2>
