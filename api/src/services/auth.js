@@ -39,15 +39,15 @@ async function persistRefreshToken(userId, token, userAgent, ip) {
   const decoded = jwt.decode(token);
   const expiresAt = new Date((decoded.exp || 0) * 1000);
   await db.query(
-    `INSERT INTO refresh_tokens(userid, token, expiresAt, userAgent, ip)
-     VALUES ($1,$2,$3,$4,$5)`,
+    `INSERT INTO refresh_tokens(userId, token, expiresAt, userAgent, ip)
+     VALUES (?,?,?,?,?)`,
     [userId, token, expiresAt, userAgent || null, ip || null]
   );
 }
 
 async function revokeRefreshToken(token) {
   await db.query(
-    `UPDATE refresh_tokens SET revokedAt = NOW() WHERE token = $1 AND revokedAt IS NULL`,
+    `UPDATE refresh_tokens SET revokedAt = NOW() WHERE token = ? AND revokedAt IS NULL`,
     [token]
   );
 }
@@ -55,7 +55,7 @@ async function revokeRefreshToken(token) {
 async function isRefreshTokenActive(token) {
   const res = await db.query(
     `SELECT id FROM refresh_tokens
-     WHERE token = $1 AND revokedAt IS NULL AND expiresAt > NOW()
+     WHERE token = ? AND revokedAt IS NULL AND expiresAt > NOW()
      LIMIT 1`,
     [token]
   );

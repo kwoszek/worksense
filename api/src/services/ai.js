@@ -63,7 +63,7 @@ Twoje ZADANIE: Wygeneruj WYŁĄCZNIE poprawny JSON (bez komentarzy, bez dodatkow
 
 WYMAGANIA FORMATU:
 - Output musi być pojedynczym obiektem JSON (brak tablicy, brak dodatkowych kluczy).
-- moodScore: liczba całkowita z zakresu 0–10. Nie zaokrąglaj agresywnie.
+- moodScore: liczba całkowita z zakresu 1–10.
 - message: 2-3 zdania, empatyczne, naturalne po polsku, w drugiej osobie ("Twoje", "Możesz"). Zawiera krótki odbiór dnia + 1–4 konkretnych mini rekomendacji (wplecionych w tekst, nie w bullet listę): np. krótka medytacja oddechowa, technika Pomodoro, spacer 5–10 min, rozciąganie, nawodnienie, rozmowa z zaufaną osobą, 3 głębokie oddechy (box breathing), krótki journaling. Zero diagnoz medycznych.
 - progressSummary: 2–3 zdania o trendzie z moodScores (stabilizacja, poprawa, pogorszenie, wahania). Krótko, rzeczowo, bez powtarzania rekomendacji z message.
 - Nie dodawaj żadnych ostrzeżeń prawnych ani dużych disclaimerów; możesz subtelnie wspomnieć, że to wsparcie, a nie terapia, tylko jeśli dane są bardzo trudne.
@@ -81,8 +81,8 @@ HISTORIA moodScores (najstarsze -> najnowsze): [${scoresList}]
 LOGIKA OCENY moodScore (wytyczne – zastosuj zdrowy rozsądek zamiast surowego wzoru):
 - Wyższa energia i niższy stres => wyższy wynik.
 - Bardzo wysoki stres (>=8) obniża wynik (chyba że energia też wysoka i opis zawiera pozytywne aspekty – wtedy umiarkowany).
-- Jeśli opis zawiera słowa typu "zmęcz", "przytł", "niepok", "stres", możesz obniżyć wynik o 0.5–1.5.
-- Jeśli opis zawiera pozytywne elementy ("postęp", "spacer", "udało", "fajnie"), możesz podnieść o 0.5–1.
+- Jeśli opis zawiera słowa typu "zmęcz", "przytł", "niepok", "stres", możesz obniżyć wynik o 1-2.
+- Jeśli opis zawiera pozytywne elementy ("postęp", "spacer", "udało", "fajnie"), możesz podnieść o 1-2.
 - Unikaj skrajności 1 lub 10 bez bardzo wyraźnych przesłanek.
 
 ANALIZA PROGRESU (progressSummary):

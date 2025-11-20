@@ -24,23 +24,47 @@ function computeStreakLevel(streak) {
   return level; // 0 means not earned yet
 }
 async function upsertStreakBadge(userId, streak) {
+  if (!userId) return;
+  // Ensure user still exists
+  const userRes = await db.query('SELECT id FROM users WHERE id = ? LIMIT 1', [userId]);
+  if (!userRes.rowCount) return;
   const level = computeStreakLevel(streak);
   if (level === 0) return; // nothing to assign
-  const badgeRow = await db.query('SELECT id, maxLevel FROM badges WHERE key=$1', ['streak']);
-  if (!badgeRow.rowCount) return; // definition missing
-  const badgeId = badgeRow.rows[0].id;
-  await db.query(
-    `INSERT INTO user_badges(userId,badgeId,level)
-     VALUES($1,$2,$3)
-     ON CONFLICT (userId,badgeId) DO UPDATE SET level=EXCLUDED.level, updatedAt=NOW()`,
-    [userId, badgeId, level]
-  );
+  // Ensure streak badge definition exists (create if missing)
+  const badgeDef = await db.query('SELECT id, maxLevel FROM badges WHERE `key` = ?', ['streak']);
+  let badgeId;
+  if (!badgeDef.rowCount) {
+    // Create definition
+    await db.query('INSERT INTO badges(`key`, name, description, maxLevel) VALUES(?,?,?,?)', [
+      'streak',
+      'Streaker',
+      'Awarded for maintaining an activity streak. Levels increase at 1,7,30,100 days.',
+      4,
+    ]);
+    const newDef = await db.query('SELECT id FROM badges WHERE `key` = ? LIMIT 1', ['streak']);
+    if (!newDef.rowCount) return; // give up silently
+    badgeId = newDef.rows[0].id;
+  } else {
+    badgeId = badgeDef.rows[0].id;
+  }
+  // Safe insert/update
+  try {
+    await db.query(
+      `INSERT INTO user_badges(userId,badgeId,level,createdAt,updatedAt)
+       VALUES(?,?,?,NOW(),NOW())
+       ON DUPLICATE KEY UPDATE level=VALUES(level), updatedAt=NOW()`,
+      [userId, badgeId, level]
+    );
+  } catch (e) {
+    // Foreign key issues: silently ignore to avoid crashing /me route
+    console.error('upsertStreakBadge failed', e.code);
+  }
 }
 async function getUserBadges(userId) {
-  const q = `SELECT b.key, b.name, b.description, ub.level
+  const q = `SELECT b.\`key\`, b.name, b.description, ub.level
              FROM user_badges ub
              JOIN badges b ON b.id = ub.badgeId
-             WHERE ub.userId = $1
+             WHERE ub.userId = ?
              ORDER BY b.id`;
   const r = await db.query(q, [userId]);
   return r.rows.map(row => ({
@@ -53,7 +77,7 @@ async function getUserBadges(userId) {
 
 // Streak computation (same logic as forum.js) and persistence
 async function computeAndUpdateStreak(userId) {
-  const q = `SELECT to_char(date, 'YYYY-MM-DD') AS d FROM checkins WHERE userId = $1 GROUP BY d ORDER BY d DESC`;
+  const q = `SELECT DATE_FORMAT(date, '%Y-%m-%d') AS d FROM checkins WHERE userId = ? GROUP BY d ORDER BY d DESC`;
   const r = await db.query(q, [userId]);
   const dates = new Set(r.rows.map(row => row.d));
   const today = new Date();
@@ -68,7 +92,7 @@ async function computeAndUpdateStreak(userId) {
       break;
     }
   }
-  await db.query('UPDATE users SET streak = $2 WHERE id = $1', [userId, streak]);
+  await db.query('UPDATE users SET streak = ? WHERE id = ?', [streak, userId]);
   return streak;
 }
 
@@ -91,18 +115,18 @@ router.post(
       const { username, email, password } = req.body;
 
       const dup = await db.query(
-        'SELECT 1 FROM users WHERE username = $1 OR email = $2 LIMIT 1',
+        'SELECT 1 FROM users WHERE username = ? OR email = ? LIMIT 1',
         [username, email]
       );
       if (dup.rowCount) return res.status(409).json({ error: 'Username or email already in use' });
 
       const pwHash = hashPassword(password);
       const ins = await db.query(
-        'INSERT INTO users(username, email, password) VALUES($1,$2,$3) RETURNING id, username, email, avatar, streak',
-        [username, email, pwHash]
+        'INSERT INTO users(username, email, password, avatar, streak) VALUES(?,?,?,?,?)',
+        [username, email, pwHash, null, 0]
       );
-
-      const row = ins.rows[0];
+      const rowData = await db.query('SELECT id, username, email, avatar, streak FROM users WHERE id = ?', [ins.insertId]);
+      const row = rowData.rows[0];
       const user = {
         id: row.id,
         username: row.username,
@@ -135,9 +159,9 @@ router.post(
       const q = `
         SELECT id, username, email, password, avatar, streak
         FROM users
-        WHERE email = $1 OR username = $1
+        WHERE email = ? OR username = ?
         LIMIT 1`;
-      const r = await db.query(q, [identifier]);
+      const r = await db.query(q, [identifier, identifier]);
       if (!r.rowCount) return res.status(401).json({ error: 'Invalid credentials' });
 
       const userRow = r.rows[0];
@@ -162,8 +186,9 @@ router.post(
 
 router.get('/me', authMiddleware, async (req, res, next) => {
   try {
-    await computeAndUpdateStreak(req.user.id);
-    const r = await db.query('SELECT id, username, email, avatar, streak FROM users WHERE id = $1', [req.user.id]);
+    // Refresh streak first
+    const streak = await computeAndUpdateStreak(req.user.id);
+    const r = await db.query('SELECT id, username, email, avatar, streak FROM users WHERE id = ?', [req.user.id]);
     if (!r.rowCount) return res.status(404).json({ error: 'Not found' });
     const row = r.rows[0];
     const user = {
@@ -171,7 +196,7 @@ router.get('/me', authMiddleware, async (req, res, next) => {
       username: row.username,
       email: row.email,
       avatar: row.avatar ? Buffer.from(row.avatar).toString('base64') : null,
-      streak: row.streak ?? 0,
+      streak: row.streak ?? streak ?? 0,
     };
     await upsertStreakBadge(user.id, user.streak);
     const badges = await getUserBadges(user.id);
@@ -180,6 +205,85 @@ router.get('/me', authMiddleware, async (req, res, next) => {
   } catch (err) { next(err); }
 });
 
+  // Update current user's profile (username, email, avatar)
+  router.put('/me', authMiddleware, async (req, res, next) => {
+    try {
+      const userId = req.user.id;
+      const { username, email, avatarBase64 } = req.body || {};
+
+      // Fetch current user
+      const curRes = await db.query('SELECT id, username, email, avatar, streak FROM users WHERE id = ? LIMIT 1', [userId]);
+      if (!curRes.rowCount) return res.status(404).json({ error: 'User not found' });
+      const current = curRes.rows[0];
+
+      const nextUsername = typeof username === 'string' && username.trim().length ? username.trim() : current.username;
+      const nextEmail = typeof email === 'string' && email.trim().length ? email.trim() : current.email;
+
+      // Uniqueness checks if changed
+      if (nextUsername !== current.username) {
+        const dupU = await db.query('SELECT 1 FROM users WHERE username = ? AND id <> ? LIMIT 1', [nextUsername, userId]);
+        if (dupU.rowCount) return res.status(400).json({ error: 'Username already taken' });
+      }
+      if (nextEmail !== current.email) {
+        const dupE = await db.query('SELECT 1 FROM users WHERE email = ? AND id <> ? LIMIT 1', [nextEmail, userId]);
+        if (dupE.rowCount) return res.status(400).json({ error: 'Email already taken' });
+      }
+
+      let avatarBuffer = current.avatar || null;
+      if (typeof avatarBase64 === 'string' && avatarBase64.length) {
+        try {
+          // strip data URL prefix if present
+          const cleaned = avatarBase64.replace(/^data:image\/[^;]+;base64,/, '');
+          avatarBuffer = Buffer.from(cleaned, 'base64');
+        } catch {
+          return res.status(400).json({ error: 'Invalid avatar image data' });
+        }
+      }
+
+      await db.query('UPDATE users SET username = ?, email = ?, avatar = ? WHERE id = ?', [
+        nextUsername,
+        nextEmail,
+        avatarBuffer,
+        userId,
+      ]);
+
+      const out = await db.query('SELECT id, username, email, avatar, streak FROM users WHERE id = ?', [userId]);
+      const row = out.rows[0];
+      const user = {
+        id: row.id,
+        username: row.username,
+        email: row.email,
+        avatar: row.avatar ? Buffer.from(row.avatar).toString('base64') : null,
+        streak: row.streak ?? 0,
+      };
+      // issue fresh access token reflecting updated claims
+      const { signAccessToken } = require('../services/auth');
+      const accessToken = signAccessToken(user);
+      return res.json({ user, accessToken });
+    } catch (err) { next(err); }
+  });
+
+  // Change password
+  router.post('/change-password', authMiddleware, async (req, res, next) => {
+    try {
+      const userId = req.user.id;
+      const { oldPassword, newPassword } = req.body || {};
+      if (!oldPassword || !newPassword) return res.status(400).json({ error: 'oldPassword and newPassword required' });
+      if (newPassword.length < 5 || newPassword.length > 100 || !/[A-Z]/.test(newPassword) || !/\d/.test(newPassword)) {
+        return res.status(400).json({ error: 'New password does not meet complexity requirements' });
+      }
+      const r = await db.query('SELECT id, password FROM users WHERE id = ? LIMIT 1', [userId]);
+      if (!r.rowCount) return res.status(404).json({ error: 'User not found' });
+      const stored = r.rows[0].password;
+      // Use existing comparePassword helper via require to avoid duplication
+      const { comparePassword, hashPassword } = require('../services/auth');
+      if (!comparePassword(oldPassword, stored)) return res.status(400).json({ error: 'Old password incorrect' });
+      const newHash = hashPassword(newPassword);
+      await db.query('UPDATE users SET password = ? WHERE id = ?', [newHash, userId]);
+      return res.json({ ok: true });
+    } catch (err) { next(err); }
+  });
+
 // Get current user's badges with metadata
 router.get('/me/badges', authMiddleware, async (req, res, next) => {
   try {
@@ -187,7 +291,7 @@ router.get('/me/badges', authMiddleware, async (req, res, next) => {
       SELECT ub.badgeId AS id, b.key, b.name, b.description, ub.level, ub.createdAt, ub.updatedAt
       FROM user_badges ub
       JOIN badges b ON b.id = ub.badgeId
-      WHERE ub.userId = $1
+      WHERE ub.userId = ?
       ORDER BY ub.level DESC, ub.updatedAt DESC`;
     const r = await db.query(q, [req.user.id]);
     res.json(r.rows);
@@ -202,7 +306,7 @@ router.post('/refresh', async (req, res, next) => {
     if (!(await isRefreshTokenActive(rt))) return res.status(401).json({ error: 'Invalid refresh token' });
 
     const decoded = verifyRefresh(rt);
-    const r = await db.query('SELECT id, username, email, avatar, streak FROM users WHERE id = $1', [decoded.sub]);
+    const r = await db.query('SELECT id, username, email, avatar, streak FROM users WHERE id = ?', [decoded.sub]);
     if (!r.rowCount) return res.status(401).json({ error: 'Invalid refresh token' });
 
     const row = r.rows[0];

@@ -119,6 +119,7 @@ export default function LoginPage() {
                                     placeholder="Stwórz hasło"
                                     type="password"
                                     isInvalid={passError}
+                                    onChange={()=> setPassError(false)}
                                     errorMessage="Hasło musi mieć co najmniej 5 znaków, zawierać dużą literę i cyfrę"
                                 />
                                 {registerError && <p className="text-sm text-red-600">Rejestracja nie powiodła się</p>}

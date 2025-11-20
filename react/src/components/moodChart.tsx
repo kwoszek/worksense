@@ -14,7 +14,7 @@ interface Props {
 type HeatValue = { date: string; count: number; content: string };
 
 function buildValueFromCheckins(checkins?: Checkin[]): HeatValue[] {
-  if (!checkins || !checkins.length) return [{}];
+  if (!checkins || !checkins.length) return [];
   const sorted = [...checkins].sort((a, b) => (a.date > b.date ? 1 : -1));
 
   return sorted.map((v) => {

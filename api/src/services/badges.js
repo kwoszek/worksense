@@ -6,26 +6,26 @@ const { db } = require('../database/db');
 
 async function ensureBadge(key, name, description = '', maxLevel = 1) {
   await db.query(
-    `INSERT INTO badges(key, name, description, maxLevel) VALUES ($1,$2,$3,$4) ON CONFLICT (key) DO NOTHING`,
+    'INSERT INTO badges(`key`, name, description, maxLevel) VALUES (?,?,?,?) ON DUPLICATE KEY UPDATE `key`=`key`',
     [key, name, description, maxLevel]
   );
-  const r = await db.query('SELECT id, key, name, description, maxlevel FROM badges WHERE key = $1', [key]);
+  const r = await db.query('SELECT id, `key`, name, description, maxLevel FROM badges WHERE `key` = ?', [key]);
   return r.rows[0];
 }
 
 async function getUserBadge(userId, badgeId) {
-  const r = await db.query('SELECT id, userId, badgeId, level FROM user_badges WHERE userId = $1 AND badgeId = $2', [userId, badgeId]);
+  const r = await db.query('SELECT id, userId, badgeId, level FROM user_badges WHERE userId = ? AND badgeId = ?', [userId, badgeId]);
   return r.rowCount ? r.rows[0] : null;
 }
 
 async function upsertUserBadge(userId, badgeId, level) {
   const existing = await getUserBadge(userId, badgeId);
   if (!existing) {
-    await db.query('INSERT INTO user_badges(userId, badgeId, level, createdAt, updatedAt) VALUES($1,$2,$3,NOW(),NOW())', [userId, badgeId, level]);
+    await db.query('INSERT INTO user_badges(userId, badgeId, level, createdAt, updatedAt) VALUES(?,?,?,NOW(),NOW())', [userId, badgeId, level]);
     return true;
   }
   if (level > existing.level) {
-    await db.query('UPDATE user_badges SET level = $1, updatedAt = NOW() WHERE id = $2', [level, existing.id]);
+    await db.query('UPDATE user_badges SET level = ?, updatedAt = NOW() WHERE id = ?', [level, existing.id]);
     return true;
   }
   return false;
@@ -40,7 +40,7 @@ function streakToLevel(streak) {
 }
 
 async function checkAndAwardForCheckin(userId) {
-  const datesRes = await db.query("SELECT to_char(date, 'YYYY-MM-DD') AS d FROM checkins WHERE userId = $1 GROUP BY d ORDER BY d DESC", [userId]);
+  const datesRes = await db.query("SELECT DATE_FORMAT(date, '%Y-%m-%d') AS d FROM checkins WHERE userId = ? GROUP BY d ORDER BY d DESC", [userId]);
   const dates = datesRes.rows.map(r => r.d);
   const dateSet = new Set(dates);
 
@@ -57,7 +57,7 @@ async function checkAndAwardForCheckin(userId) {
     }
   }
 
-  await db.query('UPDATE users SET streak = $1 WHERE id = $2', [streak, userId]);
+  await db.query('UPDATE users SET streak = ? WHERE id = ?', [streak, userId]);
 
   const badge = await ensureBadge('streak', 'Streaker', 'Awarded for maintaining an activity streak.', 4);
   const level = streakToLevel(streak);
@@ -65,8 +65,8 @@ async function checkAndAwardForCheckin(userId) {
 }
 
 async function checkAndAwardForPost(userId) {
-  const r = await db.query('SELECT COUNT(*)::INT AS cnt FROM posts WHERE userId = $1', [userId]);
-  const cnt = r.rows[0].cnt || 0;
+  const r = await db.query('SELECT COUNT(*) AS cnt FROM posts WHERE userId = ?', [userId]);
+  const cnt = (r.rows[0].cnt || 0);
   const badge = await ensureBadge('posts', 'Contributor', 'Created posts in the forum', 1);
   if (cnt >= 2) await upsertUserBadge(userId, badge.id, 1);
 }

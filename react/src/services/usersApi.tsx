@@ -116,6 +116,23 @@ export const usersApi = createApi({
       query: () => ({ url: '/me/badges' }),
       providesTags: ['Me'],
     }),
+    updateProfile: builder.mutation<{ user: AuthUser; accessToken?: string }, { username?: string; email?: string; avatarBase64?: string }>({
+      query: (body) => ({ url: '/me', method: 'PUT', body }),
+      invalidatesTags: ['Me'],
+      async onQueryStarted(_arg, { queryFulfilled, dispatch }) {
+        try {
+          const { data } = await queryFulfilled;
+          const token = data.accessToken || getAccessToken();
+            if (data?.accessToken) setAccessToken(data.accessToken);
+          if (data?.user && token) {
+            dispatch(setCredentials({ user: data.user, token }));
+          }
+        } catch {}
+      },
+    }),
+    changePassword: builder.mutation<{ ok: boolean }, { oldPassword: string; newPassword: string }>({
+      query: (body) => ({ url: '/change-password', method: 'POST', body }),
+    }),
     refresh: builder.mutation<AuthResponse, void>({
       query: () => ({ url: '/refresh', method: 'POST' }),
       async onQueryStarted(_arg, { queryFulfilled, dispatch }) {
@@ -137,5 +154,7 @@ export const {
   useLogoutMutation,
   useMeQuery,
   useMyBadgesQuery,
+  useUpdateProfileMutation,
+  useChangePasswordMutation,
   useRefreshMutation,
 } = usersApi;

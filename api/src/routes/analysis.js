@@ -21,12 +21,11 @@ router.get('/latest', authMiddleware, async (req, res, next) => {
              c.description
       FROM checkin_ai_analysis a
       JOIN checkins c ON c.id = a.checkinId
-      WHERE a.userId = $1
+      WHERE a.userId = ?
       ORDER BY a.createdAt DESC
-      LIMIT 1;
-    `;
+      LIMIT 1`;
     const r = await db.query(q, [userId]);
-    if (!r.rowCount) return res.json(null); // spójne z frontendowym typem Analysis | null
+    if (!r.rowCount) return res.json(null);
     res.json(r.rows[0]);
   } catch (err) { next(err); }
 });
@@ -48,9 +47,8 @@ router.get('/', authMiddleware, async (req, res, next) => {
              c.description
       FROM checkin_ai_analysis a
       JOIN checkins c ON c.id = a.checkinId
-      WHERE a.userId = $1
-      ORDER BY a.createdAt DESC;
-    `;
+      WHERE a.userId = ?
+      ORDER BY a.createdAt DESC`;
     const r = await db.query(q, [userId]);
     res.json(r.rows);
   } catch (err) { next(err); }
