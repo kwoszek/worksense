@@ -23,6 +23,7 @@ export default function ForumPage() {
   const [addPost, { isLoading: creating, error: createError }] = useAddPostMutation();
   const user = useSelector(selectAuthUser);
   const [isOpen, setIsOpen] = useState(false);
+  const [showCreateButton, setShowCreateButton] = useState(true);
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
   const {data: popularPosts, isLoading: isLoadingPopularPosts} = useGetPostsQuery({ limit: 5, offset: 0, orderBy: 'likes', direction: 'DESC' });
@@ -116,7 +117,10 @@ export default function ForumPage() {
               <SelectItem key="dateposted">Data publikacji</SelectItem>
               <SelectItem key="likes">Polubienia</SelectItem>
             </Select>
-            <Button onPress={() => setIsOpen(true)}>Nowy post</Button>
+            <div className="flex items-center gap-2">
+              
+              {user && <Button onPress={() => setIsOpen(true)}>Nowy post</Button>}
+            </div>
         </div>
         <div className="flex flex-col sm:flex-row gap-5 items-start">
           <Card className="flex-1 min-w-0 sm:basis-2/3 w-full">
@@ -162,7 +166,7 @@ export default function ForumPage() {
 
         </div>
       </div>
-      <Modal isOpen={isOpen} placement="top-center" onOpenChange={setIsOpen}>
+        <Modal isOpen={isOpen} placement="top-center" onOpenChange={setIsOpen}>
         <ModalContent>
           {(onClose) => (
             <>
