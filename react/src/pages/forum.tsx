@@ -121,7 +121,7 @@ export default function ForumPage() {
         <div className="flex flex-col sm:flex-row gap-5 items-start">
           <Card className="flex-1 min-w-0 sm:basis-2/3 w-full">
           <CardHeader className="pb-0">
-            <h2 className="opacity-60 text-2xl ml-5 mt-3">Posty</h2>
+            <h2 className="opacity-80 text-2xl ml-5 mt-3">Posty</h2>
           </CardHeader>
           <CardBody>
             {isInitialLoading && loadedPosts.length === 0 ? (
@@ -143,13 +143,13 @@ export default function ForumPage() {
         </Card>
         <Card className="min-w-0 sm:basis-1/3 hidden sm:block">
           <CardHeader>
-            <h2 className="opacity-60 text-2xl">Popularne posty</h2>
+            <h2 className="opacity-80 text-2xl">Popularne posty</h2>
           </CardHeader>
           <Divider />
           <CardBody>
             {!isLoadingPopularPosts ? (
               popularPosts?.map((post) => (
-                <div key={post.id} className="mb-4">
+                <div key={post.id} className="mb-4 opacity-60">
                   <h3>{post.title}</h3>
                   <Divider />
                 </div>

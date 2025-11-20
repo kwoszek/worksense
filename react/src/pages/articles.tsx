@@ -77,9 +77,9 @@ const polskieArtykulyWypalenie = [
 
   return (
     <DefaultLayout>
-      <Card className="w-8/10 m-auto px-5 my-25">
+      <Card className="w-6/10 m-auto px-5 mb-25 p-10">
       <CardHeader>
-        <h2 className="text-6xl opacity-60 mt-3">Pomocne artykuły po polsku</h2>
+        <h2 className="text-6xl opacity-100 mt-3">Pomocne artykuły po polsku</h2>
       </CardHeader>
      <Divider/>
       <CardBody>{
@@ -88,7 +88,7 @@ const polskieArtykulyWypalenie = [
         ))}
         </CardBody>
      </Card>
-     <Card className="w-8/10 m-auto px-5">
+     <Card className="w-6/10 m-auto px-5  p-10">
       <CardHeader>
         <h2 className="text-6xl opacity-60 mt-3">Pomocne artykuły po angielsku</h2>
       </CardHeader>

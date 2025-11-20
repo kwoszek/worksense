@@ -7,6 +7,7 @@ import {Divider} from "@heroui/divider";
 import forumScr from "../resources/forumScr.png";
 import focusScr from "../resources/FocusScr.png";
 import checkInScr from "../resources/checkInScr.png";
+import Progress from "../resources/Progress.png";
 import {
   Carousel,
   CarouselContent,
@@ -168,16 +169,20 @@ export default function Landing(){
                     <h2 className="text-3xl">2. Otrzymaj zalecenia od sztucznej inteligencji</h2>
                 </CardHeader>
                 <Divider />
-                <CardBody className="p-10">
-                    
+                <CardBody >
+                    <div className="p-10 flex gap-10 justify-center">
+                    <div className="">
                     <h3 className="text-xl">Na podstawie Twoich odpowiedzi sugerujemy:</h3>
-                    <ul className="list-disc">
+                    <ul className="list-disc opacity-80 ml-10 mt-5">
                         <li>krótkie przerwy</li>
                         <li>techniki oddechowe</li>
                         <li>artykuły</li>
                         <li>aktywności fizyczne</li>
                         <li>zadania na poprawę energii i koncentracji.</li>
                     </ul>
+                    </div>
+                    <img src={Progress} alt=""  className="w-3/5 mb-5 m-auto shadow-lg/20 shadow-success rounded-lg"/>
+                    </div>
                 </CardBody>
               </Card>
             </div>
