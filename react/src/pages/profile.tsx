@@ -5,7 +5,7 @@ import { Card, CardHeader, CardBody } from '@heroui/card';
 import { Divider } from '@heroui/divider';
 import { Avatar } from '@heroui/avatar';
 import { Input } from '@heroui/input';
-import { useMyBadgesQuery, useLogoutMutation, useUpdateProfileMutation, useChangePasswordMutation } from '@/services/usersApi';
+import { useMyBadgesQuery, useLogoutMutation, useUpdateProfileMutation, useChangePasswordMutation, useMeQuery } from '@/services/usersApi';
 import { useSelector } from 'react-redux';
 import { selectAuthUser } from '@/features/auth/authSlice';
 
@@ -26,6 +26,8 @@ export default function Profile() {
   const [confirmPw, setConfirmPw] = useState('');
   const [pwMsg, setPwMsg] = useState<string | null>(null);
   const [profileMsg, setProfileMsg] = useState<string | null>(null);
+  // Subscribe to /me so invalidation triggers refetch; we can manually force refetch after save.
+  const { refetch: meRefetch } = useMeQuery(undefined);
 
   const handleAvatarChange = () => {
     const file = avatarFileRef.current?.files?.[0];
@@ -44,12 +46,15 @@ export default function Profile() {
       if (uname && uname !== user?.username) body.username = uname;
       if (email && email !== user?.email) body.email = email;
       if (avatarPreview && avatarPreview.startsWith('data:image/')) body.avatarBase64 = avatarPreview;
-      await updateProfile(body).unwrap();
+      const result = await updateProfile(body).unwrap();
+      // Keep preview as-is (already showing chosen avatar); optionally replace if server returns new.
+      if (!avatarPreview && result?.user?.avatar) {
+        setAvatarPreview(`data:image/png;base64,${result.user.avatar}`);
+      }
       setProfileMsg('Profile updated');
       setEditing(false);
-      setUname(user?.username||''); 
-      setEmail(user?.email||''); 
-      setAvatarPreview(user?.avatar ? `data:image/png;base64,${user.avatar}` : null);
+      // Force immediate refresh of /me to sync other derived fields (streak etc.)
+      meRefetch();
     } catch (e: any) {
       setProfileMsg(e?.data?.error || 'Update failed');
     }

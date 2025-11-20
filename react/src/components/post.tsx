@@ -90,7 +90,7 @@ function Post(data: Posttype) {
     return(
         <div className="m-5 mt-3">
             <Divider className="mb-6"/>
-             <User avatarProps={{ src: data?.avatar, name: data.username}} name={data.username}/>
+             <User avatarProps={{ src: data?.avatar ? `data:image/png;base64,${data.avatar}` : undefined, name: data.username}} name={data.username}/>
             <p className="">{data.content}</p>
             <div className="flex justify-end mt-2">
             <div className="flex items-center justify-end gap-2">

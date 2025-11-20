@@ -14,6 +14,8 @@ const {
   clearRefreshCookie,
 } = require('../services/auth');
 const { authMiddleware } = require('../middleware/auth');
+let sharp;
+try { sharp = require('sharp'); } catch { sharp = null; }
 // Badge badge logic
 const STREAK_LEVEL_THRESHOLDS = [1, 7, 30, 100]; // ascending thresholds for levels 1..4
 function computeStreakLevel(streak) {
@@ -231,12 +233,21 @@ router.get('/me', authMiddleware, async (req, res, next) => {
 
       let avatarBuffer = current.avatar || null;
       if (typeof avatarBase64 === 'string' && avatarBase64.length) {
-        try {
-          // strip data URL prefix if present
-          const cleaned = avatarBase64.replace(/^data:image\/[^;]+;base64,/, '');
-          avatarBuffer = Buffer.from(cleaned, 'base64');
-        } catch {
-          return res.status(400).json({ error: 'Invalid avatar image data' });
+        const cleaned = avatarBase64.replace(/^data:image\/[^;]+;base64,/, '');
+        let raw;
+        try { raw = Buffer.from(cleaned, 'base64'); } catch { return res.status(400).json({ error: 'Invalid avatar image data' }); }
+        if (raw.length > 5 * 1024 * 1024) return res.status(413).json({ error: 'Avatar too large (>5MB)' });
+        if (sharp) {
+          try {
+            const img = sharp(raw).resize({ width: 256, height: 256, fit: 'cover' }).png({ quality: 80, compressionLevel: 8 });
+            const compressed = await img.toBuffer();
+            if (compressed.length > 512 * 1024) return res.status(413).json({ error: 'Compressed avatar still too large (>512KB)' });
+            avatarBuffer = compressed;
+          } catch (e) {
+            return res.status(400).json({ error: 'Avatar processing failed' });
+          }
+        } else {
+            avatarBuffer = raw;
         }
       }
 

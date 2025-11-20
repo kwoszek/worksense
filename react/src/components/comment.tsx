@@ -28,7 +28,7 @@ function Comment(data: CommentType){
 
     return(
         <div className="m-5 mb-0">
-            <User avatarProps={{ src: data?.avatar, name: data.username}} name={data.username}/>
+            <User avatarProps={{ src: data?.avatar ? `data:image/png;base64,${data.avatar}` : undefined, name: data.username}} name={data.username}/>
             <p className="">{data.content}</p>
             <div className="flex items-center justify-end gap-2 mt-2">
                 <Button

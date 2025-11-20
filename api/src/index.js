@@ -18,8 +18,10 @@ app.use(cors({
   origin: true, // reflect request origin (configure to your frontend for production)
   credentials: true,
 }));
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+// Increase body size limits to allow larger avatar uploads (default 5mb adjustable via BODY_LIMIT env)
+const bodyLimit = process.env.BODY_LIMIT || '5mb';
+app.use(express.json({ limit: bodyLimit }));
+app.use(express.urlencoded({ extended: true, limit: bodyLimit }));
 app.use(cookieParser());
 app.use(morgan('dev'));
 

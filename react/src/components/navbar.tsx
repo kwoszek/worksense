@@ -40,7 +40,7 @@ export const Navbar = () => {
           {/* auth / avatar */}
           {user ? (
             <div className="hidden sm:flex items-center gap-3">
-              <Avatar isBordered name={user.username} src="" onClick={() => nav("/profile")} />
+              <Avatar isBordered name={user.username} src={user?.avatar ? `data:image/png;base64,${user.avatar}` : undefined} onClick={() => nav("/profile")} />
             </div>
           ) : (
             <div className="hidden sm:block">
