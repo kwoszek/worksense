@@ -5,6 +5,8 @@
 SET NAMES utf8mb4;
 SET time_zone = '+01:00';
 
+SET GLOBAL max_allowed_packet = 16777216;
+
 CREATE TABLE IF NOT EXISTS users (
   id INT AUTO_INCREMENT PRIMARY KEY,
   username VARCHAR(30) NOT NULL,
