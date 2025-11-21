@@ -133,6 +133,12 @@ export const usersApi = createApi({
     changePassword: builder.mutation<{ ok: boolean }, { oldPassword: string; newPassword: string }>({
       query: (body) => ({ url: '/change-password', method: 'POST', body }),
     }),
+    requestPasswordReset: builder.mutation<{ ok: boolean }, { email: string }>({
+      query: (body) => ({ url: '/request-password-reset', method: 'POST', body }),
+    }),
+    resetPassword: builder.mutation<{ ok?: boolean; message?: string; error?: string; errors?: any[] }, { token: string; password: string }>({
+      query: (body) => ({ url: '/reset-password', method: 'POST', body }),
+    }),
     refresh: builder.mutation<AuthResponse, void>({
       query: () => ({ url: '/refresh', method: 'POST' }),
       async onQueryStarted(_arg, { queryFulfilled, dispatch }) {
@@ -156,5 +162,7 @@ export const {
   useMyBadgesQuery,
   useUpdateProfileMutation,
   useChangePasswordMutation,
+  useRequestPasswordResetMutation,
+  useResetPasswordMutation,
   useRefreshMutation,
 } = usersApi;
