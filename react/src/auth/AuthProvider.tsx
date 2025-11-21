@@ -28,7 +28,7 @@ export const AuthProvider: React.FC<React.PropsWithChildren> = ({ children }) =>
   const [accessToken, setToken] = useState<string>(getAccessToken());
   const [user, setUser] = useState<AuthUser | null>(null);
 
-  const { data: meData, isLoading: meLoading, refetch } = useMeQuery(undefined, {
+  const { data: meData, isLoading: meLoading } = useMeQuery(undefined, {
     skip: !accessToken,
   });
 

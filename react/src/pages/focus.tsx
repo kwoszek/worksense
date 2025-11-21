@@ -2,13 +2,10 @@ import { useEffect, useRef, useState } from "react";
 import DefaultLayout from "@/layouts/default";
 import { Button } from "@heroui/button";
 import { Link } from "@heroui/link";
-import {Card, CardBody} from "@heroui/card";
+import {Card} from "@heroui/card";
 import {
   Modal,
   ModalContent,
-  ModalHeader,
-  ModalBody,
-  ModalFooter,
   useDisclosure,
 } from "@heroui/react";
 
@@ -178,8 +175,6 @@ export default function FocusPage() {
 
  <Modal isOpen={isOpen} onOpenChange={onOpenChange} size="2xl" >
         <ModalContent className="w-full">
-          {(onClose) => (
-            
             <section className="max-w-2xl mx-auto p-6 mt-10">
         <h1 className="text-4xl font-semibold mb-2">O technice pomodoro</h1>
         <p className="opacity-80">Technika Pomodoro to prosta metoda zarządzania czasem: pracujesz w krótkich, intensywnych blokach (standardowo 25 minut), po każdym bloku robisz krótką przerwę (5 minut), a po czterech blokach wykonujesz dłuższą przerwę (15–30 minut). Celem jest podział pracy na wykonalne fragmenty, które ułatwiają koncentrację i regularną regenerację.</p>
@@ -207,8 +202,6 @@ export default function FocusPage() {
         </Link>
         
       </section>  
-
-          )}
         </ModalContent>
       </Modal>
 

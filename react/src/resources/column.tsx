@@ -1,19 +1,22 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<!-- Generator: Adobe Illustrator 16.0.0, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->
+import React from 'react';
 
-<svg
-   version="1.1"
-   id="Layer_1"
-   x="0px"
-   y="0px"
-   width="239.03857"
-   height="407.77301"
-   viewBox="0 0 239.03857 407.77301"
-   enable-background="new 0 0 1400 980"
-   xml:space="preserve"
-   xmlns="http://www.w3.org/2000/svg"
-   xmlns:svg="http://www.w3.org/2000/svg"><defs
-   id="defs195" />
+export interface ColumnSrcProps extends React.SVGProps<SVGSVGElement> { title?: string }
+
+export const ColumnSrc: React.FC<ColumnSrcProps> = ({ title, ...props }) => (
+   <svg
+      {...props}
+      version="1.1"
+      id="Layer_1"
+      x="0px"
+      y="0px"
+      width="239.03857"
+      height="407.77301"
+      viewBox="0 0 239.03857 407.77301"
+      xmlSpace="preserve"
+      xmlns="http://www.w3.org/2000/svg"
+   >
+      <defs id="defs195" />
+      {title ? <title>{title}</title> : null}
 <pattern
    x="-167.5"
    y="765.5"
@@ -513,3 +516,5 @@
 
 
 </svg>
+);
+export default ColumnSrc;

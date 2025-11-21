@@ -59,7 +59,7 @@ interface PostWithComments {
 }
 
 // Base URL can be overridden by Vite env `VITE_API_BASE_URL`
-const baseUrl = `${import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000'}/api/forum`;
+const baseUrl = `${import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080'}/api/forum`;
 
 const baseQuery = fetchBaseQuery({
 	baseUrl,

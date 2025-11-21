@@ -23,7 +23,6 @@ export default function ForumPage() {
   const [addPost, { isLoading: creating, error: createError }] = useAddPostMutation();
   const user = useSelector(selectAuthUser);
   const [isOpen, setIsOpen] = useState(false);
-  const [showCreateButton, setShowCreateButton] = useState(true);
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
   const {data: popularPosts, isLoading: isLoadingPopularPosts} = useGetPostsQuery({ limit: 5, offset: 0, orderBy: 'likes', direction: 'DESC' });

@@ -3,7 +3,7 @@ import DefaultLayout from "@/layouts/default";
 import { Button } from "@heroui/button";
 import { useNavigate } from "react-router-dom";
 import {NumberInput} from "@heroui/react";
-import {CheckboxGroup, Checkbox} from "@heroui/react";
+import {Checkbox} from "@heroui/react";
 const KEY = "pomodoroSettings";
 
 export default function PomodoroSettingsPage() {

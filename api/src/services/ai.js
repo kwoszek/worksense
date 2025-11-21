@@ -65,7 +65,9 @@ WYMAGANIA FORMATU:
 - Output musi być pojedynczym obiektem JSON (brak tablicy, brak dodatkowych kluczy).
 - moodScore: liczba całkowita z zakresu 1–10.
 - message: 2-3 zdania, empatyczne, naturalne po polsku, w drugiej osobie ("Twoje", "Możesz"). Zawiera krótki odbiór dnia + 1–4 konkretnych mini rekomendacji (wplecionych w tekst, nie w bullet listę): np. krótka medytacja oddechowa, technika Pomodoro, spacer 5–10 min, rozciąganie, nawodnienie, rozmowa z zaufaną osobą, 3 głębokie oddechy (box breathing), krótki journaling. Zero diagnoz medycznych.
-- progressSummary: 2–3 zdania o trendzie z moodScores (stabilizacja, poprawa, pogorszenie, wahania). Krótko, rzeczowo, bez powtarzania rekomendacji z message.
+- progressSummary: 2–3 zdania o trendzie z moodScores (stabilizacja, poprawa, pogorszenie, wahania) BEZ powtarzania rekomendacji z message.
+  Styl progressSummary MA BYĆ bardziej ludzki i wspierający – unikaj zimnych, analitycznych fraz typu "średnia jest względnie stabilna", "wykazują fluktuacje". Zamiast tego używaj naturalnych obserwacji: "były spokojniejsze dni i kilka bardziej wymagających", "utrzymujesz kurs mimo wahań", "widać stopniową poprawę nastroju", "kilka trudniejszych momentów nie zatrzymało Twojej regularności". Dodaj delikatne uznanie wysiłku użytkownika ("to że monitorujesz nastrój pomaga Ci zauważać drobne sygnały"). Unikaj przesadnej psychoterapeutycznej narracji – ma być ciepło, rzeczowo, bez diagnoz.
+  Jeśli danych jest mało, powiedz to wprost w życzliwy sposób: "Potrzeba jeszcze kilku wpisów, żeby zobaczyć wyraźniejszy kierunek – już sam fakt, że zaczynasz, jest dobrym krokiem".
 - Nie dodawaj żadnych ostrzeżeń prawnych ani dużych disclaimerów; możesz subtelnie wspomnieć, że to wsparcie, a nie terapia, tylko jeśli dane są bardzo trudne.
 - Unikaj tonu "robotycznego" i jednocześnie nie udawaj osobistego terapeuty.
 - Używaj prostego, zrozumiałego języka, unikaj żargonu psychologicznego.
@@ -86,7 +88,8 @@ LOGIKA OCENY moodScore (wytyczne – zastosuj zdrowy rozsądek zamiast surowego 
 - Unikaj skrajności 1 lub 10 bez bardzo wyraźnych przesłanek.
 
 ANALIZA PROGRESU (progressSummary):
-Rozważ trend: porównaj średnią pierwszej połowy z drugą, ostatni wynik vs średnia globalna, wariancję (duże wahania vs stabilność). Użyj prostych słów: "lekka poprawa", "stabilnie", "fluktuacje", "spadek". Jeśli brak danych lub 0-1 element, napisz że potrzeba więcej wpisów.
+Porównaj średnią pierwszej połowy z drugą, ostatni wynik vs średnia globalna, oraz poziom wahań. Użyj prostych, ciepłych sformułowań wskazujących trend ("lekka poprawa", "utrzymujesz stabilność", "kilka wahań", "chwilowy spadek") i dodaj krótkie uznanie wysiłku lub konsekwencji jeśli zasadne.
+Jeśli brak danych lub 0–1 element, napisz w życzliwy sposób, że potrzeba więcej wpisów.
 
 ZABRONIONE:
 - Żadnych '<script>' / HTML / markdown.

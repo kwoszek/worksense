@@ -20,9 +20,8 @@ import { useSelector } from "react-redux";
 import { selectAuthUser } from '@/features/auth/authSlice';
 import Group8 from "../resources/Group8.png";
 import {Accordion, AccordionItem} from "@heroui/react";
-// Import SVGs as asset URLs instead of React components to avoid InvalidCharacterError
-import IconSrc from '../resources/favi.svg?react';
-import ColumnSrc from '../resources/column.svg?react';
+import Favi from '../resources/favi';
+import ColumnSrc from '../resources/column';
 
 
 
@@ -66,7 +65,7 @@ export default function Landing(){
                     </div>
 
                     <div className="md:ml-6 md:flex-0">
-                        <IconSrc className="drop-shadow-accent-foreground drop-shadow-xl/55 w-40 md:w-56 mx-auto" alt="Worksense icon" />
+                        <Favi className="drop-shadow-accent-foreground drop-shadow-xl/55 w-40 md:w-56 mx-auto" title="Worksense icon" />
                     </div>
                 </div>
 
@@ -278,19 +277,19 @@ export default function Landing(){
                     
                                         <div className="w-full sm:w-1/3 p-10 text-2xl flex flex-col justify-between h-120">
                                         <p className="mb-4">Zmiana nawyków pracy</p>
-                                         <div className="h-80"> <ColumnSrc className="text-foreground grow-0 shrink-0 w-2/3 m-auto " alt="Column icon"/></div>
+                                         <div className="h-80"> <ColumnSrc className="text-foreground grow-0 shrink-0 w-2/3 m-auto " title="Column icon"/></div>
                                          
                                          </div>
                     
                                          <div className="w-full sm:w-1/3 p-10 text-2xl flex flex-col justify-between h-120">
                                          <p className="mb-4">Psychoedukacja o stresie i wypaleniu</p>
-                                         <div className="h-80"> <ColumnSrc className="text-foreground grow-0 shrink-0 w-2/3 m-auto " alt="Column icon"/></div>
+                                         <div className="h-80"> <ColumnSrc className="text-foreground grow-0 shrink-0 w-2/3 m-auto " title="Column icon"/></div>
                                        
                                         </div>
                     
                                         <div className="w-full sm:w-1/3 p-10 text-2xl flex flex-col justify-between h-120"> 
                                             <p className="mb-4">Wsparcie społeczne</p>
-                                            <div className="h-80"><ColumnSrc className="text-foreground grow-0 shrink-0 w-2/3 m-auto " alt="Column icon"/></div>
+                                            <div className="h-80"><ColumnSrc className="text-foreground grow-0 shrink-0 w-2/3 m-auto " title="Column icon"/></div>
                                             
                                         </div>
                                 </div>

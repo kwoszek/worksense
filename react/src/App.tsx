@@ -8,7 +8,7 @@ import PomodoroSettingsPage from "@/pages/pomodoroSettings";
 import LoginPage from "./pages/login";
 import RequireAuth from "@/features/auth/RequireAuth";
 import Profile from "@/pages/profile";
-import Landing from "./pages/landing";
+import Landing from "@/pages/landing";
 
 
 function App() {

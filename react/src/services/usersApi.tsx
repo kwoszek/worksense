@@ -29,7 +29,7 @@ export interface AuthResponse {
   accessToken: string;
 }
 
-const apiBase = `${import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000'}/api/users`;
+const apiBase = `${import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080'}/api/users`;
 
 // Access token storage
 const tokenKey = 'ws_access_token';

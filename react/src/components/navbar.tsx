@@ -32,7 +32,7 @@ export const Navbar = () => {
               {user && <Tab key="/dashboard" title="Dashboard" href="/dashboard" />}
               <Tab key="/forum" title="Forum" href="/forum" />
               <Tab key="/articles" title="Artykuły" href="/articles" />                            
-              {user && <Tab key="/progress" title="Progress" href="/progress" />}
+              {user && <Tab key="/progress" title="Progres" href="/progress" />}
               <Tab key="/focus" title="Focus" href="/focus" />
             </Tabs>
           </div>
@@ -76,7 +76,7 @@ export const Navbar = () => {
               {user && (
                 <>
                   <button onClick={() => { nav('/dashboard'); setMobileOpen(false); }} className="w-full text-left">Dashboard</button>
-                  <button onClick={() => { nav('/progress'); setMobileOpen(false); }} className="w-full text-left">Progress</button>
+                  <button onClick={() => { nav('/progress'); setMobileOpen(false); }} className="w-full text-left">Progres</button>
                   <div className="pt-2">
                     <button onClick={() => { nav('/profile'); setMobileOpen(false); }} className="w-full text-left">Profil</button>
                   </div>

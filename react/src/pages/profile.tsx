@@ -13,7 +13,7 @@ export default function Profile() {
   const user = useSelector(selectAuthUser);
   const [logout] = useLogoutMutation();
   const { data: badgeList, isLoading: badgesLoading } = useMyBadgesQuery();
-  const [updateProfile, { isLoading: updating }] = useUpdateProfileMutation();
+  const [updateProfile] = useUpdateProfileMutation();
   const [changePassword, { isLoading: changingPw }] = useChangePasswordMutation();
 
   const [editing, setEditing] = useState(false);
@@ -25,7 +25,6 @@ export default function Profile() {
   const [newPw, setNewPw] = useState('');
   const [confirmPw, setConfirmPw] = useState('');
   const [pwMsg, setPwMsg] = useState<string | null>(null);
-  const [profileMsg, setProfileMsg] = useState<string | null>(null);
   // Subscribe to /me so invalidation triggers refetch; we can manually force refetch after save.
   const { refetch: meRefetch } = useMeQuery(undefined);
 
@@ -51,12 +50,10 @@ export default function Profile() {
       if (!avatarPreview && result?.user?.avatar) {
         setAvatarPreview(`data:image/png;base64,${result.user.avatar}`);
       }
-      setProfileMsg('Profile updated');
       setEditing(false);
       // Force immediate refresh of /me to sync other derived fields (streak etc.)
       meRefetch();
     } catch (e: any) {
-      setProfileMsg(e?.data?.error || 'Update failed');
     }
   };
 
@@ -89,7 +86,7 @@ export default function Profile() {
             {editing && (
               <div>
                 <ButtonGroup>
-                  <Button size="sm" variant="flat" color="warning" onPress={() => { setEditing(false); setUname(user?.username||''); setEmail(user?.email||''); setAvatarPreview(user?.avatar ? `data:image/png;base64,${user.avatar}` : null); setProfileMsg(null); }}>Cancel</Button>
+                  <Button size="sm" variant="flat" color="warning" onPress={() => { setEditing(false); setUname(user?.username||''); setEmail(user?.email||''); setAvatarPreview(user?.avatar ? `data:image/png;base64,${user.avatar}` : null); }}>Cancel</Button>
                   <Button size="sm" variant="flat" color="success" onPress={() => { handleSaveProfile(); }}>Save</Button>
                 </ButtonGroup>
               </div>

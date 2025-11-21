@@ -96,10 +96,4 @@ function MoodChart({ checkins }: Props) {
   );
 }
 
-function dayLabel(n: number) {
-  if (!n) return '0 dni';
-  if (n === 1) return '1 dzień';
-  return `${n} dni`;
-}
-
 export default MoodChart;

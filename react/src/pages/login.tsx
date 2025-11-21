@@ -4,7 +4,7 @@ import { Form } from "@heroui/form";
 import { Input } from "@heroui/input";
 import { Button, ButtonGroup } from "@heroui/button";
 import DefaultLayout from "@/layouts/default";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useLoginMutation, useRegisterMutation } from "@/services/usersApi";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useSelector } from 'react-redux';
