@@ -5,6 +5,7 @@ import MoodChart from "@/components/moodChart";
 import React, { useState } from "react";
 // Card and Divider not needed here; chart component renders its own cards
 import { useGetCheckinsQuery, useAddCheckinMutation } from "@/services/forumApi";
+import { useMeQuery } from "@/services/usersApi";
 import { Button } from "@heroui/button";
 import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter } from "@heroui/modal";
 import { useSelector } from "react-redux";
@@ -23,6 +24,8 @@ export default function ProgressPage() {
     const { data: latestAnalysis, refetch: analysisRefetch } = useGetLatestAnalysisQuery();
     const [addCheckin, { isLoading: creating }] = useAddCheckinMutation();
     const user = useSelector(selectAuthUser);
+    // For updating streak after new check-in
+    const { refetch: meRefetch } = useMeQuery();
     const state = location.state
     const [isOpen, setIsOpen] = useState(state === 'open' ? true :false);
     const [stress, setStress] = useState(5);
@@ -55,6 +58,8 @@ export default function ProgressPage() {
         setIsOpen(false);
         await checkinRefetch();
         await analysisRefetch();
+        // Refresh /me to update streak immediately
+        await meRefetch();
       } catch (err) {
         // swallow — UI will keep modal open
       }

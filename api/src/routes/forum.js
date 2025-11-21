@@ -7,18 +7,32 @@ const router = Router();
 
 const { checkAndAwardForCheckin, checkAndAwardForPost } = require('../services/badges');
 
-// Compute consecutive daily check-in streak ending today and persist on users.streak
+// Compute streak: consecutive days ending at last checkin; only reset if a full day missed
 async function computeAndUpdateStreak(userId) {
   if (!userId) return 0;
   const q = `SELECT DATE_FORMAT(date, '%Y-%m-%d') AS d FROM checkins WHERE userId = ? GROUP BY d ORDER BY d DESC`;
   const r = await db.query(q, [userId]);
-  const dates = new Set(r.rows.map(row => row.d));
+  if (!r.rowCount) {
+    await db.query('UPDATE users SET streak = 0 WHERE id = ?', [userId]);
+    return 0;
+  }
+  const dateStrings = r.rows.map(row => row.d); // newest first
+  const datesSet = new Set(dateStrings);
   const today = new Date();
-  let cursor = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+  const todayDate = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+  const lastKey = dateStrings[0];
+  const [ly, lm, ld] = lastKey.split('-').map(n => parseInt(n, 10));
+  const lastDate = new Date(ly, lm - 1, ld);
+  const diffDays = Math.floor((todayDate - lastDate) / (1000 * 60 * 60 * 24));
+  if (diffDays > 1) {
+    await db.query('UPDATE users SET streak = 0 WHERE id = ?', [userId]);
+    return 0;
+  }
   let streak = 0;
+  let cursor = new Date(lastDate);
   while (true) {
     const key = `${cursor.getFullYear()}-${String(cursor.getMonth() + 1).padStart(2, '0')}-${String(cursor.getDate()).padStart(2, '0')}`;
-    if (dates.has(key)) {
+    if (datesSet.has(key)) {
       streak += 1;
       cursor = new Date(cursor.getFullYear(), cursor.getMonth(), cursor.getDate() - 1);
     } else {

@@ -1,5 +1,5 @@
 import DefaultLayout from "@/layouts/default";
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { Button, ButtonGroup } from '@heroui/button';
 import { Card, CardHeader, CardBody } from '@heroui/card';
 import { Divider } from '@heroui/divider';
@@ -25,6 +25,8 @@ export default function Profile() {
   const [newPw, setNewPw] = useState('');
   const [confirmPw, setConfirmPw] = useState('');
   const [pwMsg, setPwMsg] = useState<string | null>(null);
+  const [pwErrors, setPwErrors] = useState<string[]>([]);
+  const [pwAttempted, setPwAttempted] = useState(false);
   // Subscribe to /me so invalidation triggers refetch; we can manually force refetch after save.
   const { refetch: meRefetch } = useMeQuery(undefined);
 
@@ -57,20 +59,38 @@ export default function Profile() {
     }
   };
 
+  // realtime validation for password fields
+  useEffect(() => {
+    const errs: string[] = [];
+    if (!oldPw.trim()) errs.push('Stare hasło jest wymagane');
+    if (newPw.length < 5) errs.push('Min 5 znaków');
+    if (newPw.length > 100) errs.push('Max 100 znaków');
+    if (newPw && !/[A-Z]/.test(newPw)) errs.push('Brak dużej litery');
+    if (newPw && !/\d/.test(newPw)) errs.push('Brak cyfry');
+    if (newPw && oldPw && newPw === oldPw) errs.push('Nowe hasło nie może być identyczne');
+    if (confirmPw && newPw !== confirmPw) errs.push('Hasła nie są takie same');
+    setPwErrors(errs);
+    // clear success message on edits
+    if (pwMsg === 'Hasło zmienione') setPwMsg(null);
+  }, [oldPw, newPw, confirmPw]);
+
   const handleChangePassword = async () => {
     setPwMsg(null);
-    if (newPw !== confirmPw) {
-      setPwMsg('Passwords do not match');
-      return;
-    }
+    setPwAttempted(true);
+    if (pwErrors.length) return; // show errors after attempt
     try {
       await changePassword({ oldPassword: oldPw, newPassword: newPw }).unwrap();
-      setPwMsg('Password changed');
+      setPwMsg('Hasło zmienione');
       setOldPw('');
       setNewPw('');
       setConfirmPw('');
+      setPwAttempted(false);
     } catch (e: any) {
-      setPwMsg(e?.data?.error || 'Change failed');
+      if (e?.data?.errors && Array.isArray(e.data.errors)) {
+        setPwErrors(e.data.errors.map((er: any) => er.msg || er.message || 'Błąd')); 
+      } else {
+        setPwMsg(e?.data?.error || 'Zmiana nie powiodła się');
+      }
     }
   };
 
@@ -139,11 +159,16 @@ export default function Profile() {
             <div className="mb-6">
               <h3 className="text-lg opacity-70 mb-2">Change Password</h3>
               <div className="flex flex-col gap-3 max-w-sm">
-                <Input label="Old Password" size="sm" type="password" value={oldPw} onValueChange={setOldPw} />
-                <Input label="New Password" size="sm" type="password" value={newPw} onValueChange={setNewPw} />
-                <Input label="Confirm New Password" size="sm" type="password" value={confirmPw} onValueChange={setConfirmPw} />
-                {pwMsg && <div className="text-xs opacity-70">{pwMsg}</div>}
-                <Button size="sm" color="success" variant="flat" isDisabled={changingPw} onPress={handleChangePassword}>{changingPw ? 'Changing...' : 'Change Password'}</Button>
+                <Input label="Stare hasło" size="sm" type="password" value={oldPw} onValueChange={setOldPw} />
+                <Input label="Nowe hasło" size="sm" type="password" value={newPw} onValueChange={setNewPw} />
+                <Input label="Potwierdź nowe hasło" size="sm" type="password" value={confirmPw} onValueChange={setConfirmPw} />
+                {pwAttempted && pwErrors.length > 0 && (
+                  <ul className="text-xs opacity-80 list-disc pl-4">
+                    {pwErrors.map(e => <li key={e} className="text-red-600">{e}</li>)}
+                  </ul>
+                )}
+                {pwMsg && <div className="text-xs opacity-80 text-green-600">{pwMsg}</div>}
+                <Button size="sm" color="success" variant="flat" isDisabled={changingPw} onPress={handleChangePassword}>{changingPw ? 'Zmiana...' : 'Zmień hasło'}</Button>
               </div>
             </div>
 

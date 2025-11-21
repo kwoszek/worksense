@@ -77,17 +77,38 @@ async function getUserBadges(userId) {
   }));
 }
 
-// Streak computation (same logic as forum.js) and persistence
+// Streak computation: consecutive days up to last checkin.
+// Reset to 0 only if at least one full day gap (i.e. last checkin < today - 1 day)
 async function computeAndUpdateStreak(userId) {
   const q = `SELECT DATE_FORMAT(date, '%Y-%m-%d') AS d FROM checkins WHERE userId = ? GROUP BY d ORDER BY d DESC`;
   const r = await db.query(q, [userId]);
-  const dates = new Set(r.rows.map(row => row.d));
+  if (!r.rowCount) {
+    await db.query('UPDATE users SET streak = 0 WHERE id = ?', [userId]);
+    return 0;
+  }
+  const dateStrings = r.rows.map(row => row.d); // newest first
+  const datesSet = new Set(dateStrings);
+
   const today = new Date();
-  let cursor = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+  const todayKey = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+  const lastKey = dateStrings[0];
+  const [ly, lm, ld] = lastKey.split('-').map(n => parseInt(n, 10));
+  const lastDate = new Date(ly, lm - 1, ld);
+  const todayDate = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+  const diffDays = Math.floor((todayDate - lastDate) / (1000 * 60 * 60 * 24));
+
+  // Missed at least one full day: reset
+  if (diffDays > 1) {
+    await db.query('UPDATE users SET streak = 0 WHERE id = ?', [userId]);
+    return 0;
+  }
+
+  // Build streak starting from last checkin date backwards
   let streak = 0;
+  let cursor = new Date(lastDate);
   while (true) {
     const key = `${cursor.getFullYear()}-${String(cursor.getMonth() + 1).padStart(2, '0')}-${String(cursor.getDate()).padStart(2, '0')}`;
-    if (dates.has(key)) {
+    if (datesSet.has(key)) {
       streak += 1;
       cursor = new Date(cursor.getFullYear(), cursor.getMonth(), cursor.getDate() - 1);
     } else {
@@ -102,13 +123,17 @@ const router = Router();
 
 router.post(
   '/register',
-  body('username').isString().isLength({ min: 3, max: 30 }),
-  body('email').isEmail().isLength({ max: 100 }),
+  body('username')
+    .isString().withMessage('Nazwa użytkownika jest wymagana')
+    .isLength({ min: 3, max: 30 }).withMessage('Nazwa użytkownika musi mieć od 3 do 30 znaków'),
+  body('email')
+    .isEmail().withMessage('Niepoprawny adres email')
+    .isLength({ max: 100 }).withMessage('Email może mieć maksymalnie 100 znaków'),
   body('password')
-    .isString()
-    .isLength({ min: 5, max: 100 }).withMessage('Password must be at least 5 characters long')
-    .matches(/[A-Z]/).withMessage('Password must contain at least one uppercase letter')
-    .matches(/\d/).withMessage('Password must contain at least one number'),
+    .isString().withMessage('Hasło jest wymagane')
+    .isLength({ min: 5, max: 100 }).withMessage('Hasło musi mieć co najmniej 5 znaków')
+    .matches(/[A-Z]/).withMessage('Hasło musi zawierać dużą literę')
+    .matches(/\d/).withMessage('Hasło musi zawierać cyfrę'),
   async (req, res, next) => {
     try {
       const errors = validationResult(req);
@@ -120,7 +145,7 @@ router.post(
         'SELECT 1 FROM users WHERE username = ? OR email = ? LIMIT 1',
         [username, email]
       );
-      if (dup.rowCount) return res.status(409).json({ error: 'Username or email already in use' });
+      if (dup.rowCount) return res.status(409).json({ error: 'Nazwa użytkownika lub email jest już zajęty' });
 
       const pwHash = hashPassword(password);
       const ins = await db.query(
@@ -149,14 +174,14 @@ router.post(
 router.post(
   '/login',
   body('password')
-    .isString()
-    .isLength({ min: 5, max: 100 }).withMessage('Password must be at least 5 characters long')
-    .matches(/[A-Z]/).withMessage('Password must contain at least one uppercase letter')
-    .matches(/\d/).withMessage('Password must contain at least one number'),
+    .isString().withMessage('Hasło jest wymagane')
+    .isLength({ min: 5, max: 100 }).withMessage('Hasło musi mieć co najmniej 5 znaków')
+    .matches(/[A-Z]/).withMessage('Hasło musi zawierać dużą literę')
+    .matches(/\d/).withMessage('Hasło musi zawierać cyfrę'),
   async (req, res, next) => {
     try {
       const { identifier, password } = req.body || {};
-      if (!identifier) return res.status(400).json({ error: 'identifier (email or username) required' });
+      if (!identifier) return res.status(400).json({ error: 'Nazwa użytkownika lub email jest wymagany' });
 
       const q = `
         SELECT id, username, email, password, avatar, streak
@@ -164,10 +189,10 @@ router.post(
         WHERE email = ? OR username = ?
         LIMIT 1`;
       const r = await db.query(q, [identifier, identifier]);
-      if (!r.rowCount) return res.status(401).json({ error: 'Invalid credentials' });
+      if (!r.rowCount) return res.status(401).json({ error: 'Niepoprawna nazwa użytkownika lub hasło' });
 
       const userRow = r.rows[0];
-      if (!comparePassword(password, userRow.password)) return res.status(401).json({ error: 'Invalid credentials' });
+      if (!comparePassword(password, userRow.password)) return res.status(401).json({ error: 'Niepoprawna nazwa użytkownika lub hasło' });
 
       const user = {
         id: userRow.id,
@@ -244,7 +269,7 @@ router.get('/me', authMiddleware, async (req, res, next) => {
             if (compressed.length > 512 * 1024) return res.status(413).json({ error: 'Compressed avatar still too large (>512KB)' });
             avatarBuffer = compressed;
           } catch (e) {
-            return res.status(400).json({ error: 'Avatar processing failed' });
+            return res.status(400).json({ error: 'Przetwarzanie awatara nie powiodło się' });
           }
         } else {
             avatarBuffer = raw;
@@ -274,26 +299,37 @@ router.get('/me', authMiddleware, async (req, res, next) => {
     } catch (err) { next(err); }
   });
 
-  // Change password
-  router.post('/change-password', authMiddleware, async (req, res, next) => {
-    try {
-      const userId = req.user.id;
-      const { oldPassword, newPassword } = req.body || {};
-      if (!oldPassword || !newPassword) return res.status(400).json({ error: 'oldPassword and newPassword required' });
-      if (newPassword.length < 5 || newPassword.length > 100 || !/[A-Z]/.test(newPassword) || !/\d/.test(newPassword)) {
-        return res.status(400).json({ error: 'New password does not meet complexity requirements' });
-      }
-      const r = await db.query('SELECT id, password FROM users WHERE id = ? LIMIT 1', [userId]);
-      if (!r.rowCount) return res.status(404).json({ error: 'User not found' });
-      const stored = r.rows[0].password;
-      // Use existing comparePassword helper via require to avoid duplication
-      const { comparePassword, hashPassword } = require('../services/auth');
-      if (!comparePassword(oldPassword, stored)) return res.status(400).json({ error: 'Old password incorrect' });
-      const newHash = hashPassword(newPassword);
-      await db.query('UPDATE users SET password = ? WHERE id = ?', [newHash, userId]);
-      return res.json({ ok: true });
-    } catch (err) { next(err); }
-  });
+  // Change password with granular validation messages
+  router.post(
+    '/change-password',
+    authMiddleware,
+    body('oldPassword')
+      .isString().withMessage('Stare hasło jest wymagane')
+      .isLength({ min: 1 }).withMessage('Stare hasło jest wymagane'),
+    body('newPassword')
+      .isString().withMessage('Nowe hasło jest wymagane')
+      .isLength({ min: 5 }).withMessage('Nowe hasło musi mieć co najmniej 5 znaków')
+      .isLength({ max: 100 }).withMessage('Nowe hasło może mieć maksymalnie 100 znaków')
+      .matches(/[A-Z]/).withMessage('Nowe hasło musi zawierać dużą literę')
+      .matches(/\d/).withMessage('Nowe hasło musi zawierać cyfrę'),
+    async (req, res, next) => {
+      try {
+        const errors = validationResult(req);
+        if (!errors.isEmpty()) return res.status(400).json({ errors: errors.array() });
+        const userId = req.user.id;
+        const { oldPassword, newPassword } = req.body || {};
+        const r = await db.query('SELECT id, password FROM users WHERE id = ? LIMIT 1', [userId]);
+        if (!r.rowCount) return res.status(404).json({ error: 'Użytkownik nie znaleziony' });
+        const stored = r.rows[0].password;
+        const { comparePassword, hashPassword } = require('../services/auth');
+        if (!comparePassword(oldPassword, stored)) return res.status(400).json({ error: 'Stare hasło niepoprawne' });
+        if (oldPassword === newPassword) return res.status(400).json({ error: 'Nowe hasło musi różnić się od starego' });
+        const newHash = hashPassword(newPassword);
+        await db.query('UPDATE users SET password = ? WHERE id = ?', [newHash, userId]);
+        return res.json({ ok: true });
+      } catch (err) { next(err); }
+    }
+  );
 
 // Get current user's badges with metadata
 router.get('/me/badges', authMiddleware, async (req, res, next) => {

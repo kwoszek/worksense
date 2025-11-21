@@ -28,6 +28,23 @@ export default function LoginPage() {
    
     const from = (location.state as any)?.from?.pathname || '/dashboard';
 
+    function extractErrorMessage(err: any): string {
+        if (!err) return '';
+        // RTK Query fetch error shape
+        if (typeof err === 'object' && 'status' in err) {
+            const data: any = (err as any).data;
+            if (!data) return 'Wystąpił nieoczekiwany błąd';
+            if (typeof data.error === 'string') return data.error;
+            if (Array.isArray(data.errors)) {
+                return data.errors.map((e: any) => e.msg || e.message || JSON.stringify(e)).join(', ');
+            }
+            if (typeof data === 'string') return data;
+            return JSON.stringify(data);
+        }
+        if (typeof err === 'object' && err !== null && 'message' in err) return (err as any).message;
+        return 'Wystąpił nieoczekiwany błąd';
+    }
+
     async function handleLogin(e: React.FormEvent<HTMLFormElement>) {
         e.preventDefault();
         const data = new FormData(e.currentTarget);
@@ -85,7 +102,7 @@ export default function LoginPage() {
                                     placeholder="Wprowadź hasło"
                                     type="password"
                                 />
-                                {loginError && <p className="text-sm text-red-600">Login failed</p>}
+                                {loginError && <p className="text-sm text-red-600">{extractErrorMessage(loginError)}</p>}
                                 <div className="flex gap-2 justify-center w-full">
                                     <Button  color="success" type="submit" className="w-1/2" isDisabled={loggingIn} isLoading={loggingIn}>Login</Button>
                                     <Button type="reset" variant="flat" className="w-1/2" isDisabled={loggingIn}>Reset</Button>
@@ -122,7 +139,7 @@ export default function LoginPage() {
                                     onChange={()=> setPassError(false)}
                                     errorMessage="Hasło musi mieć co najmniej 5 znaków, zawierać dużą literę i cyfrę"
                                 />
-                                {registerError && <p className="text-sm text-red-600">Rejestracja nie powiodła się</p>}
+                                {registerError && <p className="text-sm text-red-600">{extractErrorMessage(registerError)}</p>}
                                 <div className="flex gap-2 w-full justify-center">
                                     <Button className="w-1/2" color="success" type="submit" isDisabled={registering} isLoading={registering}>Zarejestruj się</Button>
                                     <Button type="reset" className="w-1/2" variant="flat" isDisabled={registering} onPress={()=>setPassError(false)}>Reset</Button>
