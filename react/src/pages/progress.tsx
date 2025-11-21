@@ -200,65 +200,6 @@ export default function ProgressPage() {
   const monthUsage = calculateUsage('month');
   const sixMonthUsage = calculateUsage('6months');
 
-  // --- Last 30 days averages and usage (for radar chart) ---
-  function calculateLast30Stats() {
-    const end = new Date();
-    let start = new Date();
-    start.setDate(end.getDate() - 29); // last 30 days including today
-
-    // respect first check-in date
-    if (firstCheckinISO) {
-      const first = new Date(firstCheckinISO);
-      const firstMid = new Date(first.getFullYear(), first.getMonth(), first.getDate());
-      if (firstMid.getTime() > start.getTime()) start = firstMid;
-    }
-
-    if (start.getTime() > end.getTime()) {
-      return { avgStress: null, avgEnergy: null, avgMood: null, percentUsage: 0, scaledUsage: 0, daysWithCheckin: 0, totalDays: 0, start: formatYmd(start), end: formatYmd(end) };
-    }
-
-    const startMid = new Date(start.getFullYear(), start.getMonth(), start.getDate()).getTime();
-    const endMid = new Date(end.getFullYear(), end.getMonth(), end.getDate()).getTime();
-    const totalDays = Math.floor((endMid - startMid) / MS_PER_DAY) + 1;
-
-    let stressSum = 0, stressCount = 0;
-    let energySum = 0, energyCount = 0;
-    let moodSum = 0, moodCount = 0;
-    const seenDays = new Set<string>();
-
-    for (const c of userCheckins) {
-      const dateStr = c.date ?? (c as any).createdAt ?? '';
-      const parsed = new Date(dateStr);
-      if (isNaN(parsed.getTime())) continue;
-      const mid = new Date(parsed.getFullYear(), parsed.getMonth(), parsed.getDate()).getTime();
-      if (mid < startMid || mid > endMid) continue;
-      const key = formatYmd(new Date(parsed.getFullYear(), parsed.getMonth(), parsed.getDate()));
-      seenDays.add(key);
-
-      if (typeof c.stress === 'number') { stressSum += c.stress; stressCount++; }
-      if (typeof c.energy === 'number') { energySum += c.energy; energyCount++; }
-
-      let moodVal: number | null = null;
-      if (typeof c.moodScore === 'number') moodVal = c.moodScore;
-      else if (typeof c.energy === 'number' || typeof c.stress === 'number') {
-        const e = typeof c.energy === 'number' ? c.energy : 5;
-        const s = typeof c.stress === 'number' ? c.stress : 5;
-        moodVal = e + (10 - s);
-      }
-      if (moodVal !== null) { moodSum += moodVal; moodCount++; }
-    }
-
-    const daysWithCheckin = seenDays.size;
-    const avgStress = stressCount ? +(stressSum / stressCount).toFixed(2) : null;
-    const avgEnergy = energyCount ? +(energySum / energyCount).toFixed(2) : null;
-    const avgMood = moodCount ? +(moodSum / moodCount).toFixed(2) : null;
-    const percentUsage = totalDays > 0 ? Math.round((daysWithCheckin / totalDays) * 100) : 0;
-    const scaledUsage = +( (percentUsage / 10).toFixed(2) ); // scale 0-100% -> 0-10
-
-    return { avgStress, avgEnergy, avgMood, percentUsage, scaledUsage, daysWithCheckin, totalDays, start: formatYmd(new Date(startMid)), end: formatYmd(new Date(endMid)) };
-  }
-
-  const last30 = calculateLast30Stats();
 
   return (
     <DefaultLayout>

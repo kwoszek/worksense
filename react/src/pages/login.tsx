@@ -16,7 +16,7 @@ export default function LoginPage() {
     const [loginMutation, { isLoading: loggingIn, error: loginError }] = useLoginMutation();
     const [registerMutation, { isLoading: registering, error: registerError }] = useRegisterMutation();
     const [requestReset, { isLoading: requesting, error: requestError, data: requestData }] = useRequestPasswordResetMutation();
-    const [resetPassword, { isLoading: resetting, error: resetError, data: resetData }] = useResetPasswordMutation();
+    const [resetPassword, { isLoading: resetting, error: resetError }] = useResetPasswordMutation();
     const navigate = useNavigate();
     const location = useLocation();
     const authedUser = useSelector(selectAuthUser);
