@@ -8,6 +8,7 @@ import forumScr from "../resources/forumScr.png";
 import focusScr from "../resources/FocusScr.png";
 import checkInScr from "../resources/checkInScr.png";
 import Progress from "../resources/Progress.png";
+import stats from "../resources/stats.png";
 import {
   Carousel,
   CarouselContent,
@@ -31,8 +32,8 @@ export default function Landing(){
         <>
          <DefaultLayout>
             <div className="min-h-screen scroll-smooth">
-            <div className="flex flex-col md:flex-row justify-center items-start gap-10 p-6 mt-40">
-                <div className="w-full md:w-1/3 flex flex-col gap-6">
+            <div className="flex flex-col md:flex-row justify-center items-start gap-10 p-6 mt-10 md:mt-15">
+                <div className="w-full md:w-1/3 flex flex-col gap-6  md:h-[90svh] ">
                 <div className="md:translate-x-20 md:-translate-y-15">
                     <h1 className="text-4xl md:text-8xl font-bold mb-0">WorkSense</h1>
                 <h2 className="text-lg md:text-xl self-start">Twoje miejsce na zdrowszą pracę i naukę</h2>
@@ -124,7 +125,7 @@ export default function Landing(){
                 </Card>
                 </div>
             </section>
-                        <section className="w-full max-w-screen-lg mx-auto mt-8 px-4 md:px-0">
+                        <section className="box-border w-[80vw] max-w-screen-lg  mx-auto mt-8 px-4 md:px-0">
                                 <h2 className="text-4xl md:text-5xl font-bold mb-6">Jak działa WorkSense?</h2>
                                  <Carousel className="background-transparent border-0">
             <CarouselContent id="tutorial">
@@ -217,9 +218,14 @@ export default function Landing(){
                                 </CardHeader>
                                 <Divider />
                                 <CardBody className="p-6 md:p-10">
-                                        <img src={forumScr} alt="zdjęcie naszego forum" className="w-full md:w-3/5 mb-5 m-auto shadow-lg/20 shadow-success rounded-lg"/>
-                                        <Divider className="my-5"/>
+                                     <div className="flex flex-col md:flex-row gap-6 md:gap-10 items-center justify-center">
+                                        <div className="md:flex-1">
                                         <h3 className="text-lg m-2 text-center md:text-left">Ludzie, którzy przeszli przez to samo, najlepiej rozumieją Twoją sytuację. Rozmawiaj, dziel się doświadczeniami, pomagaj innym.</h3>
+                                        </div>
+                                        <img src={forumScr} alt="zdjęcie naszego forum" className="w-full md:w-3/5 mb-5 m-auto shadow-lg/20 shadow-success rounded-lg"/>
+                                        </div>
+                                        
+                                       
                     
                                 </CardBody>
                             </Card>
@@ -233,7 +239,9 @@ export default function Landing(){
                                 </CardHeader>
                                 <Divider />
                                 <CardBody className="p-6 md:p-10">
-                    
+
+                                     <div className="flex flex-col md:flex-row gap-6 md:gap-10 items-center justify-center">
+                                        <div className="md:flex-1">
                                         <h3 className="text-xl">Twoje dane zmieniają się codziennie — widzisz:</h3>
                                         <ul className="list-disc ml-6">
                                                 <li>spadek stresu,</li>
@@ -243,6 +251,11 @@ export default function Landing(){
                         
                                         </ul>
                                         <p className="mt-3">Motywacja rośnie, gdy widzisz realny progres.</p>
+                                        </div>
+                                        <img src={stats} alt="zdjęcie zakładki focus" className="w-full md:w-3/5 mb-5 shadow-lg/20 shadow-success rounded-lg" />
+                                        </div>
+
+                                        
                     
                                 </CardBody>
                             </Card>
@@ -296,7 +309,7 @@ export default function Landing(){
             </section>
              <section className=" w-8/10 m-auto mt-50">
                 <h2 className="text-5xl font-bold mb-6 ">Plan rozwoju</h2>
-                <div className="flex relative">
+                <div className=" flex-col md:flex-row relative">
                 <div>
                     <h3 className="text-3xl opacity-80 mb-5">Już w krótce...</h3>
                     <ul className="list-disc mb-6 ml-6 text-lg">
@@ -307,14 +320,14 @@ export default function Landing(){
                         <li>webinary i zajęcia z psychologami.</li>
                     </ul>
                 </div>
-                     <img src={Group8} className="hidden md:block h-150 right-15 -top-50 absolute" alt="picture of an apple watch and app store page with our app" />
+                     <img src={Group8} className="w-[90vw] md:w-auto md:h-150 right-15 -top-50 md:absolute" alt="picture of an apple watch and app store page with our app" />
                 </div>
             </section>
-                 <section className="w-full md:w-8/10 mx-auto mt-50 px-4 md:px-0">
+                 <section className="w-full md:w-8/10 mx-auto mt-50 px-4 md:px-0 text-justify">
                 <h2 className="text-5xl font-bold mb-6">Kim jesteśmy</h2>
-                <p className="opacity-80 w-2/3">Jesteśmy zespołem figoFagoFego z Gliwic, uczniami jednej klasy technikum informatycznego. W ramach hackathonu postawiliśmy na temat bliski naszej generacji — narastające przeciążenie, stres i wypalenie, z którymi mierzy się coraz więcej młodych ludzi.</p>
+                <p className="opacity-80 md:w-2/3">Jesteśmy zespołem figoFagoFego z Gliwic, uczniami jednej klasy technikum informatycznego. W ramach hackathonu postawiliśmy na temat bliski naszej generacji — narastające przeciążenie, stres i wypalenie, z którymi mierzy się coraz więcej młodych ludzi.</p>
                 <br />
-                <p className="opacity-80 w-2/3">WorkSense to projekt, w którym łączymy wiedzę techniczną z empatią i zrozumieniem dla zdrowia psychicznego. Każdy z nas wnosi do zespołu inne umiejętności — programowanie, projektowanie interfejsów, analizę danych czy kreatywne myślenie. Wspólnie budujemy rozwiązanie, które nie tylko działa, lecz także wspiera użytkowników w budowaniu zdrowych nawyków i lepszej jakości życia.</p>
+                <p className="opacity-80 md:w-2/3">WorkSense to projekt, w którym łączymy wiedzę techniczną z empatią i zrozumieniem dla zdrowia psychicznego. Każdy z nas wnosi do zespołu inne umiejętności — programowanie, projektowanie interfejsów, analizę danych czy kreatywne myślenie. Wspólnie budujemy rozwiązanie, które nie tylko działa, lecz także wspiera użytkowników w budowaniu zdrowych nawyków i lepszej jakości życia.</p>
 
                 
             </section>
