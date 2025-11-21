@@ -11,7 +11,7 @@ const usersRouter = require('./routes/users');
 const analysisRouter = require('./routes/analysis');
 
 const app = express();
-const PORT = process.env.PORT ? Number(process.env.PORT) : 8080;
+const PORT = process.env.PORT ? Number(process.env.PORT) : 3000;
 
 app.use(helmet());
 app.use(cors({

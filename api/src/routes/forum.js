@@ -124,6 +124,7 @@ router.get('/posts', optionalAuth, async (req, res, next) => {
     const commentsByPost = new Map();
     for (const c of comments) {
       if (!commentsByPost.has(c.postid)) commentsByPost.set(c.postid, []);
+      const avatarB64 = c.avatar ? Buffer.from(c.avatar).toString('base64') : null;
       commentsByPost.get(c.postid).push({
         id: c.id,
         userid: c.userid,
@@ -133,22 +134,25 @@ router.get('/posts', optionalAuth, async (req, res, next) => {
         likes: c.likes,
         liked: userId ? likedCommentIds.has(c.id) : false,
         username: c.username,
-        avatar: c.avatar,
+        avatar: avatarB64,
       });
     }
 
-    const response = posts.map(p => ({
-      id: p.id,
-      title: p.title,
-      content: p.content,
-      dateposted: p.dateposted,
-      userid: p.userid,
-      likes: p.likes,
-      liked: userId ? likedPostIds.has(p.id) : false,
-      username: p.username,
-      avatar: p.avatar,
-      comments: commentsByPost.get(p.id) || [],
-    }));
+    const response = posts.map(p => {
+      const avatarB64 = p.avatar ? Buffer.from(p.avatar).toString('base64') : null;
+      return {
+        id: p.id,
+        title: p.title,
+        content: p.content,
+        dateposted: p.dateposted,
+        userid: p.userid,
+        likes: p.likes,
+        liked: userId ? likedPostIds.has(p.id) : false,
+        username: p.username,
+        avatar: avatarB64,
+        comments: commentsByPost.get(p.id) || [],
+      };
+    });
 
     res.json(response);
   } catch (err) { next(err); }
@@ -158,14 +162,43 @@ router.get('/posts/:id', optionalAuth, async (req, res, next) => {
     try {
         const postId = Number(req.params.id);
         const userId = req.user?.id || null;
-        const postQ = 'SELECT p.id, p.title, p.content, p.datePosted AS dateposted, p.userId AS userid, p.likes AS likes, IF(? IS NULL, FALSE, EXISTS(SELECT 1 FROM post_likes pl WHERE pl.postId = p.id AND pl.userId = ?)) AS liked, u.username FROM posts p LEFT JOIN users u ON u.id = p.userId WHERE p.id = ?';
-        const post = await db.query(postQ, [userId, userId, postId]);
-        if (!post.rows.length) return res.status(404).json({ error: 'Post not found' });
+        const postQ = `SELECT p.id, p.title, p.content, p.datePosted AS dateposted, p.userId AS userid, p.likes AS likes,
+                              IF(? IS NULL, FALSE, EXISTS(SELECT 1 FROM post_likes pl WHERE pl.postId = p.id AND pl.userId = ?)) AS liked,
+                              u.username, u.avatar
+                       FROM posts p LEFT JOIN users u ON u.id = p.userId WHERE p.id = ?`;
+        const postRes = await db.query(postQ, [userId, userId, postId]);
+        if (!postRes.rows.length) return res.status(404).json({ error: 'Post not found' });
 
-        const commentsQ = 'SELECT c.id, c.content, c.datePosted AS dateposted, c.userId AS userid, c.likes AS likes, IF(? IS NULL, FALSE, EXISTS(SELECT 1 FROM comment_likes cl WHERE cl.commentId = c.id AND cl.userId = ?)) AS liked, u.username FROM comments c LEFT JOIN users u ON u.id = c.userId WHERE c.postId = ? ORDER BY c.datePosted';
-        const comments = await db.query(commentsQ, [userId, userId, postId]);
+        const commentsQ = `SELECT c.id, c.content, c.datePosted AS dateposted, c.userId AS userid, c.likes AS likes,
+                                  IF(? IS NULL, FALSE, EXISTS(SELECT 1 FROM comment_likes cl WHERE cl.commentId = c.id AND cl.userId = ?)) AS liked,
+                                  u.username, u.avatar
+                           FROM comments c LEFT JOIN users u ON u.id = c.userId WHERE c.postId = ? ORDER BY c.datePosted`;
+        const commentsRes = await db.query(commentsQ, [userId, userId, postId]);
 
-        res.json({ post: post.rows[0], comments: comments.rows });
+        const postRow = postRes.rows[0];
+        const postOut = {
+          id: postRow.id,
+          title: postRow.title,
+          content: postRow.content,
+          dateposted: postRow.dateposted,
+          userid: postRow.userid,
+          likes: postRow.likes,
+          liked: !!postRow.liked,
+          username: postRow.username,
+          avatar: postRow.avatar ? Buffer.from(postRow.avatar).toString('base64') : null,
+        };
+        const commentsOut = commentsRes.rows.map(r => ({
+          id: r.id,
+          content: r.content,
+          dateposted: r.dateposted,
+          userid: r.userid,
+          likes: r.likes,
+          liked: !!r.liked,
+          username: r.username,
+          avatar: r.avatar ? Buffer.from(r.avatar).toString('base64') : null,
+        }));
+
+        res.json({ post: postOut, comments: commentsOut });
     } catch (err) { next(err); }
 });
 
@@ -222,7 +255,18 @@ router.get('/posts/:id/comments', optionalAuth, async (req, res, next) => {
       db.query(listQ, [userId, userId, postId, limit, offset]),
       db.query(countQ, [postId])
     ]);
-    res.json({ comments: listResult.rows, total: countResult.rows[0].total });
+    const comments = listResult.rows.map(r => ({
+      id: r.id,
+      userid: r.userid,
+      postid: r.postid,
+      content: r.content,
+      dateposted: r.dateposted,
+      likes: r.likes,
+      liked: !!r.liked,
+      username: r.username,
+      avatar: r.avatar ? Buffer.from(r.avatar).toString('base64') : null,
+    }));
+    res.json({ comments, total: countResult.rows[0].total });
   } catch (err) { next(err); }
 });
 
