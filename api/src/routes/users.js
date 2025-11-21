@@ -39,7 +39,7 @@ async function upsertStreakBadge(userId, streak) {
     // Create definition
     await db.query('INSERT INTO badges(`key`, name, description, maxLevel) VALUES(?,?,?,?)', [
       'streak',
-      'Streaker',
+      'Streak',
       'Awarded for maintaining an activity streak. Levels increase at 7,14,30,90,180,365 days.',
       6,
     ]);

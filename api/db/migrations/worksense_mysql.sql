@@ -121,7 +121,7 @@ CREATE TABLE IF NOT EXISTS checkin_ai_analysis (
 -- Seed streak badge if missing
 -- Seed streak badge if missing (updated levels: 7,14,30,90,180,365)
 INSERT INTO badges(`key`, name, description, maxLevel)
-SELECT 'streak', 'Streaker', 'Awarded for maintaining an activity streak. Levels increase at 7,14,30,90,180,365 days.', 6
+SELECT 'streak', 'Streak', 'Awarded for maintaining an activity streak. Levels increase at 7,14,30,90,180,365 days.', 6
 WHERE NOT EXISTS (SELECT 1 FROM badges WHERE `key`='streak');
 
 -- Seed contributor (posts) badge

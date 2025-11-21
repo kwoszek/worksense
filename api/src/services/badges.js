@@ -5,17 +5,12 @@ const { db } = require('../database/db');
  */
 
 async function ensureBadge(key, name, description = '', maxLevel = 1) {
-  try {
-    await db.query(
-      'INSERT INTO badges(`key`, name, description, maxLevel) VALUES (?,?,?,?) ON DUPLICATE KEY UPDATE `key`=`key`',
-      [key, name, description, maxLevel]
-    );
-    const r = await db.query('SELECT id, `key`, name, description, maxLevel FROM badges WHERE `key` = ?', [key]);
-    return r.rows[0];
-  } catch (err) {
-    console.error('ensureBadge error for', key, err && err.message ? err.message : err);
-    throw err;
-  }
+  await db.query(
+    'INSERT INTO badges(`key`, name, description, maxLevel) VALUES (?,?,?,?) ON DUPLICATE KEY UPDATE `key`=`key`',
+    [key, name, description, maxLevel]
+  );
+  const r = await db.query('SELECT id, `key`, name, description, maxLevel FROM badges WHERE `key` = ?', [key]);
+  return r.rows[0];
 }
 
 async function getUserBadge(userId, badgeId) {
@@ -24,24 +19,16 @@ async function getUserBadge(userId, badgeId) {
 }
 
 async function upsertUserBadge(userId, badgeId, level) {
-  try {
-    const existing = await getUserBadge(userId, badgeId);
-    if (!existing) {
-      const ins = await db.query('INSERT INTO user_badges(userId, badgeId, level, createdAt, updatedAt) VALUES(?,?,?,NOW(),NOW())', [userId, badgeId, level]);
-      console.log('upsertUserBadge: inserted', { userId, badgeId, level, insertId: ins.insertId });
-      return true;
-    }
-    if (level > existing.level) {
-      await db.query('UPDATE user_badges SET level = ?, updatedAt = NOW() WHERE id = ?', [level, existing.id]);
-      console.log('upsertUserBadge: updated', { userId, badgeId, level, id: existing.id });
-      return true;
-    }
-    // no change
-    return false;
-  } catch (err) {
-    console.error('upsertUserBadge error', err && err.message ? err.message : err, { userId, badgeId, level });
-    return false;
+  const existing = await getUserBadge(userId, badgeId);
+  if (!existing) {
+    await db.query('INSERT INTO user_badges(userId, badgeId, level, createdAt, updatedAt) VALUES(?,?,?,NOW(),NOW())', [userId, badgeId, level]);
+    return true;
   }
+  if (level > existing.level) {
+    await db.query('UPDATE user_badges SET level = ?, updatedAt = NOW() WHERE id = ?', [level, existing.id]);
+    return true;
+  }
+  return false;
 }
 
 function streakToLevel(streak) {
@@ -75,7 +62,7 @@ async function checkAndAwardForCheckin(userId) {
 
   await db.query('UPDATE users SET streak = ? WHERE id = ?', [streak, userId]);
 
-  const badge = await ensureBadge('streak', 'Streaker', 'Awarded for maintaining an activity streak.', 6);
+  const badge = await ensureBadge('streak', 'Streak', 'Awarded for maintaining an activity streak.', 6);
   const level = streakToLevel(streak);
   if (level > 0) await upsertUserBadge(userId, badge.id, level);
 }
@@ -85,28 +72,14 @@ async function checkAndAwardForPost(userId) {
   const cnt = (r.rows[0].cnt || 0);
   const badge = await ensureBadge('posts', 'Contributor', 'Created posts in the forum', 1);
   // Award contributor at first post
-  try {
-    if (cnt >= 1) {
-      const awarded = await upsertUserBadge(userId, badge.id, 1);
-      if (awarded) console.log('checkAndAwardForPost: awarded Contributor to', userId, 'count', cnt);
-    }
-  } catch (err) {
-    console.error('checkAndAwardForPost error', err && err.message ? err.message : err, { userId, cnt });
-  }
+  if (cnt >= 1) await upsertUserBadge(userId, badge.id, 1);
 }
 
 async function checkAndAwardForComment(userId) {
   const r = await db.query('SELECT COUNT(*) AS cnt FROM comments WHERE userId = ?', [userId]);
   const cnt = (r.rows[0].cnt || 0);
   const badge = await ensureBadge('comments', 'Commenter', 'Commented on forum posts', 1);
-  try {
-    if (cnt >= 1) {
-      const awarded = await upsertUserBadge(userId, badge.id, 1);
-      if (awarded) console.log('checkAndAwardForComment: awarded Commenter to', userId, 'count', cnt);
-    }
-  } catch (err) {
-    console.error('checkAndAwardForComment error', err && err.message ? err.message : err, { userId, cnt });
-  }
+  if (cnt >= 1) await upsertUserBadge(userId, badge.id, 1);
 }
 
 module.exports = {
