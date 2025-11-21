@@ -219,3 +219,25 @@
     @apply bg-background text-foreground;
   }
 }
+
+
+  .apexcharts-tooltip {
+    background: var(--color-background)!important;
+    color: var(--color-foreground)!important;
+  }
+
+  .apexcharts-tooltip.apexcharts-theme-light .apexcharts-tooltip-title{
+    background: var(--color-background)!important;
+  }
+
+  .apexcharts-xaxistooltip, .apexcharts-yaxistooltip{
+    background: var(--color-background)!important;
+    color: var(--color-foreground)!important;
+    border-radius: 2em!important;
+  }
+
+  .apexcharts-menu {
+    background: var(--color-background)!important;
+    color: var(--color-foreground)!important;
+
+  }

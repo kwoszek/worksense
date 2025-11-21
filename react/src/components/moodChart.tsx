@@ -1,5 +1,6 @@
 import {Card, CardHeader, CardBody} from "@heroui/card";
 import HeatMap from '@uiw/react-heat-map';
+import { useEffect, useRef } from 'react';
 import { useSelector } from 'react-redux';
 import { selectAuthUser } from '@/features/auth/authSlice';
 import {Tooltip} from "@heroui/tooltip";
@@ -36,11 +37,64 @@ function MoodChart({ checkins }: Props) {
   const startDate = value.length ? new Date(value[0].date) : new Date();
   const user = useSelector(selectAuthUser);
   const streak = user?.streak ?? 0;
+  const heatmapContainerRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    const container = heatmapContainerRef.current;
+    if (!container) return;
+
+    const updateViewBox = () => {
+      const svg = container.querySelector('svg');
+      if (!svg) return;
+
+      // if viewBox already exists, skip
+      if (svg.getAttribute('viewBox')) return;
+
+      let width = 0;
+      let height = 0;
+      try {
+        const bbox = (svg as SVGSVGElement).getBBox();
+        width = bbox.width;
+        height = bbox.height;
+      } catch (e) {
+        // ignore
+      }
+
+      if ((!width || !height) && (svg as any).clientWidth && (svg as any).clientHeight) {
+        width = (svg as any).clientWidth;
+        height = (svg as any).clientHeight;
+      }
+
+      if ((!width || !height)) {
+        const rect = svg.getBoundingClientRect();
+        width = rect.width;
+        height = rect.height;
+      }
+
+      if (width && height) {
+        svg.setAttribute('viewBox', `0 0 ${Math.max(1, Math.round(width))*4} ${Math.max(1, Math.round(height))*1.5}`);
+      }
+    };
+
+    updateViewBox();
+
+    let observer: any = null;
+    if ((window as any).ResizeObserver) {
+      const RO = (window as any).ResizeObserver;
+      observer = new RO(() => updateViewBox());
+      observer.observe(container);
+    }
+    window.addEventListener('resize', updateViewBox);
+    return () => {
+      window.removeEventListener('resize', updateViewBox);
+      if (observer && typeof observer.disconnect === 'function') observer.disconnect();
+    };
+  }, [value]);
   return (
     <>
      <Card className="p-3">
       <CardBody>
-        <p className="text-2xl opacity-100 text-foreground-500">Twoja seria dbania o siebie: <strong className="opacity-100 text-foreground">{streak} {streak > 1 ? "dni" : "dzień"}</strong></p>
+        <p className="text-2xl opacity-100 text-foreground-500">Twoja seria dbania o siebie: <strong className="opacity-100 text-foreground">{streak} {streak > 1 || streak==0 ? "dni" : "dzień"}</strong></p>
       </CardBody>
     </Card>
     <Card className="p-3">
@@ -48,37 +102,35 @@ function MoodChart({ checkins }: Props) {
           <h2 className="text-2xl opacity-80">Wykres nastroju</h2>
         </CardHeader>
       <CardBody>
+        <div ref={heatmapContainerRef} className="w-full">
          <HeatMap
           value={value}
-          style={{ color: 'success' }}
+          style={{ color: 'success'  }}
           weekLabels={['', 'Pn', '', 'Śr', '', 'Pt', '']}
           startDate={startDate}
           rectProps={{
-          rx: "2"
+          rx: "2",
         }}
           panelColors={{
 
-        
-      
       0: "#88888833",
 
-1: "#d0e7ff",   // bardzo jasny błękit — lekki, spokojny
-2: "#b9dcff",   // chłodny, nadal jasny niebieski
-3: "#a2d1ff",   // czytelny błękit, ale wciąż łagodny
+1: "#e3f2ff",
+2: "#cde9ff",
+3: "#b0dcff",
 
-4: "#8bd0f2",   // jaśniejszy, bardziej turkusowy
-5: "#74cbe4",   // naturalny pastelowy turkus
+4: "#8ed2f3",
+5: "#6bcbdc",
 
-6: "#5fc9d1",   // wyraźniejszy turkus — początek "pozytywnych" odcieni
-7: "#54d4bb",   // świeży miękki zielono-turkusowy
+6: "#4ecfbe",
+7: "#3edb98",
 
-8: "#68e3ae",   // jasna pastelowa zieleń
-9: "#82efb6",   // bardzo pozytywna, ale miękka zieleń
+8: "#4fe87a",
+9: "#6ff38c",
 
-10: "#b6ffd1"   // najjaśniejsza, bardzo przyjemna zieleń — „top mood”
+10: "#48e064"
       }} rectRender={(props, data) => {
-        
-       
+        const titleText = `${data.date} — nastrój: ${data.count && data.count > 10 ? 10 : data.count}`;
         return (
           <>
         {data.count ? ( <Tooltip placement="top" content={<div className="text-left"><p className="font-bold ">{data.date}</p> <p>nastrój: {data.count>10?"10":data.count}</p> </div>} showArrow={true} offset={5}>
@@ -88,12 +140,13 @@ function MoodChart({ checkins }: Props) {
           </>
         );
       }}
-    
         />
+        </div>
       </CardBody>
     </Card>
     </>
   );
 }
+
 
 export default MoodChart;
