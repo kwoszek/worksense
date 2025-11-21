@@ -384,4 +384,95 @@ router.post('/logout', async (req, res, next) => {
   } catch (err) { next(err); }
 });
 
+const crypto = require('crypto');
+const { sendPasswordReset } = require('../services/mailer');
+
+// Helper to optionally hash reset token before storing
+function maybeHashToken(raw) {
+  if (process.env.HASH_RESET_TOKEN === 'true') {
+    return crypto.createHash('sha256').update(raw).digest('hex');
+  }
+  return raw;
+}
+
+// Request reset (always 200 to avoid user enumeration)
+router.post('/request-password-reset', [
+  body('email').isEmail().withMessage('Niepoprawny email')
+], async (req, res, next) => {
+  try {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) return res.status(200).json({ ok: true });
+
+    const { email } = req.body;
+    const userRes = await db.query('SELECT id, username FROM users WHERE email = ? LIMIT 1', [email]);
+    if (!userRes.rowCount) return res.status(200).json({ ok: true }); // silent
+
+    const user = userRes.rows[0];
+    const rawToken = crypto.randomBytes(32).toString('hex');
+    const storedToken = maybeHashToken(rawToken);
+    const ttlMin = Number(process.env.RESET_TOKEN_TTL_MINUTES || 30);
+    const expiresAt = new Date(Date.now() + ttlMin * 60000);
+
+    await db.query(
+      'INSERT INTO password_reset_tokens(userId, token, expiresAt) VALUES(?,?,?)',
+      [user.id, storedToken, expiresAt]
+    );
+
+    // Link always uses raw token (hash only stored when HASH_RESET_TOKEN=true)
+    const link = `${process.env.APP_BASE_URL || 'https://worksense.pl'}/login?token=${rawToken}`;
+    try {
+      await sendPasswordReset(email, user.username, link);
+    } catch (e) {
+      console.error('Mail error', e);
+    }
+    return res.json({ ok: true });
+  } catch (err) {
+    next(err);
+  }
+});
+
+// Perform reset
+router.post('/reset-password', [
+  body('token').isLength({ min: 10 }).withMessage('Token wymagany'),
+  body('password')
+    .isLength({ min: 6 }).withMessage('Min 6 znaków')
+    .matches(/[A-Z]/).withMessage('Wymagana wielka litera')
+    .matches(/\d/).withMessage('Wymagana cyfra')
+], async (req, res, next) => {
+  try {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) return res.status(400).json({ errors: errors.array() });
+
+    const { token, password } = req.body;
+    const lookupToken = maybeHashToken(token);
+
+    const tokenRes = await db.query(
+      'SELECT id, userId, expiresAt, used FROM password_reset_tokens WHERE token = ? LIMIT 1',
+      [lookupToken]
+    );
+    if (!tokenRes.rowCount) return res.status(400).json({ error: 'Niepoprawny lub wygasły token' });
+
+    const t = tokenRes.rows[0];
+    if (t.used) return res.status(400).json({ error: 'Token już użyty' });
+    if (new Date(t.expiresAt) < new Date()) return res.status(400).json({ error: 'Token wygasł' });
+
+    // Fetch user
+    const userRes = await db.query('SELECT id FROM users WHERE id = ? LIMIT 1', [t.userId]);
+    if (!userRes.rowCount) return res.status(400).json({ error: 'Użytkownik nie istnieje' });
+
+    const bcrypt = require('bcryptjs');
+    const newHash = await bcrypt.hash(password, 10);
+
+    // Use existing password column (named `password` in registration)
+    await db.query('UPDATE users SET password = ? WHERE id = ?', [newHash, t.userId]);
+    await db.query('UPDATE password_reset_tokens SET used = 1 WHERE id = ?', [t.id]);
+
+    return res.json({ ok: true, message: 'Hasło zaktualizowane' });
+  } catch (err) {
+    next(err);
+  }
+});
+
+// router.post('/admin/cleanup-reset-tokens', async (req,res,next)=>{ ... });
+
 module.exports = router;

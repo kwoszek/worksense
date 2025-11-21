@@ -122,3 +122,15 @@ CREATE TABLE IF NOT EXISTS checkin_ai_analysis (
 INSERT INTO badges(`key`, name, description, maxLevel)
 SELECT 'streak', 'Streaker', 'Awarded for maintaining an activity streak. Levels increase at 1,7,30,100 days.', 4
 WHERE NOT EXISTS (SELECT 1 FROM badges WHERE `key`='streak');
+
+-- Password reset tokens
+CREATE TABLE IF NOT EXISTS password_reset_tokens (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  userId INT NOT NULL,
+  token VARCHAR(128) NOT NULL UNIQUE,
+  expiresAt DATETIME NOT NULL,
+  used TINYINT(1) NOT NULL DEFAULT 0,
+  createdAt DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (userId) REFERENCES users(id) ON DELETE CASCADE
+);
+CREATE INDEX idx_password_reset_tokens_user ON password_reset_tokens(userId);
