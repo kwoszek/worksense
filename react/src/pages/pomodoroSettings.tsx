@@ -28,7 +28,7 @@ export default function PomodoroSettingsPage() {
     <DefaultLayout>
       <section className="max-w-xl mx-auto p-6">
         <h2 className="text-4xl mb-4">Ustawienia trybu Focus</h2>
-        <div className="grid grid-cols-2 gap-5 m-10">
+        <div className="grid grib-cols-1 md:grid-cols-2 gap-5 m-10">
          
             
             <NumberInput size="lg" labelPlacement="outside" type="number" minValue={1} label="Minuty pracy" value={workMinutes} onValueChange={setWorkMinutes}  endContent={<span className="text-default-400 text-small mr-2">min</span>}/>

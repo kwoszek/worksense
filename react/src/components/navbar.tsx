@@ -65,23 +65,27 @@ export const Navbar = () => {
 
       {/* Mobile menu panel */}
       {mobileOpen && (
-        <nav className="sm:hidden border-t">
+        <nav className="sm:hidden border-t -mt-7">
             <div className="px-4 py-3 space-y-2">
-              {/* public links */}
+             
+              {user && <button onClick={() => { nav('/dashboard'); setMobileOpen(false); }} className="w-full text-left">Dashboard</button>}
               <button onClick={() => { nav('/forum'); setMobileOpen(false); }} className="w-full text-left">Forum</button>
               <button onClick={() => { nav('/articles'); setMobileOpen(false); }} className="w-full text-left">Artykuły</button>
+                            {user &&  <button onClick={() => { nav('/progress'); setMobileOpen(false); }} className="w-full text-left">Progres</button>}
               <button onClick={() => { nav('/focus'); setMobileOpen(false); }} className="w-full text-left">Focus</button>
 
-              {/* protected links */}
-              {user && (
-                <>
-                  <button onClick={() => { nav('/dashboard'); setMobileOpen(false); }} className="w-full text-left">Dashboard</button>
-                  <button onClick={() => { nav('/progress'); setMobileOpen(false); }} className="w-full text-left">Progres</button>
-                  <div className="pt-2">
+              
+              
+
+              {user && <div className="pt-2">
                     <button onClick={() => { nav('/profile'); setMobileOpen(false); }} className="w-full text-left">Profil</button>
-                  </div>
-                </>
-              )}
+                  </div>}
+                
+                  
+                 
+                  
+                
+              
 
               {!user && (
                 <button onClick={() => { nav('/login'); setMobileOpen(false); }} className="w-full text-left">Login</button>
