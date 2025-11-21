@@ -85,7 +85,7 @@ LOGIKA OCENY moodScore (wytyczne – zastosuj zdrowy rozsądek zamiast surowego 
 - Bardzo wysoki stres (>=8) obniża wynik (chyba że energia też wysoka i opis zawiera pozytywne aspekty – wtedy umiarkowany).
 - Jeśli opis zawiera słowa typu "zmęcz", "przytł", "niepok", "stres", możesz obniżyć wynik o 1-2.
 - Jeśli opis zawiera pozytywne elementy ("postęp", "spacer", "udało", "fajnie"), możesz podnieść o 1-2.
-- Unikaj skrajności 1 lub 10 bez bardzo wyraźnych przesłanek.
+- Unikaj skrajnie złego wyniku (1), bez bardzo wyraźnych przesłanek.
 
 ANALIZA PROGRESU (progressSummary):
 Porównaj średnią pierwszej połowy z drugą, ostatni wynik vs średnia globalna, oraz poziom wahań. Użyj prostych, ciepłych sformułowań wskazujących trend ("lekka poprawa", "utrzymujesz stabilność", "kilka wahań", "chwilowy spadek") i dodaj krótkie uznanie wysiłku lub konsekwencji jeśli zasadne.
