@@ -116,6 +116,9 @@ export const usersApi = createApi({
       query: () => ({ url: '/me/badges' }),
       providesTags: ['Me'],
     }),
+    badges: builder.query<{ id: number; key: string; name: string; description?: string; maxLevel: number }[], void>({
+      query: () => ({ url: '/badges' }),
+    }),
     updateProfile: builder.mutation<{ user: AuthUser; accessToken?: string }, { username?: string; email?: string; avatarBase64?: string }>({
       query: (body) => ({ url: '/me', method: 'PUT', body }),
       invalidatesTags: ['Me'],
@@ -160,6 +163,7 @@ export const {
   useLogoutMutation,
   useMeQuery,
   useMyBadgesQuery,
+  useBadgesQuery,
   useUpdateProfileMutation,
   useChangePasswordMutation,
   useRequestPasswordResetMutation,

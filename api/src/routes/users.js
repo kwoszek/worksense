@@ -17,7 +17,7 @@ const { authMiddleware } = require('../middleware/auth');
 let sharp;
 try { sharp = require('sharp'); } catch { sharp = null; }
 // Badge badge logic
-const STREAK_LEVEL_THRESHOLDS = [1, 7, 30, 100]; // ascending thresholds for levels 1..4
+const STREAK_LEVEL_THRESHOLDS = [7, 14, 30, 90, 180, 365]; // ascending thresholds for levels 1..6
 function computeStreakLevel(streak) {
   let level = 0;
   for (let i = 0; i < STREAK_LEVEL_THRESHOLDS.length; i++) {
@@ -40,8 +40,8 @@ async function upsertStreakBadge(userId, streak) {
     await db.query('INSERT INTO badges(`key`, name, description, maxLevel) VALUES(?,?,?,?)', [
       'streak',
       'Streaker',
-      'Awarded for maintaining an activity streak. Levels increase at 1,7,30,100 days.',
-      4,
+      'Awarded for maintaining an activity streak. Levels increase at 7,14,30,90,180,365 days.',
+      6,
     ]);
     const newDef = await db.query('SELECT id FROM badges WHERE `key` = ? LIMIT 1', ['streak']);
     if (!newDef.rowCount) return; // give up silently
@@ -341,6 +341,15 @@ router.get('/me/badges', authMiddleware, async (req, res, next) => {
       WHERE ub.userId = ?
       ORDER BY ub.level DESC, ub.updatedAt DESC`;
     const r = await db.query(q, [req.user.id]);
+    res.json(r.rows);
+  } catch (err) { next(err); }
+});
+
+// Public endpoint: list all badge definitions
+router.get('/badges', async (req, res, next) => {
+  try {
+    const q = 'SELECT id, `key`, name, description, maxLevel FROM badges ORDER BY id';
+    const r = await db.query(q);
     res.json(r.rows);
   } catch (err) { next(err); }
 });

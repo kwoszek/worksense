@@ -1,11 +1,13 @@
 import DefaultLayout from "@/layouts/default";
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef } from 'react';
 import { Button, ButtonGroup } from '@heroui/button';
 import { Card, CardHeader, CardBody } from '@heroui/card';
 import { Divider } from '@heroui/divider';
 import { Avatar } from '@heroui/avatar';
 import { Input } from '@heroui/input';
-import { useMyBadgesQuery, useLogoutMutation, useUpdateProfileMutation, useChangePasswordMutation, useMeQuery } from '@/services/usersApi';
+import { useMyBadgesQuery, useBadgesQuery, useLogoutMutation, useUpdateProfileMutation, useChangePasswordMutation, useMeQuery } from '@/services/usersApi';
+import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter } from '@heroui/modal';
+import './profile.css';
 import { useSelector } from 'react-redux';
 import { selectAuthUser } from '@/features/auth/authSlice';
 
@@ -13,10 +15,12 @@ export default function Profile() {
   const user = useSelector(selectAuthUser);
   const [logout] = useLogoutMutation();
   const { data: badgeList, isLoading: badgesLoading } = useMyBadgesQuery();
-  const [updateProfile] = useUpdateProfileMutation();
+  const [updateProfile, { isLoading: updating }] = useUpdateProfileMutation();
   const [changePassword, { isLoading: changingPw }] = useChangePasswordMutation();
 
   const [editing, setEditing] = useState(false);
+    const [showAllBadges, setShowAllBadges] = useState(false);
+    const { data: allBadges, isLoading: allBadgesLoading } = useBadgesQuery();
   const [uname, setUname] = useState(user?.username || '');
   const [email, setEmail] = useState(user?.email || '');
   const [avatarPreview, setAvatarPreview] = useState<string | null>(user?.avatar ? `data:image/png;base64,${user.avatar}` : null);
@@ -25,8 +29,7 @@ export default function Profile() {
   const [newPw, setNewPw] = useState('');
   const [confirmPw, setConfirmPw] = useState('');
   const [pwMsg, setPwMsg] = useState<string | null>(null);
-  const [pwErrors, setPwErrors] = useState<string[]>([]);
-  const [pwAttempted, setPwAttempted] = useState(false);
+  const [profileMsg, setProfileMsg] = useState<string | null>(null);
   // Subscribe to /me so invalidation triggers refetch; we can manually force refetch after save.
   const { refetch: meRefetch } = useMeQuery(undefined);
 
@@ -52,45 +55,42 @@ export default function Profile() {
       if (!avatarPreview && result?.user?.avatar) {
         setAvatarPreview(`data:image/png;base64,${result.user.avatar}`);
       }
+      setProfileMsg('Profile updated');
       setEditing(false);
       // Force immediate refresh of /me to sync other derived fields (streak etc.)
       meRefetch();
     } catch (e: any) {
+      setProfileMsg(e?.data?.error || 'Update failed');
     }
   };
 
-  // realtime validation for password fields
-  useEffect(() => {
-    const errs: string[] = [];
-    if (!oldPw.trim()) errs.push('Stare hasło jest wymagane');
-    if (newPw.length < 5) errs.push('Min 5 znaków');
-    if (newPw.length > 100) errs.push('Max 100 znaków');
-    if (newPw && !/[A-Z]/.test(newPw)) errs.push('Brak dużej litery');
-    if (newPw && !/\d/.test(newPw)) errs.push('Brak cyfry');
-    if (newPw && oldPw && newPw === oldPw) errs.push('Nowe hasło nie może być identyczne');
-    if (confirmPw && newPw !== confirmPw) errs.push('Hasła nie są takie same');
-    setPwErrors(errs);
-    // clear success message on edits
-    if (pwMsg === 'Hasło zmienione') setPwMsg(null);
-  }, [oldPw, newPw, confirmPw]);
-
   const handleChangePassword = async () => {
     setPwMsg(null);
-    setPwAttempted(true);
-    if (pwErrors.length) return; // show errors after attempt
+    if (newPw !== confirmPw) {
+      setPwMsg('Passwords do not match');
+      return;
+    }
     try {
       await changePassword({ oldPassword: oldPw, newPassword: newPw }).unwrap();
-      setPwMsg('Hasło zmienione');
+      setPwMsg('Password changed');
       setOldPw('');
       setNewPw('');
       setConfirmPw('');
-      setPwAttempted(false);
     } catch (e: any) {
-      if (e?.data?.errors && Array.isArray(e.data.errors)) {
-        setPwErrors(e.data.errors.map((er: any) => er.msg || er.message || 'Błąd')); 
-      } else {
-        setPwMsg(e?.data?.error || 'Zmiana nie powiodła się');
-      }
+      setPwMsg(e?.data?.error || 'Change failed');
+    }
+  };
+
+  const badgeClass = (key: string) => {
+    switch (key) {
+      case 'streak':
+        return 'badge-gradient-streak';
+      case 'posts':
+        return 'badge-gradient-contrib';
+      case 'comments':
+        return 'badge-gradient-comment';
+      default:
+        return 'badge-default';
     }
   };
 
@@ -98,20 +98,20 @@ export default function Profile() {
     <DefaultLayout>
       <div className="max-w-4xl mx-auto w-full px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between py-6">
-          <h1 className="text-2xl opacity-70">Profile</h1>
+          <h1 className="text-2xl opacity-70">Profil</h1>
           <div className="flex items-center gap-2">
             {!editing && (
-              <Button size="sm" variant="flat" onPress={() => setEditing(true)}>Edit</Button>
+              <Button size="sm" variant="flat" onPress={() => setEditing(true)}>Edytuj</Button>
             )}
             {editing && (
               <div>
-                <ButtonGroup>
-                  <Button size="sm" variant="flat" color="warning" onPress={() => { setEditing(false); setUname(user?.username||''); setEmail(user?.email||''); setAvatarPreview(user?.avatar ? `data:image/png;base64,${user.avatar}` : null); }}>Cancel</Button>
-                  <Button size="sm" variant="flat" color="success" onPress={() => { handleSaveProfile(); }}>Save</Button>
+                  <ButtonGroup>
+                  <Button size="sm" variant="flat" color="warning" onPress={() => { setEditing(false); setUname(user?.username||''); setEmail(user?.email||''); setAvatarPreview(user?.avatar ? `data:image/png;base64,${user.avatar}` : null); setProfileMsg(null); }}>Anuluj</Button>
+                  <Button size="sm" variant="flat" color="success" isDisabled={updating} onPress={() => { handleSaveProfile(); }}>{updating ? 'Zapisywanie...' : 'Zapisz'}</Button>
                 </ButtonGroup>
               </div>
             )}
-            <Button size="sm" color="danger" variant="flat" onPress={() => logout().catch(() => {})}>Logout</Button>
+            <Button size="sm" color="danger" variant="flat" onPress={() => logout().catch(() => {})}>Wyloguj</Button>
           </div>
         </div>
 
@@ -132,11 +132,11 @@ export default function Profile() {
                 )}
               </div>
               <div className="flex-1">
-                  <Input className="w-70 bg-transparent mb-1" size="sm" classNames={{input: "text-xl font-semibold", inputWrapper: !editing ? "border-none bg-none" : undefined}} disabled={!editing} variant="bordered" value={!editing ? user?.username ?? 'Unknown' : uname} readOnly={!editing} onValueChange={editing ? setUname : undefined} />
+                  <Input className="w-70 bg-transparent mb-1" size="sm" classNames={{input: "text-xl font-semibold", inputWrapper: !editing ? "border-none bg-none" : undefined}} disabled={!editing} variant="bordered" value={!editing ? user?.username ?? 'Nieznany' : uname} readOnly={!editing} onValueChange={editing ? setUname : undefined} />
                   <Input className="w-70 bg-transparent" size="sm" classNames={{input: "text-sm opacity-70", inputWrapper: !editing ? "border-none bg-none" : undefined}} disabled={!editing} variant="bordered" value={!editing ? user?.email ?? '' : email} readOnly={!editing} onValueChange={editing ? setEmail : undefined} />
               </div>
               <div className="ml-auto text-right">
-                <div className="text-sm opacity-60">Current streak</div>
+                <div className="text-sm opacity-60">Aktualna seria</div>
                 <div className="text-2xl font-bold">{user?.streak ?? 0}</div>
               </div>
             </div>
@@ -144,31 +144,73 @@ export default function Profile() {
           <Divider />
           <CardBody>
             <div className="mb-6">
-              <h3 className="text-lg opacity-70 mb-2">Badges</h3>
+              {profileMsg && <div className="text-sm opacity-70 mb-3">{profileMsg}</div>}
+              <div className="flex items-center justify-between mb-2">
+                <h3 className="text-lg opacity-70 m-0">Odznaki</h3>
+                <div>
+                  <Button size="sm" variant="flat" onPress={() => setShowAllBadges(true)}>Pokaż wszystkie odznaki</Button>
+                </div>
+              </div>
               <div className="flex flex-wrap gap-2">
-                {badgesLoading && <div className="text-sm opacity-60">Loading...</div>}
-                {!badgesLoading && (!badgeList || !badgeList.length) && <div className="text-sm opacity-60">No badges yet</div>}
+                {badgesLoading && <div className="text-sm opacity-60">Ładowanie...</div>}
+                {!badgesLoading && (!badgeList || !badgeList.length) && <div className="text-sm opacity-60">Brak odznak</div>}
                 {!badgesLoading && badgeList && badgeList.map((b: any) => (
-                  <span key={b.id || b.key} className="px-3 py-1 rounded-full bg-green-50 text-green-700 text-sm">
-                    {b.name}{b.level && b.level > 1 ? ` • lvl ${b.level}` : ''}
+                  <span key={b.id || b.key} className={`badge-pill ${badgeClass(b.key)}`}>
+                    {b.name}{b.level && b.level > 1 ? ` • poziom ${b.level}` : ''}
                   </span>
                 ))}
               </div>
             </div>
 
+            <Modal isOpen={showAllBadges} placement="center" onOpenChange={setShowAllBadges}>
+              <ModalContent>
+                {(onClose) => (
+                  <>
+                    <ModalHeader>Wszystkie odznaki</ModalHeader>
+                    <ModalBody>
+                      {allBadgesLoading && <div className="text-sm opacity-60">Ładowanie odznak...</div>}
+                      {!allBadgesLoading && (!allBadges || !allBadges.length) && <div className="text-sm opacity-60">Brak zdefiniowanych odznak</div>}
+                      {!allBadgesLoading && allBadges && (
+                        <div className="flex flex-col gap-3">
+                          {allBadges.map((def: any) => {
+                            const owned = badgeList?.some((b: any) => b.key === def.key);
+                            const userLevel = badgeList?.find((b: any) => b.key === def.key)?.level || 0;
+                            return (
+                              <div key={def.id} className="flex items-center justify-between p-3 border rounded">
+                                <div className="flex items-center">
+                                  <div className={`badge-pill ${badgeClass(def.key)} mr-3`} style={{ width: 44, height: 28 }} />
+                                  <div>
+                                    <div className="font-medium">{def.name} {def.maxLevel > 1 ? <span className="text-xs opacity-60">(maks. poziom {def.maxLevel})</span> : null}</div>
+                                    <div className="text-sm opacity-70">{def.description}</div>
+                                  </div>
+                                </div>
+                                <div className="text-right">
+                                  {owned ? <div className="text-sm text-green-700">Zdobyte {userLevel > 1 ? `• poziom ${userLevel}` : ''}</div> : <div className="text-sm opacity-60">Nie zdobyte</div>}
+                                </div>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      )}
+                    </ModalBody>
+                    <ModalFooter>
+                      <div className="w-full flex justify-end">
+                        <Button size="sm" variant="flat" onPress={onClose}>Close</Button>
+                      </div>
+                    </ModalFooter>
+                  </>
+                )}
+              </ModalContent>
+            </Modal>
+
             <div className="mb-6">
               <h3 className="text-lg opacity-70 mb-2">Change Password</h3>
               <div className="flex flex-col gap-3 max-w-sm">
-                <Input label="Stare hasło" size="sm" type="password" value={oldPw} onValueChange={setOldPw} />
-                <Input label="Nowe hasło" size="sm" type="password" value={newPw} onValueChange={setNewPw} />
-                <Input label="Potwierdź nowe hasło" size="sm" type="password" value={confirmPw} onValueChange={setConfirmPw} />
-                {pwAttempted && pwErrors.length > 0 && (
-                  <ul className="text-xs opacity-80 list-disc pl-4">
-                    {pwErrors.map(e => <li key={e} className="text-red-600">{e}</li>)}
-                  </ul>
-                )}
-                {pwMsg && <div className="text-xs opacity-80 text-green-600">{pwMsg}</div>}
-                <Button size="sm" color="success" variant="flat" isDisabled={changingPw} onPress={handleChangePassword}>{changingPw ? 'Zmiana...' : 'Zmień hasło'}</Button>
+                <Input label="Old Password" size="sm" type="password" value={oldPw} onValueChange={setOldPw} />
+                <Input label="New Password" size="sm" type="password" value={newPw} onValueChange={setNewPw} />
+                <Input label="Confirm New Password" size="sm" type="password" value={confirmPw} onValueChange={setConfirmPw} />
+                {pwMsg && <div className="text-xs opacity-70">{pwMsg}</div>}
+                <Button size="sm" color="success" variant="flat" isDisabled={changingPw} onPress={handleChangePassword}>{changingPw ? 'Changing...' : 'Change Password'}</Button>
               </div>
             </div>
 

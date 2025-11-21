@@ -119,9 +119,20 @@ CREATE TABLE IF NOT EXISTS checkin_ai_analysis (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- Seed streak badge if missing
+-- Seed streak badge if missing (updated levels: 7,14,30,90,180,365)
 INSERT INTO badges(`key`, name, description, maxLevel)
-SELECT 'streak', 'Streaker', 'Awarded for maintaining an activity streak. Levels increase at 1,7,30,100 days.', 4
+SELECT 'streak', 'Streaker', 'Awarded for maintaining an activity streak. Levels increase at 7,14,30,90,180,365 days.', 6
 WHERE NOT EXISTS (SELECT 1 FROM badges WHERE `key`='streak');
+
+-- Seed contributor (posts) badge
+INSERT INTO badges(`key`, name, description, maxLevel)
+SELECT 'posts', 'Contributor', 'Created posts in the forum (awarded for creating your first post).', 1
+WHERE NOT EXISTS (SELECT 1 FROM badges WHERE `key`='posts');
+
+-- Seed commenter badge
+INSERT INTO badges(`key`, name, description, maxLevel)
+SELECT 'comments', 'Commenter', 'Commented on forum posts (awarded for creating your first comment).', 1
+WHERE NOT EXISTS (SELECT 1 FROM badges WHERE `key`='comments');
 
 -- Password reset tokens
 CREATE TABLE IF NOT EXISTS password_reset_tokens (

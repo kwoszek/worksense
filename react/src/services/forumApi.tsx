@@ -73,7 +73,7 @@ const baseQuery = fetchBaseQuery({
 export const forumApi = createApi({
 	reducerPath: 'forumApi',
 	baseQuery,
-	tagTypes: ['Posts', 'Post', 'Comments', 'Checkins'],
+	tagTypes: ['Posts', 'Post', 'Comments', 'Checkins', 'Me'],
 	endpoints: (builder) => ({
 		// Posts
 		getPosts: builder.query<Post[], { limit: number; offset: number; orderBy: string; direction: string }>({
@@ -89,7 +89,7 @@ export const forumApi = createApi({
 		}),
 		addPost: builder.mutation<Post, { userId: number; title: string; content: string }>({
 			query: (body) => ({ url: '/posts', method: 'POST', body }),
-			invalidatesTags: ['Posts'],
+			invalidatesTags: ['Posts', 'Me'],
 		}),
 
 		// Comments
@@ -102,6 +102,7 @@ export const forumApi = createApi({
 			invalidatesTags: (_result, _error, { postId }) => [
 				{ type: 'Post' as const, id: postId },
 				{ type: 'Comments' as const, id: postId },
+				'Me',
 			],
 		}),
 		getComments: builder.query<CommentsResponse, { postId: number; offset?: number; limit?: number }>({
