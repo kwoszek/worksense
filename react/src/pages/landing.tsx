@@ -8,6 +8,7 @@ import forumScr from "../resources/forumScr.png";
 import focusScr from "../resources/FocusScr.png";
 import checkInScr from "../resources/checkInScr.png";
 import Progress from "../resources/Progress.png";
+import stats from "../resources/stats.png";
 import {
   Carousel,
   CarouselContent,
@@ -217,9 +218,14 @@ export default function Landing(){
                                 </CardHeader>
                                 <Divider />
                                 <CardBody className="p-6 md:p-10">
-                                        <img src={forumScr} alt="zdjęcie naszego forum" className="w-full md:w-3/5 mb-5 m-auto shadow-lg/20 shadow-success rounded-lg"/>
-                                        <Divider className="my-5"/>
+                                     <div className="flex flex-col md:flex-row gap-6 md:gap-10 items-center justify-center">
+                                        <div className="md:flex-1">
                                         <h3 className="text-lg m-2 text-center md:text-left">Ludzie, którzy przeszli przez to samo, najlepiej rozumieją Twoją sytuację. Rozmawiaj, dziel się doświadczeniami, pomagaj innym.</h3>
+                                        </div>
+                                        <img src={forumScr} alt="zdjęcie naszego forum" className="w-full md:w-3/5 mb-5 m-auto shadow-lg/20 shadow-success rounded-lg"/>
+                                        </div>
+                                        
+                                       
                     
                                 </CardBody>
                             </Card>
@@ -233,7 +239,9 @@ export default function Landing(){
                                 </CardHeader>
                                 <Divider />
                                 <CardBody className="p-6 md:p-10">
-                    
+
+                                     <div className="flex flex-col md:flex-row gap-6 md:gap-10 items-center justify-center">
+                                        <div className="md:flex-1">
                                         <h3 className="text-xl">Twoje dane zmieniają się codziennie — widzisz:</h3>
                                         <ul className="list-disc ml-6">
                                                 <li>spadek stresu,</li>
@@ -243,6 +251,11 @@ export default function Landing(){
                         
                                         </ul>
                                         <p className="mt-3">Motywacja rośnie, gdy widzisz realny progres.</p>
+                                        </div>
+                                        <img src={stats} alt="zdjęcie zakładki focus" className="w-full md:w-3/5 mb-5 shadow-lg/20 shadow-success rounded-lg" />
+                                        </div>
+
+                                        
                     
                                 </CardBody>
                             </Card>
