@@ -5,9 +5,9 @@ import { Input } from "@heroui/input";
 import { Button, ButtonGroup } from "@heroui/button";
 import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter } from "@heroui/modal";
 import DefaultLayout from "@/layouts/default";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useLoginMutation, useRegisterMutation, useRequestPasswordResetMutation, useResetPasswordMutation } from "@/services/usersApi";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate, useLocation, Navigate } from "react-router-dom";
 import { useSelector } from 'react-redux';
 import { selectAuthUser } from '@/features/auth/authSlice';
 
@@ -27,15 +27,47 @@ export default function LoginPage() {
     const [setPwErrors, setSetPwErrors] = useState<string[]>([]);
     const [showResetModal, setShowResetModal] = useState(false);
     const [resetSuccessMsg, setResetSuccessMsg] = useState<string | null>(null);
+    const [captchaToken, setCaptchaToken] = useState('');
+    const recaptchaSiteKey = import.meta.env.VITE_RECAPTCHA_SITE_KEY || '';
+    const recaptchaContainerRef = useRef<HTMLDivElement | null>(null);
     const searchParams = new URLSearchParams(location.search);
     const tokenParam = searchParams.get('token');
     // Clear success message when navigating away from token view
     useEffect(() => { if (!tokenParam) setResetSuccessMsg(null); }, [tokenParam]);
 
+    // Load reCAPTCHA script & render checkbox for register form
+    useEffect(() => {
+        if (mode !== 'register') return; // only when register tab active
+        if (!recaptchaSiteKey) return;
+        // Avoid duplicate script
+        if (!document.querySelector('script[data-recaptcha]')) {
+            const s = document.createElement('script');
+            s.src = 'https://www.google.com/recaptcha/api.js?render=explicit';
+            s.async = true;
+            s.defer = true;
+            s.setAttribute('data-recaptcha', 'true');
+            document.head.appendChild(s);
+        }
+        const interval = setInterval(() => {
+            // @ts-ignore
+            if (window.grecaptcha && recaptchaContainerRef.current && recaptchaContainerRef.current.childElementCount === 0) {
+                // @ts-ignore
+                window.grecaptcha.render(recaptchaContainerRef.current, {
+                    sitekey: recaptchaSiteKey,
+                    callback: (token: string) => setCaptchaToken(token),
+                    'expired-callback': () => setCaptchaToken(''),
+                    'error-callback': () => setCaptchaToken('')
+                });
+                clearInterval(interval);
+            }
+        }, 300);
+        return () => clearInterval(interval);
+    }, [mode, recaptchaSiteKey]);
+
     // If already authenticated, redirect to dashboard
     if (authedUser) {
         
-        return <DefaultLayout>{}<div className="min-h-full flex items-center justify-center"><p>Jesteś już zalogowany</p></div></DefaultLayout>;
+        return <Navigate to="/dashboard" replace />;
     }
 
    
@@ -76,11 +108,11 @@ export default function LoginPage() {
         const username = (data.get('username') || '').toString().trim();
         const email = (data.get('email') || '').toString().trim();
         const password: string = (data.get('password') || '').toString();
-        if (!username || !email || !password.match(/[A-Z]/g) || password.length<5 || !password.match(/[0-9]/g)) {
+        if (!username || !email || !password.match(/[A-Z]/g) || password.length<5 || !password.match(/[0-9]/g) || !captchaToken) {
             setPassError(true);
             return};
         try {
-            await registerMutation({ username, email, password }).unwrap();
+            await registerMutation({ username, email, password, captchaToken }).unwrap();
             navigate('/dashboard', { replace: true });
         } catch {}
     }
@@ -233,9 +265,11 @@ export default function LoginPage() {
                                     onChange={()=> setPassError(false)}
                                     errorMessage="Hasło musi mieć co najmniej 5 znaków, zawierać dużą literę i cyfrę"
                                 />
+                                <div className="mt-2" ref={recaptchaContainerRef} />
+                                {passError && !captchaToken && <p className="text-xs text-red-600">Captcha wymagana</p>}
                                 {registerError && <p className="text-sm text-red-600">{extractErrorMessage(registerError)}</p>}
                                 <div className="flex gap-2 w-full justify-center">
-                                    <Button className="w-1/2" color="success" type="submit" isDisabled={registering} isLoading={registering}>Zarejestruj się</Button>
+                                    <Button className="w-1/2" color="success" type="submit" isDisabled={registering || !captchaToken} isLoading={registering}>Zarejestruj się</Button>
                                     <Button type="reset" className="w-1/2" variant="flat" isDisabled={registering} onPress={()=>setPassError(false)}>Reset</Button>
                                 </div>
                             </Form>

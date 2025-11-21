@@ -47,8 +47,7 @@ function MoodChart({ checkins }: Props) {
       const svg = container.querySelector('svg');
       if (!svg) return;
 
-      // if viewBox already exists, skip
-      if (svg.getAttribute('viewBox')) return;
+      // Always update viewBox so the SVG scales to container size when resized
 
       let width = 0;
       let height = 0;
@@ -72,7 +71,7 @@ function MoodChart({ checkins }: Props) {
       }
 
       if (width && height) {
-        svg.setAttribute('viewBox', `0 0 ${Math.max(1, Math.round(width))*4} ${Math.max(1, Math.round(height))*1.5}`);
+        svg.setAttribute('viewBox', `0 0 ${Math.max(1, Math.round(width))} ${Math.max(1, Math.round(height))}`);
       }
     };
 
@@ -102,7 +101,7 @@ function MoodChart({ checkins }: Props) {
           <h2 className="text-2xl opacity-80">Wykres nastroju</h2>
         </CardHeader>
       <CardBody>
-        <div ref={heatmapContainerRef} className="w-full">
+        <div ref={heatmapContainerRef} className="w-full heatmap-container">
          <HeatMap
           value={value}
           style={{ color: 'success'  }}
@@ -130,10 +129,11 @@ function MoodChart({ checkins }: Props) {
 
 10: "#48e064"
       }} rectRender={(props, data) => {
+        // ensure tooltip content uses same text but avoid unused var lint
         const titleText = `${data.date} — nastrój: ${data.count && data.count > 10 ? 10 : data.count}`;
         return (
           <>
-        {data.count ? ( <Tooltip placement="top" content={<div className="text-left"><p className="font-bold ">{data.date}</p> <p>nastrój: {data.count>10?"10":data.count}</p> </div>} showArrow={true} offset={5}>
+        {data.count ? ( <Tooltip placement="top" content={<div className="text-left"><p className="font-bold ">{titleText}</p> </div>} showArrow={true} offset={5}>
             <rect {...props} />
           </Tooltip>):(<rect {...props} />)}
          
@@ -142,6 +142,19 @@ function MoodChart({ checkins }: Props) {
       }}
         />
         </div>
+        <style>{`
+          .heatmap-container svg, .heatmap-container > svg {
+            width: 100% !important;
+            height: 220px !important; /* default height on small screens */
+          }
+          .heatmap-container svg text { font-size: inherit !important; }
+          @media (min-width: 768px) {
+            /* md and up: make chart taller for better readability */
+            .heatmap-container svg, .heatmap-container > svg {
+              height: 220px !important;
+            }
+          }
+        `}</style>
       </CardBody>
     </Card>
     </>
