@@ -173,8 +173,8 @@ export default function FocusPage() {
 
 
 
- <Modal isOpen={isOpen} onOpenChange={onOpenChange} size="2xl" className="mb-[5vh]">
-        <ModalContent className="w-full max-h-[90vh] overflow-y-auto ">
+ <Modal isOpen={isOpen} onOpenChange={onOpenChange} size="2xl" className="mb-[5svh]">
+        <ModalContent className="w-full max-h-[90svh] overflow-y-auto ">
             <section className="max-w-2xl mx-auto p-6 mt-10">
         <h1 className="text-4xl font-semibold mb-2">O technice pomodoro</h1>
         <p className="opacity-80">Technika Pomodoro to prosta metoda zarządzania czasem: pracujesz w krótkich, intensywnych blokach (standardowo 25 minut), po każdym bloku robisz krótką przerwę (5 minut), a po czterech blokach wykonujesz dłuższą przerwę (15–30 minut). Celem jest podział pracy na wykonalne fragmenty, które ułatwiają koncentrację i regularną regenerację.</p>

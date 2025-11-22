@@ -12,12 +12,14 @@ import { useGetPostsQuery } from "@/services/forumApi";
 import { useGetAnalysesQuery } from "@/services/analysisApi";
 
 export default function DashboardPage() {
-  const today = new Date().toISOString().slice(0, 10);
+  // current date in Europe/Warsaw in YYYY-MM-DD format
+  const today = new Date().toLocaleDateString('en-CA', { timeZone: 'Europe/Warsaw' });
   const { data: checkins } = useGetCheckinsQuery();
   const user = useSelector(selectAuthUser);
   const { data: analyses } = useGetAnalysesQuery();
   const latestAnalysis = analyses && analyses.length ? analyses[0] : null;
    const hasToday = !!checkins?.find((c) => c.userid === user?.id && c.date.slice(0,10) === today);
+  
 
   const chartCheckins = checkins
     ?.filter((c: any) => c.userid === user?.id)

@@ -200,6 +200,69 @@ export default function ProgressPage() {
   const monthUsage = calculateUsage('month');
   const sixMonthUsage = calculateUsage('6months');
 
+  // Build continuous daily categories from first check-in (or earliest) to today and fill missing days with null
+  const chartStartDate = firstCheckinISO ? new Date(firstCheckinISO) : (chartCheckins && chartCheckins.length ? new Date(chartCheckins[0].date) : undefined);
+  const chartEndDate = new Date();
+
+  const getDatesBetween = (start?: Date, end?: Date) => {
+    if (!start || !end) return [] as Date[];
+    const s = new Date(start.getFullYear(), start.getMonth(), start.getDate());
+    const e = new Date(end.getFullYear(), end.getMonth(), end.getDate());
+    const out: Date[] = [];
+    for (let d = new Date(s); d.getTime() <= e.getTime(); d.setDate(d.getDate() + 1)) {
+      out.push(new Date(d));
+    }
+    return out;
+  };
+
+  const dateRange = getDatesBetween(chartStartDate, chartEndDate);
+  const dateCategories = dateRange.map(d => new Date(d.getFullYear(), d.getMonth(), d.getDate()).toISOString());
+
+  const energySeriesData = dateRange.map(d => {
+    const key = formatYmd(d);
+    const c = checkinByDate[key];
+    return c && typeof c.energy === 'number' ? c.energy : null;
+  });
+  const stressSeriesData = dateRange.map(d => {
+    const key = formatYmd(d);
+    const c = checkinByDate[key];
+    return c && typeof c.stress === 'number' ? c.stress : null;
+  });
+  const moodSeriesData = dateRange.map(d => {
+    const key = formatYmd(d);
+    const c = checkinByDate[key];
+    if (!c) return null;
+    if (typeof c.moodScore === 'number') return c.moodScore;
+    const e = typeof c.energy === 'number' ? c.energy : null;
+    const s = typeof c.stress === 'number' ? c.stress : null;
+    if (e !== null && s !== null) return e + (10 - s);
+    return null;
+  });
+
+  // overall averages (mood, energy, stress) across user's checkins
+  const overallAverages = (() => {
+    let stressSum = 0, stressCount = 0;
+    let energySum = 0, energyCount = 0;
+    let moodSum = 0, moodCount = 0;
+    for (const c of userCheckins) {
+      if (typeof c.stress === 'number') { stressSum += c.stress; stressCount++; }
+      if (typeof c.energy === 'number') { energySum += c.energy; energyCount++; }
+      if (typeof c.moodScore === 'number') { moodSum += c.moodScore; moodCount++; }
+      else if (typeof c.energy === 'number' && typeof c.stress === 'number') {
+        moodSum += c.energy + (10 - c.stress);
+        moodCount++;
+      }
+    }
+    return {
+      avgStress: stressCount ? +(stressSum / stressCount).toFixed(2) : null,
+      avgEnergy: energyCount ? +(energySum / energyCount).toFixed(2) : null,
+      avgMood: moodCount ? +(moodSum / moodCount).toFixed(2) : null,
+      stressCount,
+      energyCount,
+      moodCount,
+    };
+  })();
+
 
   return (
     <DefaultLayout>
@@ -227,7 +290,7 @@ export default function ProgressPage() {
       </CardHeader>
         <CardBody>
            <div id="chart">
-                {checkins && <ReactApexChart className="text-foreground" options={{
+                {dateCategories.length > 0 && <ReactApexChart className="text-foreground" options={{
               chart: {
                 height: 350,
                 type: 'area',
@@ -241,7 +304,7 @@ export default function ProgressPage() {
               },
               xaxis: {
                 type: 'datetime',
-                categories: checkins?.map((c: any) => c.date) || []
+                categories: dateCategories
               },
               yaxis: {
                  min: 0,
@@ -255,10 +318,10 @@ export default function ProgressPage() {
               },
             }} series={[{
               name: 'Energia',
-              data: checkins?.map((c: any) => c.energy) || []
+              data: energySeriesData
             }, {
               name: 'Stres',
-              data:checkins?.map((c: any) => c.stress) || []
+              data: stressSeriesData
             }]} type="area" height={350} />}
               </div>
         </CardBody>
@@ -269,7 +332,7 @@ export default function ProgressPage() {
       </CardHeader>
         <CardBody>
            <div id="chart">
-                {checkins && <ReactApexChart className="text-foreground" options={{
+                {dateCategories.length > 0 && <ReactApexChart className="text-foreground" options={{
               chart: {
                 height: 350,
                 type: 'area',
@@ -285,7 +348,7 @@ export default function ProgressPage() {
               },
               xaxis: {
                 type: 'datetime',
-                categories: checkins?.map((c: any) => c.date) || []
+                categories: dateCategories
               },
                yaxis: {
                  min: 0,
@@ -299,9 +362,39 @@ export default function ProgressPage() {
               },
             }} series={[{
               name: 'Wskaźnik nastroju',
-              data: checkins?.map((c: any) => c.moodScore) || []
+              data: moodSeriesData
             }]} type="area" height={350} />}
               </div>
+        </CardBody>
+      </Card>
+      <Card className="p-3">
+        <CardHeader>
+          <h2 className="text-2xl opacity-80">Średnie statystyki</h2>
+        </CardHeader>
+        <CardBody>
+          <div className="flex flex-col gap-3 text-lg opacity-80">
+            <div className="flex justify-between items-center">
+              <div>Średni nastrój</div>
+              <div className="text-right">
+                <div className="font-semibold">{overallAverages.avgMood ?? '-'}</div>
+                <div className="text-sm opacity-60">{overallAverages.moodCount ?? 0} check-inów</div>
+              </div>
+            </div>
+            <div className="flex justify-between items-center">
+              <div>Średnia energia</div>
+              <div className="text-right">
+                <div className="font-semibold">{overallAverages.avgEnergy ?? '-'}</div>
+                <div className="text-sm opacity-60">{overallAverages.energyCount ?? 0} check-inów</div>
+              </div>
+            </div>
+            <div className="flex justify-between items-center">
+              <div>Średni stres</div>
+              <div className="text-right">
+                <div className="font-semibold">{overallAverages.avgStress ?? '-'}</div>
+                <div className="text-sm opacity-60">{overallAverages.stressCount ?? 0} check-inów</div>
+              </div>
+            </div>
+          </div>
         </CardBody>
       </Card>
      

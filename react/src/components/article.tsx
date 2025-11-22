@@ -6,8 +6,8 @@ function Article(props: any){
         <article className="mt-5">
         
         <Link to={props.href}  target="_blank" rel="noopener noreferrer">
-        <p className="text-2xl underline opacity-80">{props.tittle}</p>
-         <p className="opacity-60 my-3 text-lg no-underline w-2/3">{props.summary}</p>
+        <p className="font-light  opacity-100 mb-2  decoration-orange-200 hover:underline hover:bg-[#FFFFCC53] ">{props.tittle}</p>
+         
         </Link>
        
         <Divider />

@@ -1,6 +1,6 @@
 import {Card, CardHeader, CardBody} from "@heroui/card";
 import HeatMap from '@uiw/react-heat-map';
-import { useEffect, useRef } from 'react';
+import { useRef } from 'react';
 import { useSelector } from 'react-redux';
 import { selectAuthUser } from '@/features/auth/authSlice';
 import {Tooltip} from "@heroui/tooltip";
@@ -33,62 +33,12 @@ function buildValueFromCheckins(checkins?: Checkin[]): HeatValue[] {
 }
 
 function MoodChart({ checkins }: Props) {
+  // Resize/observer logic removed — chart will render with default SVG sizing and CSS.
   const value = buildValueFromCheckins(checkins);
   const startDate = value.length ? new Date(value[0].date) : new Date();
   const user = useSelector(selectAuthUser);
   const streak = user?.streak ?? 0;
   const heatmapContainerRef = useRef<HTMLDivElement | null>(null);
-
-  useEffect(() => {
-    const container = heatmapContainerRef.current;
-    if (!container) return;
-
-    const updateViewBox = () => {
-      const svg = container.querySelector('svg');
-      if (!svg) return;
-
-      // Always update viewBox so the SVG scales to container size when resized
-
-      let width = 0;
-      let height = 0;
-      try {
-        const bbox = (svg as SVGSVGElement).getBBox();
-        width = bbox.width;
-        height = bbox.height;
-      } catch (e) {
-        // ignore
-      }
-
-      if ((!width || !height) && (svg as any).clientWidth && (svg as any).clientHeight) {
-        width = (svg as any).clientWidth;
-        height = (svg as any).clientHeight;
-      }
-
-      if ((!width || !height)) {
-        const rect = svg.getBoundingClientRect();
-        width = rect.width;
-        height = rect.height;
-      }
-
-      if (width && height) {
-        svg.setAttribute('viewBox', `0 0 ${Math.max(1, Math.round(width))} ${Math.max(1, Math.round(height))}`);
-      }
-    };
-
-    updateViewBox();
-
-    let observer: any = null;
-    if ((window as any).ResizeObserver) {
-      const RO = (window as any).ResizeObserver;
-      observer = new RO(() => updateViewBox());
-      observer.observe(container);
-    }
-    window.addEventListener('resize', updateViewBox);
-    return () => {
-      window.removeEventListener('resize', updateViewBox);
-      if (observer && typeof observer.disconnect === 'function') observer.disconnect();
-    };
-  }, [value]);
   return (
     <>
      <Card className="p-3">
@@ -101,8 +51,9 @@ function MoodChart({ checkins }: Props) {
           <h2 className="text-2xl opacity-80">Wykres nastroju</h2>
         </CardHeader>
       <CardBody>
-        <div ref={heatmapContainerRef} className="w-full heatmap-container">
+        <div ref={heatmapContainerRef} className="w-full heatmap-container overflow-x-scroll h-50 ">
          <HeatMap
+          className="h-40 w-200 scale-125 p-5 pl-20"
           value={value}
           style={{ color: 'success'  }}
           weekLabels={['', 'Pn', '', 'Śr', '', 'Pt', '']}
@@ -114,20 +65,23 @@ function MoodChart({ checkins }: Props) {
 
       0: "#88888833",
 
-1: "#e3f2ff",
-2: "#cde9ff",
-3: "#b0dcff",
 
-4: "#8ed2f3",
-5: "#6bcbdc",
 
-6: "#4ecfbe",
-7: "#3edb98",
+1:  "#e6d8f8",  // jasny pastel fiolet (lekko nasycony)
+2:  "#d1b6f3",  // bardziej nasycony fiolet
+3:  "#b894ee",  // pełniejszy, ale wciąż pastelowy fiolet
 
-8: "#4fe87a",
-9: "#6ff38c",
+4:  "#a9c7f5",  // pastelowy błękit (średnia saturacja)
+5:  "#7fb1f0",  // wyraźniejszy błękit, ale nie intensywny
 
-10: "#48e064"
+6:  "#75d2db",  // turkus z umiarkowaną saturacją
+7:  "#5acb9c",  // pastelowa zieleń–mięta (żywsza)
+
+8:  "#56bf7e",  // zieleń bardziej nasycona, ale wciąż miękka
+9:  "#c8d968",  // jasna limonka, krok przed żółtym
+
+10: "#f4e676"  
+
       }} rectRender={(props, data) => {
         // ensure tooltip content uses same text but avoid unused var lint
         const titleText = `${data.date} — nastrój: ${data.count && data.count > 10 ? 10 : data.count}`;
@@ -142,19 +96,7 @@ function MoodChart({ checkins }: Props) {
       }}
         />
         </div>
-        <style>{`
-          .heatmap-container svg, .heatmap-container > svg {
-            width: 100% !important;
-            height: 220px !important; /* default height on small screens */
-          }
-          .heatmap-container svg text { font-size: inherit !important; }
-          @media (min-width: 768px) {
-            /* md and up: make chart taller for better readability */
-            .heatmap-container svg, .heatmap-container > svg {
-              height: 220px !important;
-            }
-          }
-        `}</style>
+       
       </CardBody>
     </Card>
     </>
