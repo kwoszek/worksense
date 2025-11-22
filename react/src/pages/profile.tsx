@@ -10,6 +10,9 @@ import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter } from '@herou
 import './profile.css';
 import { useSelector } from 'react-redux';
 import { selectAuthUser } from '@/features/auth/authSlice';
+import Cropper from "react-easy-crop";
+
+
 
 export default function Profile() {
   const user = useSelector(selectAuthUser);
@@ -20,6 +23,9 @@ export default function Profile() {
 
   const [editing, setEditing] = useState(false);
     const [showAllBadges, setShowAllBadges] = useState(false);
+  const [showCropper, setShowCropper] = useState(false);
+  const [selectedImage, setSelectedImage] = useState<string | null>(null);
+  const [croppedAreaPixels, setCroppedAreaPixels] = useState<any>(null);
     const { data: allBadges, isLoading: allBadgesLoading } = useBadgesQuery();
   const [uname, setUname] = useState(user?.username || '');
   const [email, setEmail] = useState(user?.email || '');
@@ -30,6 +36,8 @@ export default function Profile() {
   const [confirmPw, setConfirmPw] = useState('');
   const [pwMsg, setPwMsg] = useState<string | null>(null);
   const [profileMsg, setProfileMsg] = useState<string | null>(null);
+  const [crop, setCrop] = useState({ x: 0, y: 0 })
+  const [zoom, setZoom] = useState(1)
   // Subscribe to /me so invalidation triggers refetch; we can manually force refetch after save.
   const { refetch: meRefetch } = useMeQuery(undefined);
 
@@ -39,10 +47,45 @@ export default function Profile() {
     const reader = new FileReader();
     reader.onload = () => {
       const result = reader.result as string;
-      setAvatarPreview(result);
+      setSelectedImage(result);
+      setShowCropper(true);
     };
     reader.readAsDataURL(file);
   };
+
+  function onCropComplete(_: any, croppedPixels: any) {
+    setCroppedAreaPixels(croppedPixels);
+  }
+
+  async function getCroppedImg(imageSrc: string, pixelCrop: any) {
+    const image = await new Promise<HTMLImageElement>((resolve, reject) => {
+      const img = new Image();
+      img.crossOrigin = 'anonymous';
+      img.src = imageSrc;
+      img.onload = () => resolve(img);
+      img.onerror = (e) => reject(e);
+    });
+
+    const canvas = document.createElement('canvas');
+    canvas.width = pixelCrop.width;
+    canvas.height = pixelCrop.height;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) throw new Error('Canvas not supported');
+
+    ctx.drawImage(
+      image,
+      pixelCrop.x,
+      pixelCrop.y,
+      pixelCrop.width,
+      pixelCrop.height,
+      0,
+      0,
+      pixelCrop.width,
+      pixelCrop.height
+    );
+
+    return canvas.toDataURL('image/png');
+  }
 
   const handleSaveProfile = async () => {
     try {
@@ -127,7 +170,7 @@ export default function Profile() {
                 />
                 {editing && (
                   <div className="mt-2 text-xs" style={{ display: 'none' }}>
-                    <input ref={avatarFileRef} type="file" accept="image/*" onChange={handleAvatarChange} className="text-xs" />
+                    <input ref={avatarFileRef} type="file" accept="image/png, image/jpeg" onChange={handleAvatarChange} className="text-xs" />
                   </div>
                 )}
               </div>
@@ -196,6 +239,57 @@ export default function Profile() {
                     <ModalFooter>
                       <div className="w-full flex justify-end">
                         <Button size="sm" variant="flat" onPress={onClose}>Close</Button>
+                      </div>
+                    </ModalFooter>
+                  </>
+                )}
+              </ModalContent>
+            </Modal>
+
+            <Modal isOpen={showCropper} placement="center" onOpenChange={setShowCropper}>
+              <ModalContent>
+                {(onClose) => (
+                  <>
+                    <ModalHeader>Dostosuj awatar</ModalHeader>
+                    <ModalBody>
+                      {selectedImage ? (
+                        <div style={{ width: '100%', height: 360, position: 'relative' }}>
+                          <Cropper
+                            image={selectedImage}
+                            crop={crop}
+                            zoom={zoom}
+                            aspect={1}
+                            cropShape="round"
+                            onCropChange={setCrop}
+                            onCropComplete={onCropComplete}
+                            onZoomChange={setZoom}
+                          />
+                        </div>
+                      ) : (
+                        <div>Brak wybranego obrazu</div>
+                      )}
+                    </ModalBody>
+                    <ModalFooter>
+                      <div className="w-full flex justify-end gap-2">
+                        <Button size="sm" variant="flat" onPress={() => { setShowCropper(false); setSelectedImage(null);setCrop({ x: 0, y: 0 });
+                            setZoom(1); onClose && onClose(); }}>Anuluj</Button>
+                        <Button size="sm" color="success" onPress={async () => {
+                          if (!selectedImage || !croppedAreaPixels) return;
+                          try {
+                            const croppedDataUrl = await getCroppedImg(selectedImage, croppedAreaPixels);
+                            setAvatarPreview(croppedDataUrl);
+                            setShowCropper(false);
+                            setSelectedImage(null);
+                            setCrop({ x: 0, y: 0 });
+                            setZoom(1);
+                
+                            // clear file input
+                            if (avatarFileRef.current) avatarFileRef.current.value = '';
+                            onClose && onClose();
+                          } catch (e) {
+                            // ignore
+                          }
+                        }}>{'Zapisz'}</Button>
                       </div>
                     </ModalFooter>
                   </>
