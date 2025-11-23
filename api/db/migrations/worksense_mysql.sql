@@ -98,7 +98,9 @@ CREATE TABLE IF NOT EXISTS user_badges (
   level INT NOT NULL DEFAULT 1,
   createdAt DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   updatedAt DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  featured TINYINT(1) NOT NULL DEFAULT 0,
   UNIQUE KEY uniq_user_badge (userId, badgeId),
+  KEY idx_user_badges_featured (userId, featured),
   CONSTRAINT fk_user_badges_user FOREIGN KEY (userId) REFERENCES users(id) ON DELETE CASCADE,
   CONSTRAINT fk_user_badges_badge FOREIGN KEY (badgeId) REFERENCES badges(id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
@@ -168,3 +170,8 @@ CREATE TABLE IF NOT EXISTS password_reset_tokens (
   FOREIGN KEY (userId) REFERENCES users(id) ON DELETE CASCADE
 );
 CREATE INDEX idx_password_reset_tokens_user ON password_reset_tokens(userId);
+
+-- Schema patches for existing deployments
+ALTER TABLE user_badges
+  ADD COLUMN IF NOT EXISTS featured TINYINT(1) NOT NULL DEFAULT 0,
+  ADD INDEX IF NOT EXISTS idx_user_badges_featured (userId, featured);

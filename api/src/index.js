@@ -18,8 +18,11 @@ app.use(cors({
   origin: true, // reflect request origin (configure to your frontend for production)
   credentials: true,
 }));
-// Increase body size limits to allow larger avatar uploads (default 5mb adjustable via BODY_LIMIT env)
-const bodyLimit = process.env.BODY_LIMIT || '5mb';
+// Increase body size limits so oversized avatars reach the compression pipeline before rejection.
+// Default to 40 MB but allow overriding via BODY_LIMIT (string, e.g. "25mb") or BODY_LIMIT_MB numbers.
+const configuredBodyLimitMb = Number(process.env.BODY_LIMIT_MB);
+const bodyLimitMb = Number.isFinite(configuredBodyLimitMb) && configuredBodyLimitMb > 0 ? configuredBodyLimitMb : 100;
+const bodyLimit = process.env.BODY_LIMIT || `${bodyLimitMb}mb`;
 app.use(express.json({ limit: bodyLimit }));
 app.use(express.urlencoded({ extended: true, limit: bodyLimit }));
 app.use(cookieParser());

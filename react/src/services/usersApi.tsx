@@ -8,12 +8,15 @@ export interface AuthUser {
   avatar?: string | null;
   streak?: number;
   advancements?: UserAdvancement[]; // computed backend advancements (badge levels)
+  badges?: UserAdvancement[];
+  featuredBadges?: UserAdvancement[];
 }
 export interface UserAdvancement {
   key: string;
   name: string;
   description?: string;
   level: number;
+  featured?: boolean;
 }
 export interface LoginRequest {
   identifier: string; // email or username
@@ -142,6 +145,10 @@ export const usersApi = createApi({
         } catch {}
       },
     }),
+    updateFeaturedBadges: builder.mutation<{ badges: UserAdvancement[]; featuredBadges: UserAdvancement[] }, { badgeKeys: string[] }>({
+      query: (body) => ({ url: '/me/featured-badges', method: 'PUT', body }),
+      invalidatesTags: ['Me'],
+    }),
     changePassword: builder.mutation<{ ok: boolean }, { oldPassword: string; newPassword: string }>({
       query: (body) => ({ url: '/change-password', method: 'POST', body }),
     }),
@@ -179,4 +186,5 @@ export const {
   useResetPasswordMutation,
   useRefreshMutation,
   useDeleteMeMutation,
+  useUpdateFeaturedBadgesMutation,
 } = usersApi;

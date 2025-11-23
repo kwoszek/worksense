@@ -1,12 +1,13 @@
 import DefaultLayout from "@/layouts/default";
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
+import type { KeyboardEvent } from 'react';
 import { Button, ButtonGroup } from '@heroui/button';
 import { Card, CardHeader, CardBody } from '@heroui/card';
 import { Divider } from '@heroui/divider';
 import { Avatar } from '@heroui/avatar';
 import { getStreakColor } from '@/utils/streak';
 import { Input } from '@heroui/input';
-import { useMyBadgesQuery, useBadgesQuery, useLogoutMutation, useUpdateProfileMutation, useChangePasswordMutation, useMeQuery, useDeleteMeMutation } from '@/services/usersApi';
+import { useMyBadgesQuery, useBadgesQuery, useLogoutMutation, useUpdateProfileMutation, useChangePasswordMutation, useMeQuery, useDeleteMeMutation, useUpdateFeaturedBadgesMutation } from '@/services/usersApi';
 import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter } from '@heroui/modal';
 import { useGetPostByUserIdQuery, useDeletePostMutation } from '@/services/forumApi';
 import './profile.css';
@@ -21,9 +22,10 @@ import Cropper from "react-easy-crop";
 export default function Profile() {
   const user = useSelector(selectAuthUser);
   const [logout] = useLogoutMutation();
-  const { data: badgeList, isLoading: badgesLoading } = useMyBadgesQuery();
+  const { data: badgeList, isLoading: badgesLoading, refetch: refetchBadges } = useMyBadgesQuery();
   const [updateProfile, { isLoading: updating }] = useUpdateProfileMutation();
   const [changePassword, { isLoading: changingPw }] = useChangePasswordMutation();
+  const [updateFeaturedBadges, { isLoading: savingFeatured }] = useUpdateFeaturedBadgesMutation();
 
   const [editing, setEditing] = useState(false);
     const [showAllBadges, setShowAllBadges] = useState(false);
@@ -40,6 +42,9 @@ export default function Profile() {
   const [confirmPw, setConfirmPw] = useState('');
   const [pwMsg, setPwMsg] = useState<string | null>(null);
   const [profileMsg, setProfileMsg] = useState<string | null>(null);
+  const [featureMsg, setFeatureMsg] = useState<string | null>(null);
+  const [featuring, setFeaturing] = useState(false);
+  const [featuredSelection, setFeaturedSelection] = useState<string[]>([]);
   const [activeTab, setActiveTab] = useState<'details' | 'posts'>('details');
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [deleteConfirmText, setDeleteConfirmText] = useState('');
@@ -140,6 +145,63 @@ export default function Profile() {
     }
   };
 
+  useEffect(() => {
+    if (!featuring && badgeList) {
+      const current = badgeList.filter((b: any) => b.featured).map((b: any) => b.key);
+      setFeaturedSelection(current);
+    }
+  }, [badgeList, featuring]);
+
+  const handleToggleFeaturedBadge = (key: string) => {
+    if (!featuring) return;
+    setFeatureMsg(null);
+    setFeaturedSelection((prev) => {
+      if (prev.includes(key)) {
+        return prev.filter(item => item !== key);
+      }
+      if (prev.length >= 3) {
+        setFeatureMsg('Możesz wyróżnić maksymalnie 3 odznaki');
+        return prev;
+      }
+      return [...prev, key];
+    });
+  };
+
+  const handleBadgeKeyDown = (event: KeyboardEvent<HTMLSpanElement>, key: string) => {
+    if (!featuring) return;
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault();
+      handleToggleFeaturedBadge(key);
+    }
+  };
+
+  const startFeaturing = () => {
+    if (badgesLoading || !badgeList?.length) return;
+    setFeatureMsg(null);
+    setFeaturing(true);
+    setFeaturedSelection(badgeList.filter((b: any) => b.featured).map((b: any) => b.key));
+  };
+
+  const cancelFeaturing = () => {
+    setFeatureMsg(null);
+    setFeaturing(false);
+    if (badgeList) {
+      setFeaturedSelection(badgeList.filter((b: any) => b.featured).map((b: any) => b.key));
+    }
+  };
+
+  const handleSaveFeatured = async () => {
+    setFeatureMsg(null);
+    try {
+      await updateFeaturedBadges({ badgeKeys: featuredSelection }).unwrap();
+      setFeatureMsg('Wyróżnione odznaki zapisane');
+      setFeaturing(false);
+      await Promise.all([refetchBadges(), meRefetch()]);
+    } catch (e: any) {
+      setFeatureMsg(e?.data?.error || 'Nie udało się zapisać wyróżnień');
+    }
+  };
+
   const badgeClass = (key: string) => {
     switch (key) {
       case 'streak':
@@ -181,8 +243,8 @@ export default function Profile() {
                 </ButtonGroup>
               </div>
             )}
-            {!editing && <><Button size="sm" color="danger" variant="flat" onPress={() => logout().catch(() => {})}>Wyloguj</Button>
-            <Button size="sm" color="danger" variant="flat" onPress={() => setShowDeleteConfirm(true)}>Usuń konto</Button></>}
+            <Button size="sm" color="danger" variant="flat" onPress={() => logout().catch(() => {})}>Wyloguj</Button>
+            <Button size="sm" color="danger" variant="flat" onPress={() => setShowDeleteConfirm(true)}>Usuń konto</Button>
           </div>
         </div>
 
@@ -220,20 +282,54 @@ export default function Profile() {
           <CardBody>
             <div className="mb-6">
               {profileMsg && <div className="text-sm opacity-70 mb-3">{profileMsg}</div>}
-              <div className="flex items-center justify-between mb-5">
+              <div className="flex items-center justify-between mb-3">
                 <h3 className="text-lg opacity-70 m-0">Odznaki</h3>
-                <div>
+                <div className="flex items-center gap-2">
+                  {!featuring && (
+                    <Button size="sm" variant="flat" onPress={startFeaturing} isDisabled={badgesLoading || !badgeList?.length}>Wyróżnij</Button>
+                  )}
+                  {featuring && (
+                    <ButtonGroup>
+                      <Button size="sm" variant="flat" color="warning" onPress={cancelFeaturing}>Anuluj</Button>
+                      <Button size="sm" variant="flat" color="success" isDisabled={savingFeatured} onPress={handleSaveFeatured}>{savingFeatured ? 'Zapisywanie...' : 'Zapisz'}</Button>
+                    </ButtonGroup>
+                  )}
                   <Button size="sm" variant="flat" onPress={() => setShowAllBadges(true)}>Pokaż wszystkie odznaki</Button>
                 </div>
               </div>
+              {featureMsg && (
+                <div className={`text-xs mb-2 ${featureMsg.includes('Zapisano') || featureMsg.includes('zapisane') ? 'text-green-500' : 'text-red-500'}`}>{featureMsg}</div>
+              )}
+              {featuring && (
+                <div className="text-xs opacity-70 mb-2">Wybierz maksymalnie 3 odznaki ({featuredSelection.length}/3)</div>
+              )}
               <div className="flex flex-wrap gap-2">
                 {badgesLoading && <div className="text-sm opacity-60">Ładowanie...</div>}
                 {!badgesLoading && (!badgeList || !badgeList.length) && <div className="text-sm opacity-60">Brak odznak</div>}
                 {!badgesLoading && badgeList && badgeList.map((b: any) => {
                   const cls = badgeClass(b.key);
                   const style = cls ? undefined : badgeGradientStyle(b.key);
+                  const isSelected = featuredSelection.includes(b.key);
+                  const isActive = !featuring && b.featured;
+                  const pillClasses = [
+                    'badge-pill',
+                    cls || '',
+                    'border-1.5',
+                    'border-background',
+                    featuring ? 'border-default-500 cursor-pointer select-none' : '',
+                    featuring && isSelected ? 'border-success-500 ring-1 ring-success-400 shadow-sm' : '',
+                    !featuring && isActive ? 'border-success-500 shadow-sm' : '',
+                  ].filter(Boolean).join(' ');
                   return (
-                    <span key={b.id || b.key} className={`badge-pill ${cls || ''}`} style={style}>
+                    <span
+                      key={b.id || b.key}
+                      className={pillClasses}
+                      style={style}
+                      role={featuring ? 'button' : undefined}
+                      tabIndex={featuring ? 0 : undefined}
+                      onClick={featuring ? () => handleToggleFeaturedBadge(b.key) : undefined}
+                      onKeyDown={featuring ? (event) => handleBadgeKeyDown(event, b.key) : undefined}
+                    >
                       {b.name}{b.level && b.level > 1 ? ` • poziom ${b.level}` : ''}
                     </span>
                   );
@@ -260,7 +356,7 @@ export default function Profile() {
                           <div className="flex items-start justify-between">
                             <div>
                               <div className="font-medium">{p.title}</div>
-                              <div className="text-sm opacity-70">{p.username} • {p.dateposted}</div>
+                              <div className="text-sm opacity-70">{p.username} • {p.dateposted.slice(0,16).replace('T', ' ')}</div>
                               
                             </div>
                               <div className="text-sm opacity-70">❤ {p.likes} • {p.comments ? p.comments.length : 0} kom.</div>

@@ -21,6 +21,39 @@ try { sharp = require('sharp'); } catch { sharp = null; }
 const https = require('https');
 const querystring = require('querystring');
 
+const mysqlLimitFromEnv = Number(process.env.MYSQL_MAX_PACKET_BYTES);
+const MYSQL_MAX_PACKET_BYTES = Number.isFinite(mysqlLimitFromEnv) && mysqlLimitFromEnv > 0
+  ? mysqlLimitFromEnv
+  : 4 * 1024 * 1024;
+const mysqlSafetyFromEnv = Number(process.env.MYSQL_PACKET_SAFETY_MARGIN);
+const MYSQL_PACKET_SAFETY_MARGIN = Number.isFinite(mysqlSafetyFromEnv) && mysqlSafetyFromEnv >= 0
+  ? mysqlSafetyFromEnv
+  : 64 * 1024;
+const MAX_AVATAR_DB_BYTES = Math.max(64 * 1024, MYSQL_MAX_PACKET_BYTES - MYSQL_PACKET_SAFETY_MARGIN);
+const uploadLimitFromEnv = Number(process.env.AVATAR_UPLOAD_MAX_BYTES);
+const AVATAR_UPLOAD_MAX_BYTES = Number.isFinite(uploadLimitFromEnv) && uploadLimitFromEnv > 0
+  ? uploadLimitFromEnv
+  : 40 * 1024 * 1024;
+const avatarDimensionFromEnv = Number(process.env.AVATAR_MAX_DIMENSION);
+const AVATAR_MAX_DIMENSION = Number.isFinite(avatarDimensionFromEnv) && avatarDimensionFromEnv > 0
+  ? avatarDimensionFromEnv
+  : 512;
+
+function formatBytes(size) {
+  if (!Number.isFinite(size) || size <= 0) return '0 B';
+  const units = ['B', 'KB', 'MB', 'GB'];
+  const idx = Math.min(units.length - 1, Math.floor(Math.log(size) / Math.log(1024)));
+  return `${(size / Math.pow(1024, idx)).toFixed(idx === 0 ? 0 : 1)} ${units[idx]}`;
+}
+
+function enforceAvatarDbLimit(buffer) {
+  if (buffer.length > MAX_AVATAR_DB_BYTES) {
+    const err = new Error(`Avatar too large after compression (> ${formatBytes(MAX_AVATAR_DB_BYTES)} allowed, MySQL max_allowed_packet ${formatBytes(MYSQL_MAX_PACKET_BYTES)})`);
+    err.statusCode = 413;
+    throw err;
+  }
+}
+
 function verifyRecaptcha(token, remoteIp) {
   return new Promise((resolve, reject) => {
     if (!process.env.RECAPTCHA_SECRET) return resolve(false);
@@ -105,17 +138,18 @@ async function upsertStreakBadge(userId, streak) {
   }
 }
 async function getUserBadges(userId) {
-  const q = `SELECT b.\`key\`, b.name, b.description, ub.level
+  const q = `SELECT b.\`key\` AS badgeKey, b.name, b.description, ub.level, ub.featured
              FROM user_badges ub
              JOIN badges b ON b.id = ub.badgeId
              WHERE ub.userId = ?
              ORDER BY b.id`;
   const r = await db.query(q, [userId]);
   return r.rows.map(row => ({
-    key: row.key,
+    key: row.badgeKey,
     name: row.name,
     description: row.description,
     level: row.level,
+    featured: !!row.featured,
   }));
 }
 
@@ -217,6 +251,8 @@ router.post(
         email: row.email,
         avatar: row.avatar ? Buffer.from(row.avatar).toString('base64') : null,
         streak: row.streak ?? 0,
+        badges: [],
+        featuredBadges: [],
       };
       const accessToken = signAccessToken(user);
       const refreshToken = signRefreshToken(user);
@@ -251,12 +287,15 @@ router.post(
       const userRow = r.rows[0];
       if (!comparePassword(password, userRow.password)) return res.status(401).json({ error: 'Niepoprawna nazwa użytkownika lub hasło' });
 
+      const badges = await getUserBadges(userRow.id);
       const user = {
         id: userRow.id,
         username: userRow.username,
         email: userRow.email,
         avatar: userRow.avatar ? Buffer.from(userRow.avatar).toString('base64') : null,
         streak: userRow.streak ?? 0,
+        badges,
+        featuredBadges: badges.filter(b => b.featured),
       };
       const accessToken = signAccessToken(user);
       const refreshToken = signRefreshToken(user);
@@ -287,7 +326,54 @@ router.get('/me', authMiddleware, async (req, res, next) => {
     try { await checkAndAwardForAccountAge(user.id); } catch (e) { /* ignore badge errors */ }
     const badges = await getUserBadges(user.id);
     user.badges = badges;
-    res.json(user);
+      user.featuredBadges = badges.filter(b => b.featured);
+      res.json(user);
+  } catch (err) { next(err); }
+});
+
+      router.put('/me/featured-badges', authMiddleware, async (req, res, next) => {
+  try {
+    const userId = req.user.id;
+    const incoming = req.body?.badgeKeys ?? req.body?.badges ?? [];
+    if (!Array.isArray(incoming)) return res.status(400).json({ error: 'badgeKeys must be an array' });
+
+    const normalized = [...new Set(
+      incoming
+        .filter(key => typeof key === 'string')
+        .map(key => key.trim())
+        .filter(Boolean)
+    )];
+
+    if (normalized.length > 3) {
+      return res.status(400).json({ error: 'Możesz wyróżnić maksymalnie 3 odznaki' });
+    }
+
+    if (normalized.length) {
+      const placeholders = normalized.map(() => '?').join(',');
+      const ownedQ = `SELECT b.\`key\` AS badgeKey
+                      FROM user_badges ub
+                      JOIN badges b ON b.id = ub.badgeId
+                      WHERE ub.userId = ? AND b.\`key\` IN (${placeholders})`;
+      const ownedRes = await db.query(ownedQ, [userId, ...normalized]);
+      const ownedKeys = new Set(ownedRes.rows.map(r => r.badgeKey));
+      const missing = normalized.filter(key => !ownedKeys.has(key));
+      if (missing.length) {
+        return res.status(400).json({ error: 'Nie posiadasz jednej z wybranych odznak' });
+      }
+    }
+
+    await db.query('UPDATE user_badges SET featured = 0 WHERE userId = ?', [userId]);
+    if (normalized.length) {
+      const placeholders = normalized.map(() => '?').join(',');
+      const updateQ = `UPDATE user_badges ub
+                       JOIN badges b ON b.id = ub.badgeId
+                       SET ub.featured = 1
+                       WHERE ub.userId = ? AND b.\`key\` IN (${placeholders})`;
+      await db.query(updateQ, [userId, ...normalized]);
+    }
+
+    const badges = await getUserBadges(userId);
+    res.json({ badges, featuredBadges: badges.filter(b => b.featured) });
   } catch (err) { next(err); }
 });
 
@@ -329,18 +415,28 @@ router.delete('/me', authMiddleware, async (req, res, next) => {
         const cleaned = avatarBase64.replace(/^data:image\/[^;]+;base64,/, '');
         let raw;
         try { raw = Buffer.from(cleaned, 'base64'); } catch { return res.status(400).json({ error: 'Invalid avatar image data' }); }
-        if (raw.length > 5 * 1024 * 1024) return res.status(413).json({ error: 'Avatar too large (>5MB)' });
+        if (raw.length > AVATAR_UPLOAD_MAX_BYTES) {
+          return res.status(413).json({ error: `Avatar too large (> ${formatBytes(AVATAR_UPLOAD_MAX_BYTES)})` });
+        }
         if (sharp) {
           try {
-            const img = sharp(raw).resize({ width: 256, height: 256, fit: 'cover' }).png({ quality: 80, compressionLevel: 8 });
+            const img = sharp(raw).resize({ width: AVATAR_MAX_DIMENSION, height: AVATAR_MAX_DIMENSION, fit: 'cover' }).png({ quality: 80, compressionLevel: 8 });
             const compressed = await img.toBuffer();
-            if (compressed.length > 512 * 1024) return res.status(413).json({ error: 'Compressed avatar still too large (>512KB)' });
+            enforceAvatarDbLimit(compressed);
             avatarBuffer = compressed;
           } catch (e) {
+            if (e?.statusCode === 413) {
+              return res.status(413).json({ error: e.message });
+            }
             return res.status(400).json({ error: 'Przetwarzanie awatara nie powiodło się' });
           }
         } else {
-            avatarBuffer = raw;
+          try {
+            enforceAvatarDbLimit(raw);
+          } catch (limitErr) {
+            return res.status(413).json({ error: limitErr.message });
+          }
+          avatarBuffer = raw;
         }
       }
 
@@ -402,14 +498,54 @@ router.delete('/me', authMiddleware, async (req, res, next) => {
 // Get current user's badges with metadata
 router.get('/me/badges', authMiddleware, async (req, res, next) => {
   try {
-    const q = `
-      SELECT ub.badgeId AS id, b.key, b.name, b.description, ub.level, ub.createdAt, ub.updatedAt
-      FROM user_badges ub
-      JOIN badges b ON b.id = ub.badgeId
-      WHERE ub.userId = ?
-      ORDER BY ub.level DESC, ub.updatedAt DESC`;
-    const r = await db.query(q, [req.user.id]);
-    res.json(r.rows);
+    const badges = await getUserBadges(req.user.id);
+    res.json(badges);
+  } catch (err) { next(err); }
+});
+
+router.put('/me/featured-badges', authMiddleware, async (req, res, next) => {
+  try {
+    const userId = req.user.id;
+    const incoming = req.body?.badgeKeys ?? req.body?.badges ?? [];
+    if (!Array.isArray(incoming)) return res.status(400).json({ error: 'badgeKeys must be an array' });
+
+    const normalized = [...new Set(
+      incoming
+        .filter(key => typeof key === 'string')
+        .map(key => key.trim())
+        .filter(Boolean)
+    )];
+
+    if (normalized.length > 3) {
+      return res.status(400).json({ error: 'Możesz wyróżnić maksymalnie 3 odznaki' });
+    }
+
+    if (normalized.length) {
+      const placeholders = normalized.map(() => '?').join(',');
+      const ownedQ = `SELECT b.\`key\` AS badgeKey
+                      FROM user_badges ub
+                      JOIN badges b ON b.id = ub.badgeId
+                      WHERE ub.userId = ? AND b.\`key\` IN (${placeholders})`;
+      const ownedRes = await db.query(ownedQ, [userId, ...normalized]);
+      const ownedKeys = new Set(ownedRes.rows.map(r => r.badgeKey));
+      const missing = normalized.filter(key => !ownedKeys.has(key));
+      if (missing.length) {
+        return res.status(400).json({ error: 'Nie posiadasz jednej z wybranych odznak' });
+      }
+    }
+
+    await db.query('UPDATE user_badges SET featured = 0 WHERE userId = ?', [userId]);
+    if (normalized.length) {
+      const placeholders = normalized.map(() => '?').join(',');
+      const updateQ = `UPDATE user_badges ub
+                       JOIN badges b ON b.id = ub.badgeId
+                       SET ub.featured = 1
+                       WHERE ub.userId = ? AND b.\`key\` IN (${placeholders})`;
+      await db.query(updateQ, [userId, ...normalized]);
+    }
+
+    const badges = await getUserBadges(userId);
+    res.json({ badges, featuredBadges: badges.filter(b => b.featured) });
   } catch (err) { next(err); }
 });
 
@@ -442,6 +578,9 @@ router.post('/refresh', async (req, res, next) => {
       avatar: row.avatar ? Buffer.from(row.avatar).toString('base64') : null,
       streak: row.streak ?? 0,
     };
+    const badges = await getUserBadges(user.id);
+    user.badges = badges;
+    user.featuredBadges = badges.filter(b => b.featured);
     const accessToken = signAccessToken(user);
 
     const newRt = signRefreshToken(user);

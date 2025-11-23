@@ -7,6 +7,33 @@ const router = Router();
 
 const { checkAndAwardForCheckin, checkAndAwardForPost, checkAndAwardForComment, checkAndAwardForBestLink, checkAndAwardForBestComment } = require('../services/badges');
 
+async function getFeaturedBadgesByUserIds(userIds = []) {
+  const ids = [...new Set(userIds.filter(Boolean))];
+  if (!ids.length) return new Map();
+  const placeholders = ids.map(() => '?').join(',');
+  const q = `SELECT ub.userId,
+                   b.\`key\` AS badgeKey,
+                   b.name,
+                   b.description,
+                   ub.level
+            FROM user_badges ub
+            JOIN badges b ON b.id = ub.badgeId
+            WHERE ub.featured = 1 AND ub.userId IN (${placeholders})
+            ORDER BY ub.updatedAt DESC, ub.id ASC`;
+  const res = await db.query(q, ids);
+  const map = new Map();
+  for (const row of res.rows) {
+    if (!map.has(row.userId)) map.set(row.userId, []);
+    map.get(row.userId).push({
+      key: row.badgeKey,
+      name: row.name,
+      description: row.description,
+      level: row.level,
+    });
+  }
+  return map;
+}
+
 // Compute streak: consecutive days ending at last checkin; only reset if a full day missed
 async function computeAndUpdateStreak(userId) {
   if (!userId) return 0;
@@ -134,7 +161,13 @@ router.get('/posts', optionalAuth, async (req, res, next) => {
       }
     }
 
-    // 5. Attach comments to posts
+    // 5. Fetch featured badges for all authors in this result set
+    const featuredMap = await getFeaturedBadgesByUserIds([
+      ...posts.map(p => p.userid),
+      ...comments.map(c => c.userid),
+    ]);
+
+    // 6. Attach comments to posts
     const commentsByPost = new Map();
     for (const c of comments) {
       if (!commentsByPost.has(c.postid)) commentsByPost.set(c.postid, []);
@@ -149,6 +182,7 @@ router.get('/posts', optionalAuth, async (req, res, next) => {
         liked: userId ? likedCommentIds.has(c.id) : false,
         username: c.username,
         avatar: avatarB64,
+        featuredBadges: featuredMap.get(c.userid) || [],
       });
     }
 
@@ -164,6 +198,7 @@ router.get('/posts', optionalAuth, async (req, res, next) => {
         liked: userId ? likedPostIds.has(p.id) : false,
         username: p.username,
         avatar: avatarB64,
+        featuredBadges: featuredMap.get(p.userid) || [],
         comments: commentsByPost.get(p.id) || [],
       };
     });
@@ -190,6 +225,10 @@ router.get('/posts/:id', optionalAuth, async (req, res, next) => {
         const commentsRes = await db.query(commentsQ, [userId, userId, postId]);
 
         const postRow = postRes.rows[0];
+        const featuredMap = await getFeaturedBadgesByUserIds([
+          postRow.userid,
+          ...commentsRes.rows.map(r => r.userid),
+        ]);
         const postOut = {
           id: postRow.id,
           title: postRow.title,
@@ -200,6 +239,7 @@ router.get('/posts/:id', optionalAuth, async (req, res, next) => {
           liked: !!postRow.liked,
           username: postRow.username,
           avatar: postRow.avatar ? Buffer.from(postRow.avatar).toString('base64') : null,
+          featuredBadges: featuredMap.get(postRow.userid) || [],
         };
         const commentsOut = commentsRes.rows.map(r => ({
           id: r.id,
@@ -210,6 +250,7 @@ router.get('/posts/:id', optionalAuth, async (req, res, next) => {
           liked: !!r.liked,
           username: r.username,
           avatar: r.avatar ? Buffer.from(r.avatar).toString('base64') : null,
+          featuredBadges: featuredMap.get(r.userid) || [],
         }));
 
         res.json({ post: postOut, comments: commentsOut });
@@ -306,7 +347,13 @@ router.get('/posts/user/:id', optionalAuth, async (req, res, next) => {
       }
     }
 
-    // 5. Attach comments to posts
+    // 5. Fetch featured badges for every author in this dataset
+    const featuredMap = await getFeaturedBadgesByUserIds([
+      ...posts.map(p => p.userid),
+      ...comments.map(c => c.userid),
+    ]);
+
+    // 6. Attach comments to posts
     const commentsByPost = new Map();
     for (const c of comments) {
       if (!commentsByPost.has(c.postid)) commentsByPost.set(c.postid, []);
@@ -321,6 +368,7 @@ router.get('/posts/user/:id', optionalAuth, async (req, res, next) => {
         liked: currentUserId ? likedCommentIds.has(c.id) : false,
         username: c.username,
         avatar: avatarB64,
+        featuredBadges: featuredMap.get(c.userid) || [],
       });
     }
 
@@ -336,6 +384,7 @@ router.get('/posts/user/:id', optionalAuth, async (req, res, next) => {
         liked: currentUserId ? likedPostIds.has(p.id) : false,
         username: p.username,
         avatar: avatarB64,
+        featuredBadges: featuredMap.get(p.userid) || [],
         comments: commentsByPost.get(p.id) || [],
       };
     });
@@ -363,8 +412,14 @@ router.post('/posts/:id/comments', async (req, res, next) => {
         const datePosted = new Date().toISOString();
         const ins = await db.query('INSERT INTO comments(userId, postId, content, datePosted, likes) VALUES(?,?,?,?,?)',[userId, postId, content, datePosted, 0]);
         const sel = await db.query('SELECT id, userId AS userid, postId AS postid, content, datePosted AS dateposted FROM comments WHERE id = ?', [ins.insertId]);
+        const featuredMap = await getFeaturedBadgesByUserIds([userId]);
         try { await checkAndAwardForComment(userId); } catch (e) { /* ignore badge errors */ }
-        res.status(201).json(sel.rows[0]);
+        res.status(201).json({
+          ...sel.rows[0],
+          likes: 0,
+          liked: false,
+          featuredBadges: featuredMap.get(userId) || [],
+        });
     } catch (err) { next(err); }
 });
 
@@ -398,6 +453,7 @@ router.get('/posts/:id/comments', optionalAuth, async (req, res, next) => {
       db.query(listQ, [userId, userId, postId, limit, offset]),
       db.query(countQ, [postId])
     ]);
+    const featuredMap = await getFeaturedBadgesByUserIds(listResult.rows.map(r => r.userid));
     const comments = listResult.rows.map(r => ({
       id: r.id,
       userid: r.userid,
@@ -408,6 +464,7 @@ router.get('/posts/:id/comments', optionalAuth, async (req, res, next) => {
       liked: !!r.liked,
       username: r.username,
       avatar: r.avatar ? Buffer.from(r.avatar).toString('base64') : null,
+      featuredBadges: featuredMap.get(r.userid) || [],
     }));
     res.json({ comments, total: countResult.rows[0].total });
   } catch (err) { next(err); }

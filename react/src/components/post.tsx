@@ -4,12 +4,14 @@ import {Button} from "@heroui/button";
 import {Form} from "@heroui/form";
 import {Textarea} from "@heroui/input";
 import Comment from "@/components/comment";
+import FeaturedBadgesRow from '@/components/FeaturedBadgesRow';
 import { Post as Posttype, Comment as CommentType } from "../services/forumApi"
 import { useGetCommentsQuery, useLazyGetCommentsQuery, useAddCommentMutation, useLikePostMutation, useUnlikePostMutation } from "@/services/forumApi";
 import { useSelector } from 'react-redux';
 import { selectAuthUser } from '@/features/auth/authSlice';
 import { useState, useEffect } from "react";
 import { Divider } from "@heroui/divider";
+import "./post.css";
 
 function Post(data: Posttype) {
     // Chunked comments: initial fetch (offset 0 limit 2); subsequent chunks offset=loaded length limit=10
@@ -42,6 +44,7 @@ function Post(data: Posttype) {
                     avatar: user.avatar || undefined,
                     likes: newComment.likes || 0,
                     liked: false,
+                    featuredBadges: user.featuredBadges || [],
                 };
                 // Append new comment locally without refetch jitter
                 setLoadedComments(prev => [...prev, enrichedComment]);
@@ -91,7 +94,11 @@ function Post(data: Posttype) {
     return(
         <div className="m-5 mt-3">
             <Divider className="mb-6"/>
-             <User avatarProps={{ src: data?.avatar ? `data:image/png;base64,${data.avatar}` : undefined, name: data.username, style: { boxSizing: 'content-box', padding: 2, borderRadius: 9999, border: `3px solid ${getStreakColor(data.streak ?? 0)}` } }} name={data.username}/>
+                         <div>
+                             <User avatarProps={{ src: data?.avatar ? `data:image/png;base64,${data.avatar}` : undefined, name: data.username, style: { boxSizing: 'content-box', padding: 2, borderRadius: 9999, border: `3px solid ${getStreakColor(data.streak ?? 0)}` } }} name={data.username}/>
+                             <FeaturedBadgesRow badges={data.featuredBadges} className="mt-1 mb-1" />
+                         </div>
+             
             <p className="">{data.content}</p>
             <div className="flex justify-end mt-2">
             <div className="flex items-center justify-end gap-2">

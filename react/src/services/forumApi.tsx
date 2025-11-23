@@ -1,6 +1,13 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 
 // Types
+export interface FeaturedBadgeSummary {
+	key: string;
+	name: string;
+	description?: string;
+	level?: number;
+}
+
 export interface Post {
 	id: number;
 	userid: number;
@@ -11,6 +18,8 @@ export interface Post {
 	liked?: boolean;
 	username?: string;
 	avatar?: string;
+	streak?: number;
+	featuredBadges?: FeaturedBadgeSummary[];
 }
 
 export interface Comment {
@@ -23,6 +32,8 @@ export interface Comment {
 	liked?: boolean;
 	username?: string;
 	avatar?: string;
+	streak?: number;
+	featuredBadges?: FeaturedBadgeSummary[];
 }
 
 export interface CommentsResponse {
