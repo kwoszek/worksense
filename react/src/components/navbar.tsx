@@ -3,6 +3,7 @@ import { ThemeSwitch } from "@/components/theme-switch";
 import { Tabs, Tab } from "@heroui/tabs";
 import { useLocation, useNavigate } from "react-router-dom";
 import { Avatar } from "@heroui/avatar";
+import { getStreakColor } from '@/utils/streak';
 import { useSelector } from "react-redux";
 import { selectAuthUser } from '@/features/auth/authSlice';
 import { useLogoutMutation } from '@/services/usersApi';
@@ -40,7 +41,9 @@ export const Navbar = () => {
           {/* auth / avatar */}
           {user ? (
             <div className="hidden sm:flex items-center gap-3">
-              <Avatar isBordered name={user.username} src={user?.avatar ? `data:image/png;base64,${user.avatar}` : undefined} onClick={() => nav("/profile")} />
+              <div style={{ borderRadius: 9999, padding: 2, display: 'inline-block', border: `3px solid ${getStreakColor(user?.streak)}` }}>
+                <Avatar isBordered name={user.username} src={user?.avatar ? `data:image/png;base64,${user.avatar}` : undefined} onClick={() => nav("/profile")} />
+              </div>
             </div>
           ) : (
             <div className="hidden sm:block">

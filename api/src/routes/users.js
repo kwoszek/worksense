@@ -139,19 +139,7 @@ router.post(
       const errors = validationResult(req);
       if (!errors.isEmpty()) return res.status(400).json({ errors: errors.array() });
 
-      const { username, email, password, captchaToken } = req.body;
-
-      
-      const params = new URLSearchParams();
-      params.append('secret', process.env.RECAPTCHA_SECRET);
-      params.append('response', captchaToken);
-      params.append('remoteip', req.ip);
-      const verifyRes = await fetch('https://www.google.com/recaptcha/api/siteverify', {
-        method: 'POST',
-        body: params
-      });
-      const verifyData = await verifyRes.json();
-      if (!verifyData.success) return res.status(400).json({ error: 'Captcha niepoprawna' });
+      const { username, email, password } = req.body;
 
 
       const dup = await db.query(

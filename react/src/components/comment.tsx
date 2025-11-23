@@ -1,4 +1,5 @@
 import {User} from "@heroui/user";
+import { getStreakColor } from '@/utils/streak';
 import {Button} from "@heroui/button";
 import {Comment as CommentType, useLikeCommentMutation, useUnlikeCommentMutation} from "../services/forumApi";
 import { useState } from 'react';
@@ -28,7 +29,7 @@ function Comment(data: CommentType){
 
     return(
         <div className="m-5 mb-0">
-            <User avatarProps={{ src: data?.avatar ? `data:image/png;base64,${data.avatar}` : undefined, name: data.username}} name={data.username}/>
+            <User avatarProps={{ src: data?.avatar ? `data:image/png;base64,${data.avatar}` : undefined, name: data.username, style: { boxSizing: 'content-box', padding: 2, borderRadius: 9999, border: `3px solid ${getStreakColor(data.streak ?? 0)}` } }} name={data.username}/>
             <p className="">{data.content}</p>
             <div className="flex items-center justify-end gap-2 mt-2">
                 <Button

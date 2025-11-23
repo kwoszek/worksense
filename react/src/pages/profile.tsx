@@ -4,6 +4,7 @@ import { Button, ButtonGroup } from '@heroui/button';
 import { Card, CardHeader, CardBody } from '@heroui/card';
 import { Divider } from '@heroui/divider';
 import { Avatar } from '@heroui/avatar';
+import { getStreakColor } from '@/utils/streak';
 import { Input } from '@heroui/input';
 import { useMyBadgesQuery, useBadgesQuery, useLogoutMutation, useUpdateProfileMutation, useChangePasswordMutation, useMeQuery, useDeleteMeMutation } from '@/services/usersApi';
 import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter } from '@heroui/modal';
@@ -179,13 +180,14 @@ export default function Profile() {
             <div className="flex items-center gap-4 w-full sm:flex-row flex-col">
               <div className="flex items-center gap-4 w-full">
               <div className="flex flex-col items-center">
-                
-                <Avatar
-                  src={avatarPreview || undefined}
-                  name={user?.username || 'U'}
-                  className= {!editing ? "w-20 h-20 text-xl" : "w-20 h-20 text-xl border-medium shadow-xs" }
-                  onClick={editing ?() => avatarFileRef.current?.click() : undefined}
-                />
+                <div style={{ borderRadius: 9999, padding: 3, display: 'inline-block', border: `3px solid ${getStreakColor(user?.streak)}` }}>
+                  <Avatar
+                    src={avatarPreview || undefined}
+                    name={user?.username || 'U'}
+                    className= {!editing ? "w-20 h-20 text-xl" : "w-20 h-20 text-xl border-medium shadow-xs" }
+                    onClick={editing ?() => avatarFileRef.current?.click() : undefined}
+                  />
+                </div>
                 {editing && (
                   <div className="mt-2 text-xs" style={{ display: 'none' }}>
                     <input ref={avatarFileRef} type="file" accept="image/png, image/jpeg" onChange={handleAvatarChange} className="text-xs" />
