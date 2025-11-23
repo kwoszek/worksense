@@ -62,7 +62,7 @@ async function checkAndAwardForCheckin(userId) {
 
   await db.query('UPDATE users SET streak = ? WHERE id = ?', [streak, userId]);
 
-  const badge = await ensureBadge('streak', 'Streak', 'Awarded for maintaining an activity streak.', 6);
+  const badge = await ensureBadge('streak', 'Seria', 'Przyznawana za utrzymanie serii aktywności. Poziomy przy 7, 14, 30, 90, 180 i 365 dniach.', 6);
   const level = streakToLevel(streak);
   if (level > 0) await upsertUserBadge(userId, badge.id, level);
 }
@@ -70,7 +70,7 @@ async function checkAndAwardForCheckin(userId) {
 async function checkAndAwardForPost(userId) {
   const r = await db.query('SELECT COUNT(*) AS cnt FROM posts WHERE userId = ?', [userId]);
   const cnt = (r.rows[0].cnt || 0);
-  const badge = await ensureBadge('posts', 'Contributor', 'Created posts in the forum', 1);
+  const badge = await ensureBadge('posts', 'Współtwórca', 'Utworzył wpis na forum (przyznawana za pierwszy post).', 1);
   // Award contributor at first post
   if (cnt >= 1) await upsertUserBadge(userId, badge.id, 1);
 }
@@ -78,8 +78,94 @@ async function checkAndAwardForPost(userId) {
 async function checkAndAwardForComment(userId) {
   const r = await db.query('SELECT COUNT(*) AS cnt FROM comments WHERE userId = ?', [userId]);
   const cnt = (r.rows[0].cnt || 0);
-  const badge = await ensureBadge('comments', 'Commenter', 'Commented on forum posts', 1);
+  const badge = await ensureBadge('comments', 'Komentujący', 'Skomentował wpis na forum (przyznawana za pierwszy komentarz).', 1);
   if (cnt >= 1) await upsertUserBadge(userId, badge.id, 1);
+}
+
+// Award 'Best Link' when a user's comment that contains a link reaches at least 10 likes
+async function checkAndAwardForBestLink(commentId) {
+  if (!commentId) return;
+  const r = await db.query('SELECT id, userId, content, likes FROM comments WHERE id = ? LIMIT 1', [commentId]);
+  if (!r.rowCount) return false;
+  const row = r.rows[0];
+  const content = row.content || '';
+  const likes = Number(row.likes || 0);
+
+  // Simple URL regex: looks for http(s):// or www. domains
+  const urlRegex = /(https?:\/\/[^\s]+)|(www\.[^\s]+)/i;
+  if (!urlRegex.test(content)) return false;
+
+  if (likes >= 10) {
+    const badge = await ensureBadge('best_link', 'Najlepszy link', 'Opublikował komentarz zawierający link, który otrzymał przynajmniej 10 polubień.', 1);
+    try {
+      await upsertUserBadge(row.userId, badge.id, 1);
+      return true;
+    } catch (e) {
+      console.error('checkAndAwardForBestLink failed', e && e.code ? e.code : e);
+      return false;
+    }
+  }
+  return false;
+}
+
+// Award 'Best Comment' when a comment becomes the top-liked comment under its post and has at least 10 likes
+async function checkAndAwardForBestComment(commentId) {
+  if (!commentId) return false;
+  const r = await db.query('SELECT id, userId, postId, content, likes FROM comments WHERE id = ? LIMIT 1', [commentId]);
+  if (!r.rowCount) return false;
+  const row = r.rows[0];
+  const likes = Number(row.likes || 0);
+  if (likes < 10) return false;
+
+  // Find top comment for the same post (highest likes). Tie-breaker: lowest id.
+  const topRes = await db.query('SELECT id, userId, likes FROM comments WHERE postId = ? ORDER BY likes DESC, id ASC LIMIT 1', [row.postId]);
+  if (!topRes.rowCount) return false;
+  const top = topRes.rows[0];
+  if (top.id !== commentId) return false;
+
+  const badge = await ensureBadge('best_comment', 'Najlepszy komentarz', 'Opublikował najczęściej polubiony komentarz pod wpisem (wymaga co najmniej 10 polubień).', 1);
+  try {
+    await upsertUserBadge(row.userId, badge.id, 1);
+    return true;
+  } catch (e) {
+    console.error('checkAndAwardForBestComment failed', e && e.code ? e.code : e);
+    return false;
+  }
+}
+
+// Award 'Account Age' based on the user's first checkin date
+async function checkAndAwardForAccountAge(userId) {
+  if (!userId) return false;
+  try {
+    const r = await db.query("SELECT MIN(date) AS firstDate FROM checkins WHERE userId = ? LIMIT 1", [userId]);
+    if (!r.rowCount) return false;
+    const firstDate = r.rows[0].firstDate;
+    if (!firstDate) return false;
+
+    const first = new Date(firstDate);
+    const today = new Date();
+    // normalize to UTC midnight to avoid DST/time issues
+    const firstUtc = new Date(Date.UTC(first.getFullYear(), first.getMonth(), first.getDate()));
+    const todayUtc = new Date(Date.UTC(today.getFullYear(), today.getMonth(), today.getDate()));
+    const diffDays = Math.floor((todayUtc - firstUtc) / (1000 * 60 * 60 * 24));
+
+    // thresholds in days for levels 1..4: 30, 180, 365, 730
+    let level = 0;
+    if (diffDays >= 730) level = 4;
+    else if (diffDays >= 365) level = 3;
+    else if (diffDays >= 180) level = 2;
+    else if (diffDays >= 30) level = 1;
+
+    const badge = await ensureBadge('account_age', 'Wiek konta', 'Przyznawana na podstawie daty pierwszego checkinu. Poziomy przy 30, 180, 365 i 730 dniach.', 4);
+    if (level > 0) {
+      await upsertUserBadge(userId, badge.id, level);
+      return true;
+    }
+    return false;
+  } catch (e) {
+    console.error('checkAndAwardForAccountAge failed', e && e.code ? e.code : e);
+    return false;
+  }
 }
 
 module.exports = {
@@ -87,5 +173,7 @@ module.exports = {
   checkAndAwardForCheckin,
   checkAndAwardForPost,
   checkAndAwardForComment,
+  checkAndAwardForBestLink,
   upsertUserBadge,
+  checkAndAwardForAccountAge,
 };

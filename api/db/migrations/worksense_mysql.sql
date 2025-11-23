@@ -119,18 +119,43 @@ CREATE TABLE IF NOT EXISTS checkin_ai_analysis (
 -- Seed streak badge if missing
 -- Seed streak badge if missing (updated levels: 7,14,30,90,180,365)
 INSERT INTO badges(`key`, name, description, maxLevel)
-SELECT 'streak', 'Streak', 'Awarded for maintaining an activity streak. Levels increase at 7,14,30,90,180,365 days.', 6
+SELECT 'streak', 'Seria', 'Przyznawana za utrzymanie serii aktywności. Poziomy przy 7, 14, 30, 90, 180 i 365 dniach.', 6
 WHERE NOT EXISTS (SELECT 1 FROM badges WHERE `key`='streak');
 
 -- Seed contributor (posts) badge
 INSERT INTO badges(`key`, name, description, maxLevel)
-SELECT 'posts', 'Contributor', 'Created posts in the forum (awarded for creating your first post).', 1
+SELECT 'posts', 'Współtwórca', 'Utworzył wpis na forum (przyznawana za pierwszy post).', 1
 WHERE NOT EXISTS (SELECT 1 FROM badges WHERE `key`='posts');
 
 -- Seed commenter badge
 INSERT INTO badges(`key`, name, description, maxLevel)
-SELECT 'comments', 'Commenter', 'Commented on forum posts (awarded for creating your first comment).', 1
+SELECT 'comments', 'Komentujący', 'Skomentował wpis na forum (przyznawana za pierwszy komentarz).', 1
 WHERE NOT EXISTS (SELECT 1 FROM badges WHERE `key`='comments');
+
+-- Seed Best Link badge (awarded when a comment containing a link receives at least 10 likes)
+INSERT INTO badges(`key`, name, description, maxLevel)
+SELECT 'best_link', 'Najlepszy link', 'Opublikował komentarz zawierający link, który otrzymał przynajmniej 10 polubień.', 1
+WHERE NOT EXISTS (SELECT 1 FROM badges WHERE `key`='best_link');
+
+-- Seed Best Comment badge (most-liked comment under a post with at least 10 likes)
+INSERT INTO badges(`key`, name, description, maxLevel)
+SELECT 'best_comment', 'Najlepszy komentarz', 'Opublikował najczęściej polubiony komentarz pod wpisem (wymaga co najmniej 10 polubień).', 1
+WHERE NOT EXISTS (SELECT 1 FROM badges WHERE `key`='best_comment');
+
+-- Seed Account Age badge (based on date of first checkin)
+INSERT INTO badges(`key`, name, description, maxLevel)
+SELECT 'account_age', 'Wiek konta', 'Przyznawana na podstawie daty pierwszego checkinu. Poziomy przy 30, 180, 365 i 730 dniach.', 4
+WHERE NOT EXISTS (SELECT 1 FROM badges WHERE `key`='account_age');
+
+-- Seed Lookout badge (manual award by admin for valid bug reports)
+INSERT INTO badges(`key`, name, description, maxLevel)
+SELECT 'lookout', 'Czujny', 'Zgłosił prawidłowy błąd (przyznawana ręcznie przez administratorów).', 1
+WHERE NOT EXISTS (SELECT 1 FROM badges WHERE `key`='lookout');
+
+-- Seed Outstanding badge (manual award by admin for outstanding positive activity)
+INSERT INTO badges(`key`, name, description, maxLevel)
+SELECT 'outstanding', 'Wyjątkowy', 'Uznany przez administratorów za wyjątkową aktywność na forum (przyznawana ręcznie).', 1
+WHERE NOT EXISTS (SELECT 1 FROM badges WHERE `key`='outstanding');
 
 -- Password reset tokens
 CREATE TABLE IF NOT EXISTS password_reset_tokens (

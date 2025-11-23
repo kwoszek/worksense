@@ -14,8 +14,50 @@ const {
   clearRefreshCookie,
 } = require('../services/auth');
 const { authMiddleware } = require('../middleware/auth');
+const { checkAndAwardForAccountAge } = require('../services/badges');
 let sharp;
 try { sharp = require('sharp'); } catch { sharp = null; }
+// Server-side reCAPTCHA verification helper
+const https = require('https');
+const querystring = require('querystring');
+
+function verifyRecaptcha(token, remoteIp) {
+  return new Promise((resolve, reject) => {
+    if (!process.env.RECAPTCHA_SECRET) return resolve(false);
+    const postData = querystring.stringify({
+      secret: process.env.RECAPTCHA_SECRET,
+      response: token,
+      remoteip: remoteIp || ''
+    });
+
+    const options = {
+      hostname: 'www.google.com',
+      path: '/recaptcha/api/siteverify',
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+        'Content-Length': Buffer.byteLength(postData)
+      }
+    };
+
+    const req = https.request(options, (res) => {
+      let data = '';
+      res.on('data', (chunk) => { data += chunk; });
+      res.on('end', () => {
+        try {
+          const parsed = JSON.parse(data || '{}');
+          return resolve(Boolean(parsed.success));
+        } catch (e) {
+          return resolve(false);
+        }
+      });
+    });
+
+    req.on('error', (err) => reject(err));
+    req.write(postData);
+    req.end();
+  });
+}
 // Badge badge logic
 const STREAK_LEVEL_THRESHOLDS = [7, 14, 30, 90, 180, 365]; // ascending thresholds for levels 1..6
 function computeStreakLevel(streak) {
@@ -139,7 +181,20 @@ router.post(
       const errors = validationResult(req);
       if (!errors.isEmpty()) return res.status(400).json({ errors: errors.array() });
 
-      const { username, email, password } = req.body;
+      const { username, email, password, captchaToken } = req.body;
+
+      // Verify reCAPTCHA token server-side (if configured)
+      if (process.env.RECAPTCHA_SECRET) {
+        if (!captchaToken) return res.status(400).json({ error: 'Brak tokena captcha' });
+        let passed = false;
+        try {
+          passed = await verifyRecaptcha(captchaToken, req.ip);
+        } catch (e) {
+          console.error('recaptcha verify error', e && e.code ? e.code : e);
+          passed = false;
+        }
+        if (!passed) return res.status(400).json({ error: 'Weryfikacja reCAPTCHA nie powiodła się' });
+      }
 
 
       const dup = await db.query(
@@ -228,6 +283,8 @@ router.get('/me', authMiddleware, async (req, res, next) => {
       streak: row.streak ?? streak ?? 0,
     };
     await upsertStreakBadge(user.id, user.streak);
+    // Award account-age badge based on first checkin date
+    try { await checkAndAwardForAccountAge(user.id); } catch (e) { /* ignore badge errors */ }
     const badges = await getUserBadges(user.id);
     user.badges = badges;
     res.json(user);

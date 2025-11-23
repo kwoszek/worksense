@@ -5,7 +5,7 @@ const { analyzeCheckinAndProgress } = require('../services/ai');
 
 const router = Router();
 
-const { checkAndAwardForCheckin, checkAndAwardForPost, checkAndAwardForComment } = require('../services/badges');
+const { checkAndAwardForCheckin, checkAndAwardForPost, checkAndAwardForComment, checkAndAwardForBestLink, checkAndAwardForBestComment } = require('../services/badges');
 
 // Compute streak: consecutive days ending at last checkin; only reset if a full day missed
 async function computeAndUpdateStreak(userId) {
@@ -553,6 +553,8 @@ router.post('/comments/:id/like', authMiddleware, async (req, res, next) => {
       await db.query('UPDATE comments SET likes = likes + 1 WHERE id = ?', [commentId]);
     } catch (e) { /* duplicate like */ }
     const count = await db.query('SELECT likes FROM comments WHERE id = ?', [commentId]);
+    try { await checkAndAwardForBestLink(commentId); } catch (e) { /* ignore badge errors */ }
+    try { await checkAndAwardForBestComment(commentId); } catch (e) { /* ignore badge errors */ }
     res.json({ liked: true, likes: count.rows[0].likes });
   } catch (err) { next(err); }
 });

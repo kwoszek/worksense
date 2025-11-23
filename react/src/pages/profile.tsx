@@ -10,6 +10,7 @@ import { useMyBadgesQuery, useBadgesQuery, useLogoutMutation, useUpdateProfileMu
 import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter } from '@heroui/modal';
 import { useGetPostByUserIdQuery, useDeletePostMutation } from '@/services/forumApi';
 import './profile.css';
+import { badgeGradientStyle } from '@/utils/badgeColors';
 import { useSelector } from 'react-redux';
 import { selectAuthUser } from '@/features/auth/authSlice';
 import Cropper from "react-easy-crop";
@@ -147,8 +148,18 @@ export default function Profile() {
         return 'badge-gradient-contrib';
       case 'comments':
         return 'badge-gradient-comment';
+      case 'best_link':
+        return 'badge-gradient-bestlink';
+      case 'best_comment':
+        return 'badge-gradient-bestcomment';
+      case 'lookout':
+        return 'badge-gradient-lookout';
+      case 'outstanding':
+        return 'badge-gradient-outstanding';
+      case 'account_age':
+        return 'badge-gradient-accountage';
       default:
-        return 'badge-default';
+        return ''; // no fixed class; use generated inline style
     }
   };
 
@@ -218,11 +229,15 @@ export default function Profile() {
               <div className="flex flex-wrap gap-2">
                 {badgesLoading && <div className="text-sm opacity-60">Ładowanie...</div>}
                 {!badgesLoading && (!badgeList || !badgeList.length) && <div className="text-sm opacity-60">Brak odznak</div>}
-                {!badgesLoading && badgeList && badgeList.map((b: any) => (
-                  <span key={b.id || b.key} className={`badge-pill ${badgeClass(b.key)}`}>
-                    {b.name}{b.level && b.level > 1 ? ` • poziom ${b.level}` : ''}
-                  </span>
-                ))}
+                {!badgesLoading && badgeList && badgeList.map((b: any) => {
+                  const cls = badgeClass(b.key);
+                  const style = cls ? undefined : badgeGradientStyle(b.key);
+                  return (
+                    <span key={b.id || b.key} className={`badge-pill ${cls || ''}`} style={style}>
+                      {b.name}{b.level && b.level > 1 ? ` • poziom ${b.level}` : ''}
+                    </span>
+                  );
+                })}
               </div>
             </div>
 
