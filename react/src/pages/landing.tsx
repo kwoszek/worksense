@@ -23,6 +23,7 @@ import Group8 from "../resources/Group8.png";
 import {Accordion, AccordionItem} from "@heroui/react";
 import Favi from '../resources/favi';
 import ColumnSrc from '../resources/column';
+import Badges from '../resources/Badges.png';
 
 
 
@@ -269,8 +270,11 @@ export default function Landing(){
                                 </CardHeader>
                                 <Divider />
                                 <CardBody className="p-6 md:p-10">
-                    
-                                        <h3 className="text-xl">Dbasz o siebie = zdobywasz punkty. Nawyki stają się przyjemniejsze dzięki elementom grywalizacji.</h3>
+                                        <div className="flex flex-col md:flex-row gap-6 md:gap-10 items-center justify-center">
+                                          <h3 className="text-xl">Dbasz o siebie = zdobywasz odznaki. Nawyki stają się przyjemniejsze dzięki elementom grywalizacji.</h3>
+                                        <img src={Badges} alt="zdjęcie sekcji z odznakami" className="w-full md:w-3/5 mb-5 shadow-lg/20 shadow-success rounded-lg" />
+                                        </div>
+                                        
                     
                                 </CardBody>
                             </Card>

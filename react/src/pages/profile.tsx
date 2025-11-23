@@ -181,8 +181,8 @@ export default function Profile() {
                 </ButtonGroup>
               </div>
             )}
-            <Button size="sm" color="danger" variant="flat" onPress={() => logout().catch(() => {})}>Wyloguj</Button>
-            <Button size="sm" color="danger" variant="flat" onPress={() => setShowDeleteConfirm(true)}>Usuń konto</Button>
+            {!editing && <><Button size="sm" color="danger" variant="flat" onPress={() => logout().catch(() => {})}>Wyloguj</Button>
+            <Button size="sm" color="danger" variant="flat" onPress={() => setShowDeleteConfirm(true)}>Usuń konto</Button></>}
           </div>
         </div>
 
@@ -287,12 +287,12 @@ export default function Profile() {
               )}
             </div>
 
-            <Modal isOpen={showAllBadges} placement="center" onOpenChange={setShowAllBadges}>
+            <Modal className="h-[75svh] overflow-y-scroll" isOpen={showAllBadges} placement="center" onOpenChange={setShowAllBadges}>
               <ModalContent>
                 {(onClose) => (
                   <>
                     <ModalHeader>Wszystkie odznaki</ModalHeader>
-                    <ModalBody>
+                    <ModalBody className="h-[65svh] overflow-y-scroll">
                       {allBadgesLoading && <div className="text-sm opacity-60">Ładowanie odznak...</div>}
                       {!allBadgesLoading && (!allBadges || !allBadges.length) && <div className="text-sm opacity-60">Brak zdefiniowanych odznak</div>}
                       {!allBadgesLoading && allBadges && (
