@@ -113,6 +113,15 @@ export const usersApi = createApi({
         } catch {}
       },
     }),
+    deleteMe: builder.mutation<{ ok: boolean }, void>({
+      query: () => ({ url: '/me', method: 'DELETE' }),
+      invalidatesTags: ['Me'],
+      async onQueryStarted(_arg, { queryFulfilled, dispatch }) {
+        try { await queryFulfilled; } catch {}
+        clearAccessToken();
+        dispatch(clearAuth());
+      },
+    }),
     myBadges: builder.query<UserAdvancement[], void>({
       query: () => ({ url: '/me/badges' }),
       providesTags: ['Me'],
@@ -170,4 +179,5 @@ export const {
   useRequestPasswordResetMutation,
   useResetPasswordMutation,
   useRefreshMutation,
+  useDeleteMeMutation,
 } = usersApi;

@@ -28,7 +28,7 @@ function buildValueFromCheckins(checkins?: Checkin[]): HeatValue[] {
     const fallbackCount = energy + (10 - stress);
     const count = typeof moodScore === 'number' ? moodScore : fallbackCount;
 
-    return { date, count, content: `Mood: ${count} | Stress: ${stress} | Energy: ${energy}` };
+    return { date, count, content: `Nastrój: ${count} | Stres: ${stress} | Energia: ${energy}` };
   });
 }
 
@@ -57,6 +57,7 @@ function MoodChart({ checkins }: Props) {
           value={value}
           style={{ color: 'success'  }}
           weekLabels={['', 'Pn', '', 'Śr', '', 'Pt', '']}
+          monthLabels={['Sty', 'Lut', 'Mar', 'Kwi', 'Maj', 'Cze', 'Lip', 'Sie', 'Wrz', 'Paź', 'Lis', 'Gru']}
           startDate={startDate}
           rectProps={{
           rx: "2",

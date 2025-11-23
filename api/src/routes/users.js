@@ -141,6 +141,7 @@ router.post(
 
       const { username, email, password, captchaToken } = req.body;
 
+      
       const params = new URLSearchParams();
       params.append('secret', process.env.RECAPTCHA_SECRET);
       params.append('response', captchaToken);
@@ -244,6 +245,15 @@ router.get('/me', authMiddleware, async (req, res, next) => {
     res.json(user);
   } catch (err) { next(err); }
 });
+
+router.delete('/me', authMiddleware, async (req, res, next) => {
+  try {
+    const q = 'DELETE FROM users WHERE id = ?';
+    const r = await db.query(q, [req.user.id]);
+    res.json({ ok: true });
+  } catch (err) { next(err); }
+});
+
 
   // Update current user's profile (username, email, avatar)
   router.put('/me', authMiddleware, async (req, res, next) => {
@@ -366,6 +376,7 @@ router.get('/badges', async (req, res, next) => {
     res.json(r.rows);
   } catch (err) { next(err); }
 });
+
 
 router.post('/refresh', async (req, res, next) => {
   try {

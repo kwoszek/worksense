@@ -5,12 +5,14 @@ import { Card, CardHeader, CardBody } from '@heroui/card';
 import { Divider } from '@heroui/divider';
 import { Avatar } from '@heroui/avatar';
 import { Input } from '@heroui/input';
-import { useMyBadgesQuery, useBadgesQuery, useLogoutMutation, useUpdateProfileMutation, useChangePasswordMutation, useMeQuery } from '@/services/usersApi';
+import { useMyBadgesQuery, useBadgesQuery, useLogoutMutation, useUpdateProfileMutation, useChangePasswordMutation, useMeQuery, useDeleteMeMutation } from '@/services/usersApi';
 import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter } from '@heroui/modal';
+import { useGetPostByUserIdQuery, useDeletePostMutation } from '@/services/forumApi';
 import './profile.css';
 import { useSelector } from 'react-redux';
 import { selectAuthUser } from '@/features/auth/authSlice';
 import Cropper from "react-easy-crop";
+
 
 
 
@@ -36,10 +38,21 @@ export default function Profile() {
   const [confirmPw, setConfirmPw] = useState('');
   const [pwMsg, setPwMsg] = useState<string | null>(null);
   const [profileMsg, setProfileMsg] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState<'details' | 'posts'>('details');
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [deleteConfirmText, setDeleteConfirmText] = useState('');
+  const [deleteMe, { isLoading: deleting }] = useDeleteMeMutation();
   const [crop, setCrop] = useState({ x: 0, y: 0 })
   const [zoom, setZoom] = useState(1)
   // Subscribe to /me so invalidation triggers refetch; we can manually force refetch after save.
   const { refetch: meRefetch } = useMeQuery(undefined);
+
+  // Fetch posts for this user when posts tab is active
+  const { data: userPosts, isLoading: postsLoading } = useGetPostByUserIdQuery(
+    { userId: user?.id ?? 0, limit: 20, offset: 0 },
+    { skip: !user?.id || activeTab !== 'posts' }
+  );
+  const [deletePost, { isLoading: deletingPost }] = useDeletePostMutation();
 
   const handleAvatarChange = () => {
     const file = avatarFileRef.current?.files?.[0];
@@ -98,29 +111,30 @@ export default function Profile() {
       if (!avatarPreview && result?.user?.avatar) {
         setAvatarPreview(`data:image/png;base64,${result.user.avatar}`);
       }
-      setProfileMsg('Profile updated');
+      setProfileMsg('Profil zaktualizowany');
       setEditing(false);
       // Force immediate refresh of /me to sync other derived fields (streak etc.)
       meRefetch();
     } catch (e: any) {
-      setProfileMsg(e?.data?.error || 'Update failed');
+  setProfileMsg(e?.data?.error || 'Aktualizacja nie powiodła się');
     }
   };
+
 
   const handleChangePassword = async () => {
     setPwMsg(null);
     if (newPw !== confirmPw) {
-      setPwMsg('Passwords do not match');
+      setPwMsg('Hasła nie pasują');
       return;
     }
     try {
       await changePassword({ oldPassword: oldPw, newPassword: newPw }).unwrap();
-      setPwMsg('Password changed');
+      setPwMsg('Hasło zmienione');
       setOldPw('');
       setNewPw('');
       setConfirmPw('');
     } catch (e: any) {
-      setPwMsg(e?.data?.error || 'Change failed');
+      setPwMsg(e?.data?.error || 'Zmiana nie powiodła się');
     }
   };
 
@@ -143,6 +157,7 @@ export default function Profile() {
         <div className="flex items-center justify-between py-6">
           <h1 className="text-2xl opacity-70">Profil</h1>
           <div className="flex items-center gap-2">
+            
             {!editing && (
               <Button size="sm" variant="flat" onPress={() => setEditing(true)}>Edytuj</Button>
             )}
@@ -155,13 +170,16 @@ export default function Profile() {
               </div>
             )}
             <Button size="sm" color="danger" variant="flat" onPress={() => logout().catch(() => {})}>Wyloguj</Button>
+            <Button size="sm" color="danger" variant="flat" onPress={() => setShowDeleteConfirm(true)}>Usuń konto</Button>
           </div>
         </div>
 
         <Card className="p-4">
           <CardHeader>
-            <div className="flex items-center gap-4 w-full">
+            <div className="flex items-center gap-4 w-full sm:flex-row flex-col">
+              <div className="flex items-center gap-4 w-full">
               <div className="flex flex-col items-center">
+                
                 <Avatar
                   src={avatarPreview || undefined}
                   name={user?.username || 'U'}
@@ -175,10 +193,11 @@ export default function Profile() {
                 )}
               </div>
               <div className="flex-1">
-                  <Input className="w-70 bg-transparent mb-1" size="sm" classNames={{input: "text-xl font-semibold", inputWrapper: !editing ? "border-none bg-none" : undefined}} disabled={!editing} variant="bordered" value={!editing ? user?.username ?? 'Nieznany' : uname} readOnly={!editing} onValueChange={editing ? setUname : undefined} />
-                  <Input className="w-70 bg-transparent" size="sm" classNames={{input: "text-sm opacity-70", inputWrapper: !editing ? "border-none bg-none" : undefined}} disabled={!editing} variant="bordered" value={!editing ? user?.email ?? '' : email} readOnly={!editing} onValueChange={editing ? setEmail : undefined} />
+                  <Input className="w-fit bg-transparent mb-1" size="sm" classNames={{input: "text-xl font-semibold", inputWrapper: !editing ? "border-none bg-none" : undefined}} disabled={!editing} variant="bordered" value={!editing ? user?.username ?? 'Nieznany' : uname} readOnly={!editing} onValueChange={editing ? setUname : undefined} />
+                  <Input className="w-fit bg-transparent" size="sm" classNames={{input: "text-sm opacity-70", inputWrapper: !editing ? "border-none bg-none" : undefined}} disabled={!editing} variant="bordered" value={!editing ? user?.email ?? '' : email} readOnly={!editing} onValueChange={editing ? setEmail : undefined} />
               </div>
-              <div className="ml-auto text-right">
+              </div>
+              <div className="sm:ml-auto self-start mt-2 text-left sm:text-right sm:mt-0">
                 <div className="text-sm opacity-60">Aktualna seria</div>
                 <div className="text-2xl font-bold">{user?.streak ?? 0}</div>
               </div>
@@ -188,7 +207,7 @@ export default function Profile() {
           <CardBody>
             <div className="mb-6">
               {profileMsg && <div className="text-sm opacity-70 mb-3">{profileMsg}</div>}
-              <div className="flex items-center justify-between mb-2">
+              <div className="flex items-center justify-between mb-5">
                 <h3 className="text-lg opacity-70 m-0">Odznaki</h3>
                 <div>
                   <Button size="sm" variant="flat" onPress={() => setShowAllBadges(true)}>Pokaż wszystkie odznaki</Button>
@@ -203,6 +222,52 @@ export default function Profile() {
                   </span>
                 ))}
               </div>
+            </div>
+
+            {/* Tabs: Details / Posts */}
+            <div className="mb-6">
+              <div className="flex items-center gap-2 mb-3">
+            
+                <Button  onPress={() => {activeTab=="posts"?setActiveTab("details"): setActiveTab('posts')}}>Wpisy</Button>
+              </div>
+
+              {activeTab === 'posts' && (
+                <Card>
+                  <CardBody>
+                  {postsLoading && <div className="text-sm opacity-60">Ładowanie wpisów...</div>}
+                  {!postsLoading && (!userPosts || !userPosts.length) && <div className="text-sm opacity-60">Brak wpisów</div>}
+                  {!postsLoading && userPosts && (
+                    <div className="flex flex-col gap-3">
+                      {userPosts.map((p: any) => {console.log(p.dateposted) ;return(
+                        <div key={p.id} className="p-3">
+                          <div className="flex items-start justify-between">
+                            <div>
+                              <div className="font-medium">{p.title}</div>
+                              <div className="text-sm opacity-70">{p.username} • {p.dateposted}</div>
+                              
+                            </div>
+                              <div className="text-sm opacity-70">❤ {p.likes} • {p.comments ? p.comments.length : 0} kom.</div>
+                          </div>
+                            <div className="mt-2 text-sm">{p.content ? (p.content.length > 300 ? p.content.slice(0, 300) + '…' : p.content) : ''}</div>
+                            {p.userid === user?.id && (
+                              <div className="mt-3 flex justify-end">
+                                <Button size="sm" color="danger" variant="flat" onPress={async () => {
+                                  const ok = window.confirm('Na pewno usunąć ten wpis?');
+                                  if (!ok) return;
+                                  try {
+                                    await deletePost({ postId: p.id }).unwrap();
+                                  } catch (e: any) {
+                                    setProfileMsg(e?.data?.error || 'Usuwanie wpisu nie powiodło się');
+                                  }
+                                }} isDisabled={deletingPost}>{deletingPost ? 'Usuwanie...' : 'Usuń wpis'}</Button>
+                              </div>
+                            )}
+                        </div>
+                      )})}
+                    </div>
+                  )}</CardBody>
+                </Card>
+              )}
             </div>
 
             <Modal isOpen={showAllBadges} placement="center" onOpenChange={setShowAllBadges}>
@@ -237,14 +302,44 @@ export default function Profile() {
                       )}
                     </ModalBody>
                     <ModalFooter>
-                      <div className="w-full flex justify-end">
-                        <Button size="sm" variant="flat" onPress={onClose}>Close</Button>
+                        <div className="w-full flex justify-end">
+                        <Button size="sm" variant="flat" onPress={onClose}>Zamknij</Button>
                       </div>
                     </ModalFooter>
                   </>
                 )}
               </ModalContent>
-            </Modal>
+              </Modal>
+
+              <Modal isOpen={showDeleteConfirm} placement="center" onOpenChange={setShowDeleteConfirm}>
+                <ModalContent>
+                  {(onClose) => (
+                    <>
+                      <ModalHeader>Usuń konto</ModalHeader>
+                      <ModalBody>
+                        <div className="text-sm opacity-80 mb-3">To działanie jest nieodwracalne. Aby potwierdzić wpisz <strong>DELETE</strong> i kliknij Usuń.</div>
+                        <Input label="Potwierdź (wpisz DELETE)" size="sm" value={deleteConfirmText} onValueChange={setDeleteConfirmText} />
+                      </ModalBody>
+                      <ModalFooter>
+                        <div className="w-full flex justify-end gap-2">
+                          <Button size="sm" variant="flat" onPress={() => { setShowDeleteConfirm(false); setDeleteConfirmText(''); onClose && onClose(); }}>Anuluj</Button>
+                          <Button size="sm" color="danger" onPress={async () => {
+                            if (deleteConfirmText !== 'DELETE') return;
+                            try {
+                              await deleteMe().unwrap();
+                            } catch (e: any) {
+                              setProfileMsg(e?.data?.error || 'Usuwanie konta nie powiodło się');
+                              return;
+                            }
+                            // Navigate away after account deletion (auth state cleared by onQueryStarted)
+                            window.location.href = '/';
+                          }} isDisabled={deleting || deleteConfirmText !== 'DELETE'}>{deleting ? 'Usuwanie...' : 'Usuń'}</Button>
+                        </div>
+                      </ModalFooter>
+                    </>
+                  )}
+                </ModalContent>
+              </Modal>
 
             <Modal isOpen={showCropper} placement="center" onOpenChange={setShowCropper}>
               <ModalContent>
@@ -298,20 +393,17 @@ export default function Profile() {
             </Modal>
 
             <div className="mb-6">
-              <h3 className="text-lg opacity-70 mb-2">Change Password</h3>
+              <h3 className="text-lg opacity-70 mb-2">Zmień hasło</h3>
               <div className="flex flex-col gap-3 max-w-sm">
-                <Input label="Old Password" size="sm" type="password" value={oldPw} onValueChange={setOldPw} />
-                <Input label="New Password" size="sm" type="password" value={newPw} onValueChange={setNewPw} />
-                <Input label="Confirm New Password" size="sm" type="password" value={confirmPw} onValueChange={setConfirmPw} />
+                <Input label="Stare hasło" size="sm" type="password" value={oldPw} onValueChange={setOldPw} />
+                <Input label="Nowe hasło" size="sm" type="password" value={newPw} onValueChange={setNewPw} />
+                <Input label="Potwierdź nowe hasło" size="sm" type="password" value={confirmPw} onValueChange={setConfirmPw} />
                 {pwMsg && <div className="text-xs opacity-70">{pwMsg}</div>}
-                <Button size="sm" color="success" variant="flat" isDisabled={changingPw} onPress={handleChangePassword}>{changingPw ? 'Changing...' : 'Change Password'}</Button>
+                <Button size="sm" color="success" variant="flat" isDisabled={changingPw} onPress={handleChangePassword}>{changingPw ? 'Zmieniamy...' : 'Zmień hasło'}</Button>
               </div>
             </div>
 
-            <div>
-              <h3 className="text-lg opacity-70 mb-2">About</h3>
-              <p className="text-sm opacity-80">Manage your profile, badges and security settings here.</p>
-            </div>
+            
           </CardBody>
         </Card>
       </div>

@@ -45,7 +45,7 @@ CREATE TABLE IF NOT EXISTS checkins (
   description TEXT,
   date DATE NOT NULL,
   moodScore INT NULL,
-  CONSTRAINT fk_checkins_user FOREIGN KEY (userId) REFERENCES users(id) ON DELETE SET NULL,
+  CONSTRAINT fk_checkins_user FOREIGN KEY (userId) REFERENCES users(id) ON DELETE CASCADE,
   UNIQUE KEY uniq_user_date (userId, date)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 

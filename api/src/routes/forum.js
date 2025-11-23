@@ -216,6 +216,134 @@ router.get('/posts/:id', optionalAuth, async (req, res, next) => {
     } catch (err) { next(err); }
 });
 
+// Delete a post (only owner)
+router.delete('/posts/:id', authMiddleware, async (req, res, next) => {
+  const userId = req.user.id;
+  const postId = Number(req.params.id);
+  if (Number.isNaN(postId)) return res.status(400).json({ error: 'Invalid post id' });
+  try {
+    const exists = await db.query('SELECT id, userId FROM posts WHERE id = ?', [postId]);
+    if (!exists.rowCount) return res.status(404).json({ error: 'Post not found' });
+    if (exists.rows[0].userId !== userId) return res.status(403).json({ error: 'Not authorized' });
+
+    // Remove likes and comments related to this post (if not handled by FK cascade)
+    try { await db.query('DELETE FROM post_likes WHERE postId = ?', [postId]); } catch (e) { /* ignore */ }
+    try { await db.query('DELETE FROM comment_likes WHERE commentId IN (SELECT id FROM comments WHERE postId = ?)', [postId]); } catch (e) { /* ignore */ }
+    try { await db.query('DELETE FROM comments WHERE postId = ?', [postId]); } catch (e) { /* ignore */ }
+    await db.query('DELETE FROM posts WHERE id = ?', [postId]);
+
+    res.json({ ok: true });
+  } catch (err) { next(err); }
+});
+
+// Posts by a specific user (paginated, includes comments and liked flags for requesting user)
+router.get('/posts/user/:id', optionalAuth, async (req, res, next) => {
+  try {
+    const urlUserId = Number(req.params.id);
+    if (Number.isNaN(urlUserId)) return res.status(400).json({ error: 'Invalid user id' });
+
+    const offset = Number(req.query.offset || 0);
+    const limit = Number(req.query.limit || 20);
+    const rawOrder = String(req.query.orderBy || 'dateposted').toLowerCase();
+    const allowedOrder = new Set(['dateposted', 'likes']);
+    const orderKey = allowedOrder.has(rawOrder) ? rawOrder : 'dateposted';
+    const direction = String(req.query.direction || 'DESC').toUpperCase() === 'ASC' ? 'ASC' : 'DESC';
+    const orderColumn = orderKey === 'dateposted' ? 'p.dateposted' : 'p.likes';
+    const currentUserId = req.user?.id || null;
+
+    // 1. Fetch posts for the user
+    const postsQ = `SELECT p.id,
+                           p.title,
+                           p.content,
+                           p.datePosted AS dateposted,
+                           p.userId AS userid,
+                           p.likes,
+                           u.username,
+                           u.avatar
+                    FROM posts p
+                    LEFT JOIN users u ON u.id = p.userId
+                    WHERE p.userId = ?
+                    ORDER BY ${orderColumn} ${direction}
+                    LIMIT ? OFFSET ?`;
+    const postsRes = await db.query(postsQ, [urlUserId, limit, offset]);
+    const posts = postsRes.rows;
+    if (!posts.length) return res.json([]);
+
+    // 2. Collect post IDs
+    const postIds = posts.map(p => p.id);
+    const placeholders = postIds.map(() => '?').join(',');
+
+    // 3. Fetch comments for these posts
+    const commentsQ = `SELECT c.id,
+                              c.userId AS userid,
+                              c.postId AS postid,
+                              c.content,
+                              c.datePosted AS dateposted,
+                              c.likes,
+                              u.username,
+                              u.avatar
+                       FROM comments c
+                       LEFT JOIN users u ON u.id = c.userId
+                       WHERE c.postId IN (${placeholders})
+                       ORDER BY c.datePosted ASC, c.id ASC`;
+    const commentsRes = await db.query(commentsQ, postIds);
+    const comments = commentsRes.rows;
+
+    // 4. Optionally fetch likes for current requesting user
+    let likedPostIds = new Set();
+    let likedCommentIds = new Set();
+    if (currentUserId) {
+      const likedPostsQ = `SELECT postId FROM post_likes WHERE userId = ? AND postId IN (${placeholders})`;
+      const likedPostsRes = await db.query(likedPostsQ, [currentUserId, ...postIds]);
+      likedPostIds = new Set(likedPostsRes.rows.map(r => r.postId));
+
+      const commentIds = comments.map(c => c.id);
+      if (commentIds.length) {
+        const commentPlaceholders = commentIds.map(() => '?').join(',');
+        const likedCommentsQ = `SELECT commentId FROM comment_likes WHERE userId = ? AND commentId IN (${commentPlaceholders})`;
+        const likedCommentsRes = await db.query(likedCommentsQ, [currentUserId, ...commentIds]);
+        likedCommentIds = new Set(likedCommentsRes.rows.map(r => r.commentId));
+      }
+    }
+
+    // 5. Attach comments to posts
+    const commentsByPost = new Map();
+    for (const c of comments) {
+      if (!commentsByPost.has(c.postid)) commentsByPost.set(c.postid, []);
+      const avatarB64 = c.avatar ? Buffer.from(c.avatar).toString('base64') : null;
+      commentsByPost.get(c.postid).push({
+        id: c.id,
+        userid: c.userid,
+        postid: c.postid,
+        content: c.content,
+        dateposted: c.dateposted,
+        likes: c.likes,
+        liked: currentUserId ? likedCommentIds.has(c.id) : false,
+        username: c.username,
+        avatar: avatarB64,
+      });
+    }
+
+    const response = posts.map(p => {
+      const avatarB64 = p.avatar ? Buffer.from(p.avatar).toString('base64') : null;
+      return {
+        id: p.id,
+        title: p.title,
+        content: p.content,
+        dateposted: p.dateposted,
+        userid: p.userid,
+        likes: p.likes,
+        liked: currentUserId ? likedPostIds.has(p.id) : false,
+        username: p.username,
+        avatar: avatarB64,
+        comments: commentsByPost.get(p.id) || [],
+      };
+    });
+
+    res.json(response);
+  } catch (err) { next(err); }
+});
+
 router.post('/posts', async (req, res, next) => {
     try {
         const { userId, title, content } = req.body;

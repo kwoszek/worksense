@@ -22,7 +22,7 @@ export default function DefaultLayout({ children }: { children: React.ReactNode 
                     <Link underline="always" href="/forum" color="foreground">Forum</Link>
                   </li>
                   <li>
-                    <Link underline="always" href="/articles" color="foreground">Articles</Link>
+                    <Link underline="always" href="/articles" color="foreground">Artykuły</Link>
                   </li>
                 </ul>
               </div>
@@ -34,13 +34,13 @@ export default function DefaultLayout({ children }: { children: React.ReactNode 
               <div className="flex-1 flex items-center justify-center">
                 <ul className="list-disc text-center">
                   <li>
-                    <Link underline="always" href="/progress" color="foreground">Progress</Link>
+                    <Link underline="always" href="/progress" color="foreground">Progres</Link>
                   </li>
                   <li>
                     <Link underline="always" href="/focus" color="foreground">Focus</Link>
                   </li>
                   <li>
-                    <Link underline="always" href="/profile" color="foreground">Profile</Link>
+                    <Link underline="always" href="/profile" color="foreground">Profil</Link>
                   </li>
                 </ul>
               </div>

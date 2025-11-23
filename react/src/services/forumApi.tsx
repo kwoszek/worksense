@@ -80,6 +80,11 @@ export const forumApi = createApi({
 			query: ({ limit, offset, orderBy, direction }) => `/posts?limit=${limit}&offset=${offset}&orderBy=${orderBy}&direction=${direction}`,
 			providesTags: ['Posts'],
 		}),
+		getPostByUserId: builder.query<Post[], { userId: number; limit: number; offset: number }>({
+			// backend route is /posts/user/:id
+			query: ({ userId, limit, offset }) => `/posts/user/${userId}?limit=${limit}&offset=${offset}`,
+			providesTags: ['Posts'],
+		}),
 		getPost: builder.query<PostWithComments, number>({
 			query: (id: number) => `/posts/${id}`,
 			providesTags: (_result, _error, id) => [
@@ -122,6 +127,10 @@ export const forumApi = createApi({
 			query: ({ postId }) => ({ url: `/posts/${postId}/like`, method: 'DELETE' }),
 			invalidatesTags: ['Posts'],
 		}),
+		deletePost: builder.mutation<{ ok: boolean }, { postId: number }>({
+			query: ({ postId }) => ({ url: `/posts/${postId}`, method: 'DELETE' }),
+			invalidatesTags: ['Posts', 'Me'],
+		}),
 
 		// Likes - Comments
 		likeComment: builder.mutation<{ liked: boolean; likes: number }, { commentId: number; postId: number }>({
@@ -163,4 +172,6 @@ export const {
 	useUnlikePostMutation,
 	useLikeCommentMutation,
 	useUnlikeCommentMutation,
+	useDeletePostMutation,
+	useGetPostByUserIdQuery,
 } = forumApi;

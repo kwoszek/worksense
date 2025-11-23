@@ -33,41 +33,20 @@ export default function ProgressPage() {
     const [energy, setEnergy] = useState(5);
     const [description, setDescription] = useState("");
 
-    // const [energyAndStressChart, setEnergyAndStressChart] = useState({
-          
-    //         series: [{
-    //           name: 'Energia',
-    //           data: checkins?.map((c: any) => c.energy) || []
-    //         }, {
-    //           name: 'Stres',
-    //           data:checkins?.map((c: any) => c.stress) || []
-    //         }]
-    //         options: {
-    //           chart: {
-    //             height: 350,
-    //             type: 'area'
-    //           },
-    //           dataLabels: {
-    //             enabled: false
-    //           },
-    //           stroke: {
-    //             curve: 'smooth'
-    //           },
-    //           xaxis: {
-    //             type: 'datetime',
-    //             categories: checkins?.map((c: any) => c.date) || []
-    //           },
-    //           tooltip: {
-    //             x: {
-    //               format: 'dd/MM/yy HH:mm'
-    //             },
-    //           },
-    //         },
-          
-          
-    //     });
+  const getWarsawYmd = () => {
+    try {
+      const fmt = new Intl.DateTimeFormat('en-CA', { timeZone: 'Europe/Warsaw', year: 'numeric', month: '2-digit', day: '2-digit' });
+      return fmt.format(new Date());
+    } catch (e) {
+      // Fallback: use UTC-based YYYY-MM-DD. This is less correct around timezone boundaries
+      // but guarantees a stable string on environments without Intl timezone support.
+      console.log('Intl timezone formatting not supported, falling back to UTC date');
+      return new Date().toISOString().slice(0, 10);
+    }
+  };
+  const todayTwo = getWarsawYmd(); 
   
-  const todayTwo = new Date().toISOString().slice(0, 10);
+
   const hasToday = !!checkins?.find((c: any) => c.userid === user?.id && (c.date ?? '').slice(0,10) ===   todayTwo);
   
    
@@ -218,6 +197,9 @@ export default function ProgressPage() {
   const dateRange = getDatesBetween(chartStartDate, chartEndDate);
   const dateCategories = dateRange.map(d => new Date(d.getFullYear(), d.getMonth(), d.getDate()).toISOString());
 
+  // Polish formatter for x-axis labels (e.g. "23 lis")
+  const plDateFmt = new Intl.DateTimeFormat('pl-PL', { day: '2-digit', month: 'short' });
+
   const energySeriesData = dateRange.map(d => {
     const key = formatYmd(d);
     const c = checkinByDate[key];
@@ -275,7 +257,7 @@ export default function ProgressPage() {
     
       <Card className="p-5">
       <CardHeader>
-        <h2 className="opacity-80 text-2xl">Podsumowanie twojego progresu</h2>
+        <h2 className="opacity-80 text-2xl">Podsumowanie Twoich postępów</h2>
       </CardHeader>
       <CardBody>
          {latestAnalysis?.progressSummary ? (
@@ -304,7 +286,12 @@ export default function ProgressPage() {
               },
               xaxis: {
                 type: 'datetime',
-                categories: dateCategories
+                categories: dateCategories,
+                labels: {
+                  formatter: function (val: any) {
+                    try { return plDateFmt.format(new Date(val)); } catch (e) { return String(val); }
+                  }
+                }
               },
               yaxis: {
                  min: 0,
@@ -348,7 +335,12 @@ export default function ProgressPage() {
               },
               xaxis: {
                 type: 'datetime',
-                categories: dateCategories
+                categories: dateCategories,
+                labels: {
+                  formatter: function (val: any) {
+                    try { return plDateFmt.format(new Date(val)); } catch (e) { return String(val); }
+                  }
+                }
               },
                yaxis: {
                  min: 0,
@@ -408,8 +400,7 @@ export default function ProgressPage() {
       <CardBody>
                   <div className="flex flex-col gap-4">
                     <div className="flex items-center justify-center gap-3">
-                      
-                      <Button onPress={() => setIsOpen(true)} isDisabled={hasToday} size="lg">{hasToday?"Ju zrobiłeś dzisiaj check-in":"Nowy Check-in"}</Button>
+                      <Button onPress={() => setIsOpen(true)} isDisabled={hasToday} size="lg">{hasToday?"Już wykonałeś dzisiejszy check-in":"Nowy check-in"}</Button>
                     </div>
                     {latestAnalysis && (
                       <div className="mt-3  opacity-80">
@@ -486,7 +477,7 @@ export default function ProgressPage() {
         </Card>
       <Card>
         <CardHeader className="p-5">
-        <h2 className="opacity-80 text-2xl">Sredni nastrój w dzień tygodnia</h2>
+  <h2 className="opacity-80 text-2xl">Średni nastrój według dnia tygodnia</h2>
       </CardHeader>
         <CardBody>
            <div id="chart">
@@ -520,7 +511,7 @@ export default function ProgressPage() {
                           <label className="text-md opacity-80">Poziom stresu: {stress}</label>
                          
                  <Slider
-                 aria-label="stress slider"
+                 aria-label="poziom stresu"
                  minValue={0}
                   maxValue={10}
                   name="stress"
@@ -533,7 +524,7 @@ export default function ProgressPage() {
                         <div>
                           <label className="text-md opacity-80">Poziom energii: {energy}</label>
                           <Slider
-                           aria-label="energy slider"
+                           aria-label="poziom energii"
                            minValue={0}
                             maxValue={10}
                             name="energy"

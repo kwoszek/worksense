@@ -13,12 +13,26 @@ import { useGetAnalysesQuery } from "@/services/analysisApi";
 
 export default function DashboardPage() {
   // current date in Europe/Warsaw in YYYY-MM-DD format
-  const today = new Date().toLocaleDateString('en-CA', { timeZone: 'Europe/Warsaw' });
+  // Use Intl.DateTimeFormat to ensure timeZone support across browsers (Safari older versions
+  // sometimes ignore the timeZone option when using Date.prototype.toLocaleDateString).
+  const getWarsawYmd = () => {
+    try {
+      const fmt = new Intl.DateTimeFormat('en-CA', { timeZone: 'Europe/Warsaw', year: 'numeric', month: '2-digit', day: '2-digit' });
+      return fmt.format(new Date());
+    } catch (e) {
+      // Fallback: use UTC-based YYYY-MM-DD. This is less correct around timezone boundaries
+      // but guarantees a stable string on environments without Intl timezone support.
+      console.log('Intl timezone formatting not supported, falling back to UTC date');
+      return new Date().toISOString().slice(0, 10);
+    }
+  };
+  const today = getWarsawYmd();
+  
   const { data: checkins } = useGetCheckinsQuery();
   const user = useSelector(selectAuthUser);
   const { data: analyses } = useGetAnalysesQuery();
   const latestAnalysis = analyses && analyses.length ? analyses[0] : null;
-   const hasToday = !!checkins?.find((c) => c.userid === user?.id && c.date.slice(0,10) === today);
+  const hasToday = !!checkins?.find((c) => c.userid === user?.id && c.date.slice(0,10) === today);
   
 
   const chartCheckins = checkins
@@ -111,7 +125,7 @@ export default function DashboardPage() {
           <h2 className="text-2xl opacity-80">Cześć {user?.username}!</h2>
         </CardHeader>
       <CardBody>
-         {hasToday ? <div className="text-sm opacity-70">Check-in na dzisiaj zrobiony!!</div>:<Link  to="/progress" className="text-3xl opacity-80 text-success underline" state="open">Zrób codzienny check-in</Link>}
+         {hasToday ? <div className="text-sm opacity-70">Już wykonałeś dzisiejszy check-in!</div> : <Link  to="/progress" className="text-3xl opacity-80 text-success underline" state="open">Zrób codzienny check-in</Link>}
         
       </CardBody>
     </Card>
