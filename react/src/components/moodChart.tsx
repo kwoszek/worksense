@@ -1,7 +1,7 @@
 import {Card, CardHeader, CardBody} from "@heroui/card";
 import HeatMap from '@uiw/react-heat-map';
-import { useRef } from 'react';
 import { useSelector } from 'react-redux';
+import { useRef} from 'react';
 import { selectAuthUser } from '@/features/auth/authSlice';
 import {Tooltip} from "@heroui/tooltip";
 // No longer need analyses; moodScore is returned on checkins
@@ -32,6 +32,7 @@ function buildValueFromCheckins(checkins?: Checkin[]): HeatValue[] {
   });
 }
 
+
 function MoodChart({ checkins }: Props) {
   // Resize/observer logic removed — chart will render with default SVG sizing and CSS.
   const value = buildValueFromCheckins(checkins);
@@ -55,7 +56,7 @@ function MoodChart({ checkins }: Props) {
          <HeatMap
           className="h-40 w-200 scale-125 p-5 pl-20"
           value={value}
-          style={{ color: 'success'  }}
+          style={{ color: 'success', '--rhm-rect-active': "#a9c7f5" }}
           weekLabels={['', 'Pn', '', 'Śr', '', 'Pt', '']}
           monthLabels={['Sty', 'Lut', 'Mar', 'Kwi', 'Maj', 'Cze', 'Lip', 'Sie', 'Wrz', 'Paź', 'Lis', 'Gru']}
           startDate={startDate}
@@ -68,24 +69,25 @@ function MoodChart({ checkins }: Props) {
 
 
 
-1:  "#e6d8f8",  // jasny pastel fiolet (lekko nasycony)
-2:  "#d1b6f3",  // bardziej nasycony fiolet
-3:  "#b894ee",  // pełniejszy, ale wciąż pastelowy fiolet
+2:  "#e6d8f8",  
+3:  "#d1b6f3",  
+4:  "#b894ee",  
 
-4:  "#a9c7f5",  // pastelowy błękit (średnia saturacja)
-5:  "#7fb1f0",  // wyraźniejszy błękit, ale nie intensywny
+5:  "#a9c7f5",  
+6:  "#7fb1f0",  
 
-6:  "#75d2db",  // turkus z umiarkowaną saturacją
-7:  "#5acb9c",  // pastelowa zieleń–mięta (żywsza)
+7:  "#75d2db",  
+8:  "#5acb9c",  
 
-8:  "#56bf7e",  // zieleń bardziej nasycona, ale wciąż miękka
-9:  "#c8d968",  // jasna limonka, krok przed żółtym
+9:  "#56bf7e",  
+10:  "#c8d968",  
 
-10: "#f4e676"  
+11: "#f4e676"  
 
       }} rectRender={(props, data) => {
-        // ensure tooltip content uses same text but avoid unused var lint
+       
         const titleText = `${data.date} — nastrój: ${data.count && data.count > 10 ? 10 : data.count}`;
+        
         return (
           <>
         {data.count ? ( <Tooltip placement="top" content={<div className="text-left"><p className="font-bold ">{titleText}</p> </div>} showArrow={true} offset={5}>

@@ -63,7 +63,7 @@ export default function Landing(){
                             <li>zanika motywacja,</li>
                             <li>tracimy radość z nauki i pracy.</li>
                         </ul>
-                        <p className="w-full text-lg">WorkSense powstał, aby temu przeciwdziałać. Nasza misja jest prosta: <b>pomóc Ci zrozumieć siebie, wesprzeć Cię psychologicznie i nauczyć Cię pracować w zdrowy, świadomy sposób.</b></p>
+                        <p className="w-full text-lg">WorkSense powstał, aby temu przeciwdziałać. Nasza misja jest prosta: <b>pomóc Ci zrozumieć siebie, wesprzeć Cię i nauczyć Cię pracować w zdrowy, świadomy sposób.</b></p>
                     </div>
 
                     <div className="md:ml-6 md:flex-0">

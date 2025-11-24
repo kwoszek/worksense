@@ -137,8 +137,8 @@ const prewencja = [
   return (
     <DefaultLayout>
 
-      <div className="grid place-items-start w-full grid-cols-2 p-20">
-      <div className="  px-5 mb-25 p-10">
+      <div className="grid place-items-start w-full grid-cols-1 md:grid-cols-2 p-5 md:p-20">
+      <div className="  px-5 mb-10 md:mb-25 p-10">
      
         <h2 className="text-4xl opacity-100 mt-3">Przeglądy</h2>
       
@@ -149,7 +149,7 @@ const prewencja = [
         ))}
        
      </div>
-     <div className="  px-5 mb-25 p-10">
+     <div className="  px-5 mb-10 md:mb-25 p-10">
      
         <h2 className="text-4xl opacity-100 mt-3">Badania</h2>
       
@@ -160,7 +160,7 @@ const prewencja = [
         ))}
        
      </div>
-      <div className=" px-5 mb-25 p-10">
+      <div className=" px-5 mb-10 md:mb-25 p-10">
      
         <h2 className="text-4xl opacity-100 mt-3">Czynniki ryzyka, konsekwencje i mechanizmy</h2>
       
@@ -171,7 +171,7 @@ const prewencja = [
         ))}
        
      </div>
-     <div className=" px-5 mb-25 p-10">
+     <div className=" px-5 mb-10 md:mb-25 p-10">
      
         <h2 className="text-4xl opacity-100 mt-3">Prewencja</h2>
       

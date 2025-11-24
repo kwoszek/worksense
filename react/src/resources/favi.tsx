@@ -26,7 +26,7 @@ export const Favi: React.FC<FaviProps> = ({ title, width, height, ...props }) =>
          y="0"
          transform="scale(0.92787498,1.0777314)"
          fill="#ffffff"
-         fontFamily="Inter"
+         fontFamily="var(--default-font-family)"
          fontSize="36.5863px"
          fontWeight="bold"
          letterSpacing="1.04042px"
