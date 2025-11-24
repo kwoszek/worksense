@@ -32,9 +32,9 @@ export default function Landing(){
     return (
         <>
          <DefaultLayout>
-            <div className="min-h-screen scroll-smooth">
-            <div className="flex flex-col md:flex-row justify-center items-start gap-10 p-6 mt-10 md:mt-25 h-[75svh]">
-                <div className="w-full md:w-1/3 flex flex-col gap-6   ">
+            <div className=" min-h-screen scroll-smooth">
+            <div className="flex flex-col md:flex-row justify-center items-center gap-10 p-6 mt-10 md:mt-25 h-[80svh]">
+                <div className="w-full md:w-1/3 flex flex-col gap-6  relative md:-top-[5vw] ">
                 <div className="md:translate-x-20 md:-translate-y-15">
                     <h1 className="text-4xl md:text-8xl font-bold mb-0">WorkSense</h1>
                 <h2 className="text-lg md:text-xl self-start">Twoje miejsce na zdrowszą pracę i naukę</h2>
@@ -48,10 +48,10 @@ export default function Landing(){
                 </div>
                 </div>
 
-                <img src={Mockup3Devices} alt="image of 3 devices with our website shown on them" className="w-full md:w-1/2" />
+                <img src={Mockup3Devices} alt="image of 3 devices with our website shown on them" className="w-full md:w-1/2 " />
 
             </div>
-            <section className="w-full max-w-screen-lg mx-auto mt-12 px-4 md:px-0">
+            <section className="w-full max-w-screen-lg mx-auto mt-12 px-4 sm:px-10">
                 <h2 className="text-4xl md:text-5xl font-bold mb-6">Dlaczego stworzyliśmy WorkSense?</h2>
 
                 <div className="flex flex-col md:flex-row items-center gap-6">
@@ -74,7 +74,7 @@ export default function Landing(){
             </section>
              <section className="w-full md:w-8/10 mx-auto mt-30 px-4 md:px-0">
                 <h2 className="text-5xl font-bold mb-6">Co oferuje WorkSense?</h2>
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-2 text-center opacity-80">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2 text-center opacity-80">
                 <Card className=" p-3">
                     <CardHeader >
                         <h3 className="text-2xl text-center w-full">Codzienny Check-Up</h3></CardHeader>
@@ -311,11 +311,11 @@ export default function Landing(){
                                         </div>
                                 </div>
             </section>
-             <section className=" w-8/10 m-auto mt-20 sm:mt-80">
+             <section className="w-9/10 m-auto mt-20 sm:mt-80">
                 <h2 className="text-5xl font-bold mb-6 ">Plan rozwoju</h2>
-                <div className=" flex-col md:flex-row relative">
-                <div>
-                    <h3 className="text-3xl opacity-80 mb-5">Już w krótce...</h3>
+                <div className=" flex-col md:flex-row relative justify-center">
+                <div className="md:w-1/2">
+                    <h3 className="text-3xl opacity-80 mb-5 ">Już w krótce...</h3>
                     <ul className="list-disc mb-6 ml-6 text-lg">
                         <li>aplikacja mobilna,</li>
                         <li>integracja ze smartwatchami (monitoring stresu, snu, aktywności),</li>
@@ -324,7 +324,7 @@ export default function Landing(){
                         <li>webinary i zajęcia z psychologami.</li>
                     </ul>
                 </div>
-                     <img src={Group8} className="w-[90vw] md:w-auto md:h-150 right-15 -top-50 md:absolute" alt="picture of an apple watch and app store page with our app" />
+                     <img src={Group8} className="w-[90vw] md:w-1/2  right-5 -top-50 md:absolute" alt="picture of an apple watch and app store page with our app" />
                 </div>
             </section>
                  <section className="w-full md:w-8/10 mx-auto mt-20 sm:mt-60 px-4 md:px-0 text-justify">

@@ -97,8 +97,8 @@ export default function DashboardPage() {
   }
 ];
   return (
-    <DefaultLayout>
-      <div className="flex flex-wrap justify-center gap-5">
+    <DefaultLayout >
+      <div className="flex flex-wrap justify-center gap-5 px-4 md:px-0">
       <div className= "flex flex-col gap-5 w-full sm:w-1/2 min-w-0" >
       <MoodChart checkins={chartCheckins} />
     <Card className="p-5 hidden sm:block">

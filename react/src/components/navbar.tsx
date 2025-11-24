@@ -22,13 +22,13 @@ export const Navbar = () => {
   return (
     <header className="w-full">
       <div className="flex items-center justify-between mt-8 px-4 sm:px-6 lg:px-8 mb-13">
-        <h1 className="text-3xl cursor-pointer underline" onClick={() => nav("/")}>WorkSense</h1>
+        <h1 className="text-3xl cursor-pointer" onClick={() => nav("/")}>WorkSense</h1>
 
         <div className="flex items-center gap-4">
           <ThemeSwitch />
 
           {/* Desktop tabs - hidden on small screens */}
-          <div className="hidden sm:block">
+          <div className="hidden md:block">
             <Tabs aria-label="Tabs" radius="full" selectedKey={pathname} variant="bordered">
               {user && <Tab key="/dashboard" title="Dashboard" href="/dashboard" />}
               <Tab key="/forum" title="Forum" href="/forum" />
@@ -40,27 +40,29 @@ export const Navbar = () => {
 
           {/* auth / avatar */}
           {user ? (
-            <div className="hidden sm:flex items-center gap-3">
+            <div className="hidden md:flex items-center gap-3">
               <div style={{ borderRadius: 9999, padding: 2, display: 'inline-block', border: `3px solid ${getStreakColor(user?.streak)}` }}>
                 <Avatar isBordered name={user.username} src={user?.avatar ? `data:image/png;base64,${user.avatar}` : undefined} onClick={() => nav("/profile")} />
               </div>
             </div>
           ) : (
-            <div className="hidden sm:block">
+            <div className="hidden md:block">
               <Button color="success" radius="full" onPress={() => nav("/login")}>Login</Button>
             </div>
           )}
 
           {/* Mobile menu button */}
-          <div className="sm:hidden">
+          <div className="md:hidden">
             <button
               aria-label="Toggle menu"
-              onClick={() => setMobileOpen((s) => !s)}
+              onClick={() => {setMobileOpen((s) => !s)}}
               className="p-2 rounded-md border"
             >
-              <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <path d="M4 6h16M4 12h16M4 18h16" />
-              </svg>
+              <div className="flex flex-col overflow-hidden">
+              <span className={"ham a w-[25px] h-[2px] bg-foreground "+ mobileOpen.toString()}></span>
+               <span className={"ham b w-[25px] h-[2px] bg-foreground mt-1.5 "+ mobileOpen.toString()}></span>
+                <span className={"ham c w-[25px] h-[2px] bg-foreground mt-1.5 "+ mobileOpen.toString()}></span>
+                </div>
             </button>
           </div>
         </div>
@@ -68,7 +70,7 @@ export const Navbar = () => {
 
       {/* Mobile menu panel */}
       {mobileOpen && (
-        <nav className="sm:hidden border-t -mt-7">
+        <nav className="md:hidden border-t -mt-7 mobile">
             <div className="px-4 py-3 space-y-2">
              
               {user && <button onClick={() => { nav('/dashboard'); setMobileOpen(false); }} className="w-full text-left">Dashboard</button>}

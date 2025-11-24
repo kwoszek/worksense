@@ -15,8 +15,8 @@ export const Favi: React.FC<FaviProps> = ({ title, width, height, ...props }) =>
       <rect
          width="47.648041"
          height="47.648041"
-         x=""
-         y=""
+         x="0"
+         y="0"
          ry="11.989829"
          rx="11.900388"
          fill="#000000"
@@ -31,7 +31,7 @@ export const Favi: React.FC<FaviProps> = ({ title, width, height, ...props }) =>
          fontWeight="bold"
          letterSpacing="1.04042px"
       >
-         <tspan x="7.5" y="36">W</tspan>
+         <tspan x="8.5" y="36">W</tspan>
       </text>
    </svg>
 );
