@@ -56,7 +56,7 @@ function MoodChart({ checkins }: Props) {
          <HeatMap
           className="h-40 w-200 scale-125 p-5 pl-20"
           value={value}
-          style={{ color: 'success', '--rhm-rect-active': "#a9c7f5" }}
+          style={{ color: 'success', '--rhm-rect-active': "#a9c7f5" } as any}
           weekLabels={['', 'Pn', '', 'Śr', '', 'Pt', '']}
           monthLabels={['Sty', 'Lut', 'Mar', 'Kwi', 'Maj', 'Cze', 'Lip', 'Sie', 'Wrz', 'Paź', 'Lis', 'Gru']}
           startDate={startDate}
