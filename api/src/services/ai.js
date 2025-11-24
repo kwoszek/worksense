@@ -87,7 +87,7 @@ LOGIKA OCENY moodScore (wytyczne – zastosuj zdrowy rozsądek zamiast surowego 
 - Jeśli opis zawiera pozytywne elementy ("postęp", "spacer", "udało", "fajnie"), możesz podnieść o 1-2.
 - Unikaj skrajnie złego wyniku (1), bez bardzo wyraźnych przesłanek.
 - w ostatecznym wyniku najbardziej powinien liczyć się opis dnia jeśli uytkownik sam stwierdza , że czuje się dobrze lub źle, to powinno to dominować nad suchymi liczbami.
-- energia powinna stanowić 20% moodScore stres 20% a opis dnia 60%
+- energia powinna stanowić 10% moodScore stres 10% a opis dnia 80%
 
 ANALIZA PROGRESU (progressSummary):
 Porównaj średnią pierwszej połowy z drugą, ostatni wynik vs średnia globalna, oraz poziom wahań. Użyj prostych, ciepłych sformułowań wskazujących trend ("lekka poprawa", "utrzymujesz stabilność", "kilka wahań", "chwilowy spadek") i dodaj krótkie uznanie wysiłku lub konsekwencji jeśli zasadne.

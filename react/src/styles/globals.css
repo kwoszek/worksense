@@ -241,3 +241,39 @@
     color: var(--color-foreground)!important;
 
   }
+
+  .true.a{
+    transform: translate(6px, 6px);
+    rotate: 45deg;
+    
+  }
+
+  .true.b{
+    rotate: -45deg;
+  }
+
+  .true.c{
+    transform: translate(50px,0px);
+  }
+
+  
+
+
+  .ham{
+    transition: rotate 0.3s ease, transform 0.3s ease;
+  }
+
+  @keyframes slideDown {
+    from {
+      opacity: 0;
+      transform: translateY(-10%);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .mobile{
+    animation: slideDown 0.5s ease forwards;
+  }

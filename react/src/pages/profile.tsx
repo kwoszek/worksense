@@ -243,8 +243,11 @@ export default function Profile() {
                 </ButtonGroup>
               </div>
             )}
+            {!editing && 
+            <>
             <Button size="sm" color="danger" variant="flat" onPress={() => logout().catch(() => {})}>Wyloguj</Button>
-            <Button size="sm" color="danger" variant="flat" onPress={() => setShowDeleteConfirm(true)}>Usuń konto</Button>
+            <Button size="sm" color="danger" variant="flat" onPress={() => setShowDeleteConfirm(true)}>Usuń konto</Button></>}
+            
           </div>
         </div>
 
@@ -284,17 +287,19 @@ export default function Profile() {
               {profileMsg && <div className="text-sm opacity-70 mb-3">{profileMsg}</div>}
               <div className="flex items-center justify-between mb-3">
                 <h3 className="text-lg opacity-70 m-0">Odznaki</h3>
-                <div className="flex items-center gap-2">
+                <div className="flex items-center justify-between gap-2">
                   {!featuring && (
                     <Button size="sm" variant="flat" onPress={startFeaturing} isDisabled={badgesLoading || !badgeList?.length}>Wyróżnij</Button>
                   )}
+                  <div className="flex items-center">
                   {featuring && (
                     <ButtonGroup>
                       <Button size="sm" variant="flat" color="warning" onPress={cancelFeaturing}>Anuluj</Button>
                       <Button size="sm" variant="flat" color="success" isDisabled={savingFeatured} onPress={handleSaveFeatured}>{savingFeatured ? 'Zapisywanie...' : 'Zapisz'}</Button>
                     </ButtonGroup>
                   )}
-                  <Button size="sm" variant="flat" onPress={() => setShowAllBadges(true)}>Pokaż wszystkie odznaki</Button>
+                  <Button size="sm" variant="flat" onPress={() => setShowAllBadges(true)}>Pokaż wszystkie</Button>
+                </div>
                 </div>
               </div>
               {featureMsg && (

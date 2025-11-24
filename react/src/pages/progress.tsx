@@ -16,6 +16,7 @@ import { Divider } from "@heroui/divider";
 import { useGetLatestAnalysisQuery } from "@/services/analysisApi";
 import {today, getLocalTimeZone, parseDate} from "@internationalized/date";
 import ReactApexChart from "react-apexcharts";
+import {I18nProvider} from "@react-aria/i18n";
 
 
 
@@ -419,6 +420,7 @@ export default function ProgressPage() {
         </CardHeader>
         <CardBody>
             <div className="checkin-calendar flex justify-center pt-2">
+                <I18nProvider locale="pl-PL-u-ca-catholic">
               <Calendar
                 showMonthAndYearPickers
                  maxValue={today(getLocalTimeZone())}
@@ -440,6 +442,7 @@ export default function ProgressPage() {
                   if (checkinByDate && checkinByDate[key]) openDay(key);
                 }}
               />
+              </I18nProvider>
 
               <style>{`.checkin-calendar [data-slot="cell-button"][data-unavailable="false"]{background-color: rgba(16,185,129,0.12); border-radius: 0.375rem;} .checkin-calendar [data-slot="cell-button"][data-unavailable="true"]{opacity:0.6;}`}</style>
             </div>

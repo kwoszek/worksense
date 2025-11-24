@@ -142,8 +142,8 @@ export default function FocusPage() {
   return (
     <DefaultLayout>
       
-      <section className="flex flex-col items-center justify-center gap-6 py-8 md:py-10">
-        <Card className="w-full max-w-xl p-6  mb-5">
+      <section className="flex flex-col items-center justify-center gap-6 px-4 md:px-0 py-8 md:py-10 ">
+        <Card className="w-full  max-w-lg p-6  mb-5">
           <div className="flex items-center justify-between">
             <h2 className="text-xl font-semibold">Focus</h2>
              
