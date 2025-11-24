@@ -1,0 +1,11 @@
+User-agent: *
+Allow: /
+
+# Keep crawlers focused on the public frontend
+Disallow: /api/
+Disallow: /admin/
+Disallow: /auth/
+Disallow: /dashboard/
+Disallow: /progress/
+
+Sitemap: https://worksense.pl/sitemap.xml

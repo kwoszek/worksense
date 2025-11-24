@@ -5,7 +5,6 @@ import {Comment as CommentType, useLikeCommentMutation, useUnlikeCommentMutation
 import { useState } from 'react';
 import { useSelector } from 'react-redux';
 import { selectAuthUser } from '@/features/auth/authSlice';
-import FeaturedBadgesRow from '@/components/FeaturedBadgesRow';
 
 
 function Comment(data: CommentType){

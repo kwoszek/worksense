@@ -265,7 +265,7 @@ router.delete('/posts/:id', authMiddleware, async (req, res, next) => {
   try {
     const exists = await db.query('SELECT id, userId FROM posts WHERE id = ?', [postId]);
     if (!exists.rowCount) return res.status(404).json({ error: 'Post not found' });
-    if (exists.rows[0].userId !== userId) return res.status(403).json({ error: 'Not authorized' });
+    if (exists.rows[0].userId !== userId) return res.status(403).json({ error: 'Nieautoryzowany' });
 
     // Remove likes and comments related to this post (if not handled by FK cascade)
     try { await db.query('DELETE FROM post_likes WHERE postId = ?', [postId]); } catch (e) { /* ignore */ }
@@ -281,7 +281,7 @@ router.delete('/posts/:id', authMiddleware, async (req, res, next) => {
 router.get('/posts/user/:id', optionalAuth, async (req, res, next) => {
   try {
     const urlUserId = Number(req.params.id);
-    if (Number.isNaN(urlUserId)) return res.status(400).json({ error: 'Invalid user id' });
+    if (Number.isNaN(urlUserId)) return res.status(400).json({ error: 'Niepoprawny użytkownik' });
 
     const offset = Number(req.query.offset || 0);
     const limit = Number(req.query.limit || 20);
@@ -427,7 +427,7 @@ router.post('/posts/:id/comments', async (req, res, next) => {
 router.get('/posts/:id/comments', optionalAuth, async (req, res, next) => {
   try {
     const postId = Number(req.params.id);
-    if (Number.isNaN(postId)) return res.status(400).json({ error: 'Invalid post id' });
+    if (Number.isNaN(postId)) return res.status(400).json({ error: 'Nieprawidłowy post' });
 
     const offset = Number(req.query.offset || 0);
     const limit = Number(req.query.limit || 20);
@@ -502,7 +502,7 @@ router.post('/checkins', authMiddleware, async (req, res, next) => {
       stress < 0 || stress > 10 ||
       energy < 0 || energy > 10
     ) {
-      return res.status(400).json({ error: 'stress and energy must be numbers 0–10' });
+      return res.status(400).json({ error: 'Stres i energia muszą być liczbami od 0 do 10' });
     }
 
     const today = new Date();
@@ -514,7 +514,7 @@ router.post('/checkins', authMiddleware, async (req, res, next) => {
     const existsQ = `SELECT id FROM checkins WHERE userId = ? AND date = ? LIMIT 1`;
     const exists = await db.query(existsQ, [userId, todayStr]);
     if (exists.rowCount) {
-      return res.status(400).json({ error: 'You already submitted a check-in for today.' });
+      return res.status(400).json({ error: 'Już przesłałeś dzisiejszy check-in.' });
     }
 
     const date = todayStr; // zapis jako DATE
@@ -539,7 +539,6 @@ router.post('/checkins', authMiddleware, async (req, res, next) => {
       moodScores,
     });
 
-    console.log('AI result:', aiResult);
 
     // zapisz wynik AI w osobnej tabeli
     const aiInsertQ = `INSERT INTO checkin_ai_analysis(userId, checkinId, moodScore, message, progressSummary)
@@ -567,11 +566,11 @@ module.exports = router;
 router.post('/posts/:id/like', authMiddleware, async (req, res, next) => {
   const userId = req.user.id;
   const postId = Number(req.params.id);
-  if (Number.isNaN(postId)) return res.status(400).json({ error: 'Invalid post id' });
+  if (Number.isNaN(postId)) return res.status(400).json({ error: 'Nieprawidłowy post' });
   try {
     // Ensure post exists
     const exists = await db.query('SELECT id, likes FROM posts WHERE id = ?', [postId]);
-    if (!exists.rowCount) return res.status(404).json({ error: 'Post not found' });
+    if (!exists.rowCount) return res.status(404).json({ error: 'Nie znaleziono posta' });
     // Insert like if not exists
     // Try insert, ignore duplicate error
     try {
@@ -601,10 +600,10 @@ router.delete('/posts/:id/like', authMiddleware, async (req, res, next) => {
 router.post('/comments/:id/like', authMiddleware, async (req, res, next) => {
   const userId = req.user.id;
   const commentId = Number(req.params.id);
-  if (Number.isNaN(commentId)) return res.status(400).json({ error: 'Invalid comment id' });
+  if (Number.isNaN(commentId)) return res.status(400).json({ error: 'Niepoprawny komentarz' });
   try {
     const exists = await db.query('SELECT id, likes FROM comments WHERE id = ?', [commentId]);
-    if (!exists.rowCount) return res.status(404).json({ error: 'Comment not found' });
+    if (!exists.rowCount) return res.status(404).json({ error: 'Nie znaleziono komentarza' });
     try {
       await db.query('INSERT INTO comment_likes(userId, commentId) VALUES(?,?)',[userId, commentId]);
       await db.query('UPDATE comments SET likes = likes + 1 WHERE id = ?', [commentId]);

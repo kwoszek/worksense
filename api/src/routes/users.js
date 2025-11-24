@@ -48,7 +48,7 @@ function formatBytes(size) {
 
 function enforceAvatarDbLimit(buffer) {
   if (buffer.length > MAX_AVATAR_DB_BYTES) {
-    const err = new Error(`Avatar too large after compression (> ${formatBytes(MAX_AVATAR_DB_BYTES)} allowed, MySQL max_allowed_packet ${formatBytes(MYSQL_MAX_PACKET_BYTES)})`);
+    const err = new Error(`Avatar przekracza maksymalny rozmiar do zapisania`);
     err.statusCode = 413;
     throw err;
   }
@@ -166,7 +166,6 @@ async function computeAndUpdateStreak(userId) {
   const datesSet = new Set(dateStrings);
 
   const today = new Date();
-  const todayKey = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
   const lastKey = dateStrings[0];
   const [ly, lm, ld] = lastKey.split('-').map(n => parseInt(n, 10));
   const lastDate = new Date(ly, lm - 1, ld);
@@ -335,7 +334,7 @@ router.get('/me', authMiddleware, async (req, res, next) => {
   try {
     const userId = req.user.id;
     const incoming = req.body?.badgeKeys ?? req.body?.badges ?? [];
-    if (!Array.isArray(incoming)) return res.status(400).json({ error: 'badgeKeys must be an array' });
+    if (!Array.isArray(incoming)) return res.status(400).json({ error: 'Niepoprawny format odznak' });
 
     const normalized = [...new Set(
       incoming
@@ -394,7 +393,7 @@ router.delete('/me', authMiddleware, async (req, res, next) => {
 
       // Fetch current user
       const curRes = await db.query('SELECT id, username, email, avatar, streak FROM users WHERE id = ? LIMIT 1', [userId]);
-      if (!curRes.rowCount) return res.status(404).json({ error: 'User not found' });
+      if (!curRes.rowCount) return res.status(404).json({ error: 'Nie znaleziono użytkownika' });
       const current = curRes.rows[0];
 
       const nextUsername = typeof username === 'string' && username.trim().length ? username.trim() : current.username;
@@ -403,20 +402,20 @@ router.delete('/me', authMiddleware, async (req, res, next) => {
       // Uniqueness checks if changed
       if (nextUsername !== current.username) {
         const dupU = await db.query('SELECT 1 FROM users WHERE username = ? AND id <> ? LIMIT 1', [nextUsername, userId]);
-        if (dupU.rowCount) return res.status(400).json({ error: 'Username already taken' });
+        if (dupU.rowCount) return res.status(400).json({ error: 'Nazwa użytkownika jest już zajęta' });
       }
       if (nextEmail !== current.email) {
         const dupE = await db.query('SELECT 1 FROM users WHERE email = ? AND id <> ? LIMIT 1', [nextEmail, userId]);
-        if (dupE.rowCount) return res.status(400).json({ error: 'Email already taken' });
+        if (dupE.rowCount) return res.status(400).json({ error: 'Email jest już zajęty' });
       }
 
       let avatarBuffer = current.avatar || null;
       if (typeof avatarBase64 === 'string' && avatarBase64.length) {
         const cleaned = avatarBase64.replace(/^data:image\/[^;]+;base64,/, '');
         let raw;
-        try { raw = Buffer.from(cleaned, 'base64'); } catch { return res.status(400).json({ error: 'Invalid avatar image data' }); }
+        try { raw = Buffer.from(cleaned, 'base64'); } catch { return res.status(400).json({ error: 'Nieprawidłowe dane obrazu awatara' }); }
         if (raw.length > AVATAR_UPLOAD_MAX_BYTES) {
-          return res.status(413).json({ error: `Avatar too large (> ${formatBytes(AVATAR_UPLOAD_MAX_BYTES)})` });
+          return res.status(413).json({ error: `Rozmiar awatara jest za duży` });
         }
         if (sharp) {
           try {
@@ -507,7 +506,7 @@ router.put('/me/featured-badges', authMiddleware, async (req, res, next) => {
   try {
     const userId = req.user.id;
     const incoming = req.body?.badgeKeys ?? req.body?.badges ?? [];
-    if (!Array.isArray(incoming)) return res.status(400).json({ error: 'badgeKeys must be an array' });
+    if (!Array.isArray(incoming)) return res.status(400).json({ error: 'Niepoprawny format odznak' });
 
     const normalized = [...new Set(
       incoming
@@ -562,14 +561,13 @@ router.get('/badges', async (req, res, next) => {
 router.post('/refresh', async (req, res, next) => {
   try {
     const rt = req.cookies?.rt || req.body?.refreshToken;
-    if (!rt) return res.status(401).json({ error: 'No refresh token' });
+    if (!rt) return res.status(401).json({ error: 'Brak tokenu odświeżania' });
 
-    if (!(await isRefreshTokenActive(rt))) return res.status(401).json({ error: 'Invalid refresh token' });
+    if (!(await isRefreshTokenActive(rt))) return res.status(401).json({ error: 'Nieprawidłowy token odświeżania' });
 
     const decoded = verifyRefresh(rt);
     const r = await db.query('SELECT id, username, email, avatar, streak FROM users WHERE id = ?', [decoded.sub]);
-    if (!r.rowCount) return res.status(401).json({ error: 'Invalid refresh token' });
-
+    if (!r.rowCount) return res.status(401).json({ error: 'Nieprawidłowy token odświeżania' });
     const row = r.rows[0];
     const user = {
       id: row.id,

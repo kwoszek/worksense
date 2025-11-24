@@ -150,7 +150,7 @@ export default function FocusPage() {
             <div className="text-sm opacity-80">Tryb: {mode === "work" ? "Praca" : mode === "short" ? "Krótka przerwa" : "Długa przerwa"}</div>
           </div>
           <div className="flex gap-3 justify-center mt-2">
-              <Link onPress={onOpen} underline="always" color="foreground">O technice</Link>
+              <Link onPress={onOpen} className="hover:cursor-pointer" underline="always" color="foreground">O technice</Link>
               <Link href="/focus/settings" underline="always" color="foreground">Ustawienia</Link>
             </div>
 

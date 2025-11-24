@@ -1,4 +1,3 @@
-import { Card, CardBody, CardHeader } from "@heroui/card";
 import { Divider } from "@heroui/divider";
 import DefaultLayout from "@/layouts/default";
 import Article from "@/components/article";

@@ -26,6 +26,7 @@ export interface RegisterRequest {
   username: string;
   email: string;
   password: string;
+  captchaToken: string;
 }
 export interface AuthResponse {
   user: AuthUser;

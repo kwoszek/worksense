@@ -35,12 +35,12 @@ app.use('/api/analysis', analysisRouter);
 app.get('/', (_req, res) => res.json({ ok: true }));
 
 app.use((req, res) => {
-  res.status(404).json({ error: 'Not Found' });
+  res.status(404).json({ error: 'Nie znaleziono' });
 });
 
 app.use((err, req, res, next) => {
   console.error(err);
-  res.status(500).json({ error: err.message || 'Server error' });
+  res.status(500).json({ error: err.message || 'Błąd serwera' });
 });
 
 app.listen(PORT, async () => {

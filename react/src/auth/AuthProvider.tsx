@@ -12,6 +12,7 @@ import {
 } from '@/services/usersApi';
 import { useDispatch } from 'react-redux';
 import { setCredentials } from '@/features/auth/authSlice';
+const siteKey = import.meta.env.VITE_RECAPTCHA_SITE_KEY;
 
 type AuthContextType = {
   user: AuthUser | null;
@@ -72,7 +73,7 @@ export const AuthProvider: React.FC<React.PropsWithChildren> = ({ children }) =>
   };
 
   const register = async (username: string, email: string, password: string) => {
-    const res = await registerMut({ username, email, password }).unwrap();
+    const res = await registerMut({ username, email, password, captchaToken: siteKey }).unwrap();
     setAccessToken(res.accessToken);
     setToken(res.accessToken);
     setUser(res.user);
