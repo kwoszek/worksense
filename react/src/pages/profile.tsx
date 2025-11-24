@@ -243,8 +243,11 @@ export default function Profile() {
                 </ButtonGroup>
               </div>
             )}
+            {!editing && 
+            <>
             <Button size="sm" color="danger" variant="flat" onPress={() => logout().catch(() => {})}>Wyloguj</Button>
-            <Button size="sm" color="danger" variant="flat" onPress={() => setShowDeleteConfirm(true)}>Usuń konto</Button>
+            <Button size="sm" color="danger" variant="flat" onPress={() => setShowDeleteConfirm(true)}>Usuń konto</Button></>}
+            
           </div>
         </div>
 

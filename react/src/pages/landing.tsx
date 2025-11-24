@@ -271,7 +271,13 @@ export default function Landing(){
                                 <Divider />
                                 <CardBody className="p-6 md:p-10">
                                         <div className="flex flex-col md:flex-row gap-6 md:gap-10 items-center justify-center">
-                                          <h3 className="text-xl">Dbasz o siebie = zdobywasz odznaki. Nawyki stają się przyjemniejsze dzięki elementom grywalizacji.</h3>
+                                             <div className="md:flex-1">
+                                        <h3 className="text-xl">Dbasz o siebie = zdobywasz odznaki. Nawyki stają się przyjemniejsze dzięki elementom grywalizacji.</h3>
+                                       
+                                        <p className="mt-3">Możesz także zdobyć obramówkę do avatara w zależności od twojej aktualnej serii serii.</p>
+                                        </div>
+                                          
+
                                         <img src={Badges} alt="zdjęcie sekcji z odznakami" className="w-full md:w-3/5 mb-5 shadow-lg/20 shadow-success rounded-lg" />
                                         </div>
                                         
@@ -324,7 +330,7 @@ export default function Landing(){
                         <li>webinary i zajęcia z psychologami.</li>
                     </ul>
                 </div>
-                     <img src={Group8} className="w-[90vw] md:w-1/2  right-5 -top-50 md:absolute" alt="picture of an apple watch and app store page with our app" />
+                     <img src={Group8} className="w-[90vw] md:w-1/2 max-h-150 right-5 -top-50 md:absolute object-contain" alt="picture of an apple watch and app store page with our app" />
                 </div>
             </section>
                  <section className="w-full md:w-8/10 mx-auto mt-20 sm:mt-60 px-4 md:px-0 text-justify">
