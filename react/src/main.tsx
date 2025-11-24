@@ -6,6 +6,12 @@ import App from "./App.tsx";
 import { Provider } from "./provider.tsx";
 import "@/styles/globals.css";
 
+if (typeof window !== 'undefined') {
+  console.log = () => {};
+  console.warn = () => {};
+  console.error = () => {};
+}
+
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
     <BrowserRouter>

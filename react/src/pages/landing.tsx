@@ -1,10 +1,8 @@
-
 import DefaultLayout from "@/layouts/default";
 import Mockup3Devices from "../resources/Mockup3Devices.webp";
 import {Button, ButtonGroup} from "@heroui/button";
 import {Card, CardHeader, CardBody} from "@heroui/card";
 import {Divider} from "@heroui/divider";
-import {Image} from "@heroui/image";
 import forumScr from "../resources/forumScr.webp";
 import focusScr from "../resources/FocusScr.webp";
 import checkInScr from "../resources/checkInScr.webp";
@@ -49,13 +47,7 @@ export default function Landing(){
                 </div>
                 </div>
 
-                <Image
-                    removeWrapper
-                    loading="lazy"
-                    src={Mockup3Devices}
-                    alt="image of 3 devices with our website shown on them"
-                    className="w-full md:w-1/2"
-                />
+                <img src={Mockup3Devices} alt="image of 3 devices with our website shown on them" className="w-full md:w-1/2 " />
 
             </div>
             <section className="w-full max-w-screen-lg mx-auto mt-12 px-4 sm:px-10">
@@ -159,13 +151,7 @@ export default function Landing(){
                                                 <li>wsparcie w budowaniu samoświadomości</li>
                                         </ul>
                                                 </div>
-                                                <Image
-                                                    removeWrapper
-                                                    loading="lazy"
-                                                    src={checkInScr}
-                                                    alt="zdjęcie sekcji check in"
-                                                    className="w-full md:w-3/5 mb-5 shadow-lg/20 shadow-success rounded-lg"
-                                                />
+                                                <img src={checkInScr} alt="zdjęcie sekcji check in" className="w-full md:w-3/5 mb-5 shadow-lg/20 shadow-success rounded-lg" />
                     
                                         </div>
                                 </CardBody>
@@ -191,13 +177,7 @@ export default function Landing(){
                                                 <li>zadania na poprawę energii i koncentracji.</li>
                                         </ul>
                                         </div>
-                                            <Image
-                                                removeWrapper
-                                                loading="lazy"
-                                                src={Progress}
-                                                alt=""
-                                                className="w-full md:w-3/5 mb-5 shadow-lg/20 shadow-success rounded-lg"
-                                            />
+                                        <img src={Progress} alt=""  className="w-full md:w-3/5 mb-5 shadow-lg/20 shadow-success rounded-lg"/>
                                         </div>
                                 </CardBody>
                             </Card>
@@ -223,13 +203,7 @@ export default function Landing(){
             
                                         </ul>
                                         </div>
-                                                                                <Image
-                                                                                    removeWrapper
-                                                                                    loading="lazy"
-                                                                                    src={focusScr}
-                                                                                    alt="zdjęcie zakładki focus"
-                                                                                    className="w-full md:w-3/5 mb-5 shadow-lg/20 shadow-success rounded-lg"
-                                                                                />
+                                        <img src={focusScr} alt="zdjęcie zakładki focus" className="w-full md:w-3/5 mb-5 shadow-lg/20 shadow-success rounded-lg" />
                                         </div>
                     
                                 </CardBody>
@@ -248,13 +222,7 @@ export default function Landing(){
                                         <div className="md:flex-1">
                                         <h3 className="text-lg m-2 text-center md:text-left">Ludzie, którzy przeszli przez to samo, najlepiej rozumieją Twoją sytuację. Rozmawiaj, dziel się doświadczeniami, pomagaj innym.</h3>
                                         </div>
-                                            <Image
-                                                removeWrapper
-                                                loading="lazy"
-                                                src={forumScr}
-                                                alt="zdjęcie naszego forum"
-                                                className="w-full md:w-3/5 mb-5 m-auto shadow-lg/20 shadow-success rounded-lg"
-                                            />
+                                        <img src={forumScr} alt="zdjęcie naszego forum" className="w-full md:w-3/5 mb-5 m-auto shadow-lg/20 shadow-success rounded-lg"/>
                                         </div>
                                         
                                        
@@ -284,13 +252,7 @@ export default function Landing(){
                                         </ul>
                                         <p className="mt-3">Motywacja rośnie, gdy widzisz realny progres.</p>
                                         </div>
-                                            <Image
-                                                removeWrapper
-                                                loading="lazy"
-                                                src={stats}
-                                                alt="zdjęcie zakładki focus"
-                                                className="w-full md:w-3/5 mb-5 shadow-lg/20 shadow-success rounded-lg"
-                                            />
+                                        <img src={stats} alt="zdjęcie zakładki focus" className="w-full md:w-3/5 mb-5 shadow-lg/20 shadow-success rounded-lg" />
                                         </div>
 
                                         
@@ -315,13 +277,8 @@ export default function Landing(){
                                         </div>
                                           
 
-    <Image
-        removeWrapper
-        loading="lazy"
-        src={Badges}
-        alt="zdjęcie sekcji z odznakami"
-        className="w-full md:w-3/5 mb-5 shadow-lg/20 shadow-success rounded-lg"
-    />                                        </div>
+                                        <img src={Badges} alt="zdjęcie sekcji z odznakami" className="w-full md:w-3/5 mb-5 shadow-lg/20 shadow-success rounded-lg" />
+                                        </div>
                                         
                     
                                 </CardBody>
@@ -372,13 +329,7 @@ export default function Landing(){
                         <li>webinary i zajęcia z psychologami.</li>
                     </ul>
                 </div>
-                                         <Image
-                                             removeWrapper
-                                             loading="lazy"
-                                             src={Group8}
-                                             className="w-[90vw] md:w-1/2 max-h-150 right-5 -top-50 md:absolute object-contain"
-                                             alt="picture of an apple watch and app store page with our app"
-                                         />
+                     <img src={Group8} className="w-[90vw] md:w-1/2 max-h-150 right-5 -top-50 md:absolute object-contain" alt="picture of an apple watch and app store page with our app" />
                 </div>
             </section>
                  <section className="w-full md:w-8/10 mx-auto mt-20 sm:mt-60 px-4 md:px-0 text-justify">
