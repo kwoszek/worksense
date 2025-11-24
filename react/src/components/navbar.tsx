@@ -42,7 +42,7 @@ export const Navbar = () => {
           {user ? (
             <div className="hidden md:flex items-center gap-3">
               <div style={{ borderRadius: 9999, padding: 2, display: 'inline-block', border: `3px solid ${getStreakColor(user?.streak)}` }}>
-                <Avatar isBordered name={user.username} src={user?.avatar ? `data:image/png;base64,${user.avatar}` : undefined} onClick={() => nav("/profile")} />
+                <Avatar className="hover:cursor-pointer hover:scale-110 transition-transform duration-200" isBordered name={user.username} src={user?.avatar ? `data:image/png;base64,${user.avatar}` : undefined} onClick={() => nav("/profile")} />
               </div>
             </div>
           ) : (
