@@ -366,7 +366,7 @@ export default function Profile() {
                             </div>
                               <div className="text-sm opacity-70">❤ {p.likes} • {p.comments ? p.comments.length : 0} kom.</div>
                           </div>
-                            <div className="mt-2 text-sm">{p.content ? (p.content.length > 300 ? p.content.slice(0, 300) + '…' : p.content) : ''}</div>
+                            <div className="mt-2 text-sm whitespace-pre-wrap">{formatPostPreview(p.content)}</div>
                             {p.userid === user?.id && (
                               <div className="mt-3 flex justify-end">
                                 <Button size="sm" color="danger" variant="flat" onPress={async () => {
@@ -527,5 +527,12 @@ export default function Profile() {
       </div>
     </DefaultLayout>
   );
+}
+
+function formatPostPreview(content?: string | null, limit = 300) {
+  if (!content) return '';
+  const normalized = content.replace(/<br\s*\/?>/gi, '\n');
+  if (normalized.length <= limit) return normalized;
+  return `${normalized.slice(0, limit).trimEnd()}…`;
 }
 
