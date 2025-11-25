@@ -10,6 +10,8 @@ import { useLoginMutation, useRegisterMutation, useRequestPasswordResetMutation,
 import { useNavigate, useLocation, Navigate } from "react-router-dom";
 import { useSelector } from 'react-redux';
 import { selectAuthUser } from '@/features/auth/authSlice';
+import {Checkbox} from "@heroui/checkbox";
+import { Link } from "react-router-dom";
 
 export const EyeSlashFilledIcon = (props: React.SVGProps<SVGSVGElement>) => {
   return (
@@ -260,6 +262,7 @@ export default function LoginPage() {
                                     value={confirmNewPw}
                                     onChange={e=>setConfirmNewPw(e.target.value)}
                                 />
+                               
                                 {setPwErrors.length>0 && <ul className="text-xs text-red-600 list-disc pl-4">{setPwErrors.map(e=> <li key={e}>{e}</li>)}</ul>}
                                 {resetError && <p className="text-sm text-red-600">{extractErrorMessage(resetError)}</p>}
                                 <div className="flex gap-2 w-full justify-center">
@@ -375,6 +378,7 @@ export default function LoginPage() {
         </button>
       }
                                 />
+                                 <Checkbox>  Rejestrując się, akceptuję <Link to='/eula'>Regulamin</Link> i <Link to='/privacy'>Politykę prywatności</Link>.</Checkbox>
                                 <div className="mt-2" ref={recaptchaContainerRef} />
                                 {passError && !captchaToken && <p className="text-xs text-red-600">Captcha wymagana</p>}
                                 {registerError && <p className="text-sm text-red-600">{extractErrorMessage(registerError)}</p>}

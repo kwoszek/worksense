@@ -46,9 +46,8 @@ export default function DefaultLayout({ children }: { children: React.ReactNode 
               </div>
             </div>
             <div className="mt-4 text-center text-sm text-muted-foreground mb-5">
-              <span className="">Terms</span>
-              <span className="ml-5">Privacy</span>
-               
+              <Link underline="always" color="foreground" href="/terms">Terms</Link>
+              <Link underline="always" color="foreground" className="ml-5" href="/privacy">Privacy</Link>
             </div>
           </div>
         </div>

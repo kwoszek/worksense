@@ -9,6 +9,8 @@ import LoginPage from "./pages/login";
 import RequireAuth from "@/features/auth/RequireAuth";
 import Profile from "@/pages/profile";
 import Landing from "@/pages/landing";
+import TermsPage from "@/pages/terms";
+import PrivacyPage from "@/pages/privacy";
 
 
 function App() {
@@ -23,7 +25,9 @@ function App() {
      
   <Route path="/focus" element={<FocusPage />} />
   <Route path="/focus/settings" element={<PomodoroSettingsPage />} />
-      <Route path="/profile" element={<RequireAuth><Profile /></RequireAuth>} />
+  <Route path="/profile" element={<RequireAuth><Profile /></RequireAuth>} />
+  <Route path="/terms" element={<TermsPage />} />
+  <Route path="/privacy" element={<PrivacyPage />} />
       <Route path="/" element={<Navigate to="/dashboard" replace />} />
       <Route path="*" element={<Navigate to="/dashboard" replace />} />
     </Routes>
