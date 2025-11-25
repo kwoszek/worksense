@@ -102,6 +102,8 @@ export default function LoginPage() {
 
   const toggleVisibility = () => setIsVisible(!isVisible);
 
+  const checkboxRef = useRef<HTMLInputElement | null>(null);
+
     // Load reCAPTCHA script & render checkbox for register form
     useEffect(() => {
         if (mode !== 'register') return; // only when register tab active
@@ -377,9 +379,34 @@ export default function LoginPage() {
           )}
         </button>
       }
-                                />
-                                 <Checkbox>  Rejestrując się, akceptuję <Link to='/eula'>Regulamin</Link> i <Link to='/privacy'>Politykę prywatności</Link>.</Checkbox>
-                                <div className="mt-2" ref={recaptchaContainerRef} />
+      />
+      <div className="flex gap-2">
+    <Checkbox required ref={checkboxRef}/>
+    <p className="hover:cursor-pointer" onClick={()=>checkboxRef.current?.click()}>
+  Rejestrując się, akceptuję{" "}
+  <Link
+    className="underline"
+    to="/terms"
+    onClick={(e) => {
+      e.stopPropagation();
+    }}
+  >
+    Regulamin
+  </Link> 
+  {" "}i{ " "} 
+  <Link
+    className="underline"
+    to="/privacy"
+    onClick={(e) => {
+      e.stopPropagation();
+    }}
+  >
+    Politykę prywatności
+  </Link>.
+
+      </p>
+      </div>
+                                <div className="mt-2 mx-auto" ref={recaptchaContainerRef} />
                                 {passError && !captchaToken && <p className="text-xs text-red-600">Captcha wymagana</p>}
                                 {registerError && <p className="text-sm text-red-600">{extractErrorMessage(registerError)}</p>}
                                 <div className="flex gap-2 w-full justify-center">
