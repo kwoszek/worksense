@@ -1,6 +1,7 @@
 import {Card, CardHeader, CardBody} from "@heroui/card";
 import DefaultLayout from "@/layouts/default";
 import { Link } from "react-router-dom";
+import { useEffect, useState } from 'react';
 
 import { Divider } from "@heroui/divider";
 import Post from "@/components/post";
@@ -10,6 +11,8 @@ import { useSelector } from "react-redux";
 import { selectAuthUser } from "@/features/auth/authSlice";
 import { useGetPostsQuery } from "@/services/forumApi";
 import { useGetAnalysesQuery } from "@/services/analysisApi";
+import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter } from "@heroui/modal";
+import { Button } from "@heroui/button";
 
 export default function DashboardPage() {
   // current date in Europe/Warsaw in YYYY-MM-DD format
@@ -33,6 +36,23 @@ export default function DashboardPage() {
   const { data: analyses } = useGetAnalysesQuery();
   const latestAnalysis = analyses && analyses.length ? analyses[0] : null;
   const hasToday = !!checkins?.find((c) => c.userid === user?.id && c.date.slice(0,10) === today);
+  const [showFirstLoginModal, setShowFirstLoginModal] = useState(false);
+
+  useEffect(() => {
+    if (!user?.id || typeof window === 'undefined') return;
+    const key = `ws_first_login_seen_${user.id}`;
+    const hasSeen = localStorage.getItem(key);
+    if (!hasSeen) {
+      setShowFirstLoginModal(true);
+    }
+  }, [user?.id]);
+
+  const handleDismissFirstLogin = () => {
+    if (user?.id && typeof window !== 'undefined') {
+      localStorage.setItem(`ws_first_login_seen_${user.id}`, 'true');
+    }
+    setShowFirstLoginModal(false);
+  };
   
 
   const chartCheckins = checkins
@@ -98,6 +118,21 @@ export default function DashboardPage() {
 ];
   return (
     <DefaultLayout >
+      <Modal isOpen={showFirstLoginModal} onOpenChange={(open) => {
+        if (!open) handleDismissFirstLogin();
+      }} placement="center" backdrop="blur">
+        <ModalContent className="p-3">
+          {() => (
+            <>
+              <ModalHeader className="text-3xl flex flex-col gap-1">Witamy w Worksense!</ModalHeader>
+              <ModalBody>
+                <p className="opacity-80 bg-[#FF000024] text-lg p-5 rounded-lg">Pamiętaj nasza aplikacja NIE zastępuje profesjonalnej pomocy psychologicznej, a jedynie stanowi formę wsparcia.</p>
+              </ModalBody>
+            
+            </>
+          )}
+        </ModalContent>
+      </Modal>
       <div className="flex flex-wrap justify-center gap-5 px-4 md:px-0">
       <div className= "flex flex-col gap-5 w-full sm:w-1/2 min-w-0" >
       <MoodChart checkins={chartCheckins} />

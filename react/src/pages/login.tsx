@@ -382,7 +382,7 @@ export default function LoginPage() {
       />
       <div className="flex gap-2">
     <Checkbox required ref={checkboxRef}/>
-    <p className="hover:cursor-pointer" onClick={()=>checkboxRef.current?.click()}>
+    <p className="hover:cursor-pointer text-sm" onClick={()=>checkboxRef.current?.click()}>
   Rejestrując się, akceptuję{" "}
   <Link
     className="underline"
