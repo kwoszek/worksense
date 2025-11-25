@@ -9,7 +9,7 @@ import { Post as Posttype, Comment as CommentType } from "../services/forumApi"
 import { useGetCommentsQuery, useLazyGetCommentsQuery, useAddCommentMutation, useLikePostMutation, useUnlikePostMutation } from "@/services/forumApi";
 import { useSelector } from 'react-redux';
 import { selectAuthUser } from '@/features/auth/authSlice';
-import { useState, useEffect, Fragment } from "react";
+import { useState, useEffect } from "react";
 import { Divider } from "@heroui/divider";
 import "./post.css";
 
@@ -79,7 +79,8 @@ function Post(data: Posttype) {
             const pageComments = pageResp.comments;
             const existingIds = new Set(loadedComments.map(c => c.id));
             const newUnique = pageComments.filter(c => !existingIds.has(c.id));
-            if (newUnique.length) setLoadedComments(prev => [...prev, ...newUnique]);
+            const newComments = [...loadedComments, ...newUnique].sort((a, b) => new Date(a.dateposted).getTime() - new Date(b.dateposted).getTime());
+            if (newUnique.length) setLoadedComments(newComments);
             setTotalComments(pageResp.total);
             setLastChunkCount(pageComments.length);
         }
@@ -91,7 +92,6 @@ function Post(data: Posttype) {
     }
 
     const isLoadingComments = (loadedComments.length === 0 && !initialComments.length) || isFetchingMore;
-    const contentSegments = splitContentWithBreaks(data.content);
     return(
         <div className="m-5 mt-3">
             <Divider className="mb-6"/>
@@ -100,15 +100,7 @@ function Post(data: Posttype) {
                              <FeaturedBadgesRow badges={data.featuredBadges} className="mt-1 mb-1" />
                          </div>
              
-            <h2 className="text-2xl mb-1 mt-1 font-bold">{data.title}</h2>
-            <p className="whitespace-pre-wrap">
-                {contentSegments.length === 0 ? data.content : contentSegments.map((segment: string, idx: number) => (
-                    <Fragment key={idx}>
-                        {segment}
-                        {idx < contentSegments.length - 1 && <br />}
-                    </Fragment>
-                ))}
-            </p>
+            <p className="">{data.content}</p>
             <div className="flex justify-end mt-2">
             <div className="flex items-center justify-end gap-2">
                 <Button
@@ -209,9 +201,4 @@ function commentsLabel(n: number) {
     const mod100 = n % 100;
     if (mod10 >= 2 && mod10 <= 4 && !(mod100 >= 12 && mod100 <= 14)) return `${n} komentarze`;
     return `${n} komentarzy`;
-}
-
-function splitContentWithBreaks(content?: string | null): string[] {
-    if (!content) return [];
-    return content.split(/(?:<br\s*\/?>|\r?\n)/gi);
 }

@@ -7,7 +7,6 @@ import { Provider } from "./provider.tsx";
 import "@/styles/globals.css";
 
 if (typeof window !== 'undefined') {
-  console.log = () => {};
   console.warn = () => {};
   console.error = () => {};
 }

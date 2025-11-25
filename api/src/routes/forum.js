@@ -115,7 +115,8 @@ router.get('/posts', optionalAuth, async (req, res, next) => {
                            p.userId AS userid,
                            p.likes,
                            u.username,
-                           u.avatar
+                           u.avatar,
+                           u.streak
                     FROM posts p
                     LEFT JOIN users u ON u.id = p.userId
                     ORDER BY ${orderColumn} ${direction}
@@ -136,7 +137,8 @@ router.get('/posts', optionalAuth, async (req, res, next) => {
                               c.datePosted AS dateposted,
                               c.likes,
                               u.username,
-                              u.avatar
+                              u.avatar,
+                              u.streak
                        FROM comments c
                        LEFT JOIN users u ON u.id = c.userId
                        WHERE c.postId IN (${placeholders})
@@ -182,6 +184,7 @@ router.get('/posts', optionalAuth, async (req, res, next) => {
         liked: userId ? likedCommentIds.has(c.id) : false,
         username: c.username,
         avatar: avatarB64,
+        streak: c.streak,
         featuredBadges: featuredMap.get(c.userid) || [],
       });
     }
@@ -198,6 +201,7 @@ router.get('/posts', optionalAuth, async (req, res, next) => {
         liked: userId ? likedPostIds.has(p.id) : false,
         username: p.username,
         avatar: avatarB64,
+        streak: p.streak,
         featuredBadges: featuredMap.get(p.userid) || [],
         comments: commentsByPost.get(p.id) || [],
       };
@@ -300,7 +304,8 @@ router.get('/posts/user/:id', optionalAuth, async (req, res, next) => {
                            p.userId AS userid,
                            p.likes,
                            u.username,
-                           u.avatar
+                           u.avatar,
+                           u.streak
                     FROM posts p
                     LEFT JOIN users u ON u.id = p.userId
                     WHERE p.userId = ?
@@ -322,7 +327,8 @@ router.get('/posts/user/:id', optionalAuth, async (req, res, next) => {
                               c.datePosted AS dateposted,
                               c.likes,
                               u.username,
-                              u.avatar
+                              u.avatar,
+                              u.streak
                        FROM comments c
                        LEFT JOIN users u ON u.id = c.userId
                        WHERE c.postId IN (${placeholders})
@@ -368,6 +374,7 @@ router.get('/posts/user/:id', optionalAuth, async (req, res, next) => {
         liked: currentUserId ? likedCommentIds.has(c.id) : false,
         username: c.username,
         avatar: avatarB64,
+        streak: c.streak,
         featuredBadges: featuredMap.get(c.userid) || [],
       });
     }
@@ -384,6 +391,7 @@ router.get('/posts/user/:id', optionalAuth, async (req, res, next) => {
         liked: currentUserId ? likedPostIds.has(p.id) : false,
         username: p.username,
         avatar: avatarB64,
+        streak: p.streak,
         featuredBadges: featuredMap.get(p.userid) || [],
         comments: commentsByPost.get(p.id) || [],
       };
@@ -411,13 +419,13 @@ router.post('/posts/:id/comments', async (req, res, next) => {
         const { userId, content } = req.body;
         const datePosted = new Date().toISOString();
         const ins = await db.query('INSERT INTO comments(userId, postId, content, datePosted, likes) VALUES(?,?,?,?,?)',[userId, postId, content, datePosted, 0]);
-        const sel = await db.query('SELECT id, userId AS userid, postId AS postid, content, datePosted AS dateposted FROM comments WHERE id = ?', [ins.insertId]);
+        const sel = await db.query('SELECT comments.id, userId AS userid, postId AS postid, content, datePosted AS dateposted, users.streak FROM comments LEFT JOIN users ON users.id = comments.userId WHERE comments.id = ?', [ins.insertId]);
         const featuredMap = await getFeaturedBadgesByUserIds([userId]);
         try { await checkAndAwardForComment(userId); } catch (e) { /* ignore badge errors */ }
         res.status(201).json({
           ...sel.rows[0],
           likes: 0,
-          liked: false,
+          liked: false, 
           featuredBadges: featuredMap.get(userId) || [],
         });
     } catch (err) { next(err); }
@@ -442,7 +450,8 @@ router.get('/posts/:id/comments', optionalAuth, async (req, res, next) => {
              c.likes AS likes,
              IF(? IS NULL, FALSE, EXISTS(SELECT 1 FROM comment_likes cl WHERE cl.commentId = c.id AND cl.userId = ?)) AS liked,
              u.username,
-             u.avatar
+             u.avatar,
+             u.streak
       FROM comments c
       LEFT JOIN users u ON u.id = c.userId
       WHERE c.postId = ?
@@ -463,6 +472,7 @@ router.get('/posts/:id/comments', optionalAuth, async (req, res, next) => {
       likes: r.likes,
       liked: !!r.liked,
       username: r.username,
+      streak: r.streak,
       avatar: r.avatar ? Buffer.from(r.avatar).toString('base64') : null,
       featuredBadges: featuredMap.get(r.userid) || [],
     }));
