@@ -11,6 +11,7 @@ import Profile from "@/pages/profile";
 import Landing from "@/pages/landing";
 import TermsPage from "@/pages/terms";
 import PrivacyPage from "@/pages/privacy";
+import NotFoundPage from "@/pages/404";
 
 
 function App() {
@@ -29,7 +30,7 @@ function App() {
   <Route path="/terms" element={<TermsPage />} />
   <Route path="/privacy" element={<PrivacyPage />} />
       <Route path="/" element={<Navigate to="/dashboard" replace />} />
-      <Route path="*" element={<Navigate to="/dashboard" replace />} />
+      <Route path="*" element={<NotFoundPage/>} />
     </Routes>
   );
 }
