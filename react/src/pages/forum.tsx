@@ -33,8 +33,10 @@ export default function ForumPage() {
     const t = title.trim();
     const c = content.trim();
     if (!t || !c) return;
+    // Replace newline characters with <br/> so line breaks are preserved in HTML rendering
+    const prepared = c.replace(/\r?\n/g, '<br/>');
     try {
-      await addPost({ userId: user.id, title: t, content: c }).unwrap();
+      await addPost({ userId: user.id, title: t, content: prepared }).unwrap();
       setTitle("");
       setContent("");
       setIsOpen(false);

@@ -334,7 +334,7 @@ export default function Landing(){
             </section>
                  <section className="w-full md:w-8/10 mx-auto mt-20 sm:mt-60 px-4 md:px-0 text-justify">
                 <h2 className="text-5xl font-bold mb-6 ">Kim jesteśmy</h2>
-                <p className="opacity-80 md:w-2/3">Jesteśmy zespołem figoFagoFego z Gliwic, uczniami jednej klasy technikum informatycznego. W ramach hackathonu postawiliśmy na temat bliski naszej generacji — narastające przeciążenie, stres i wypalenie, z którymi mierzy się coraz więcej młodych ludzi.</p>
+                <p className="opacity-80 md:w-2/3">Jesteśmy zespołem FigoFagoFego z Gliwic, uczniami jednej klasy technikum informatycznego. W ramach hackathonu postawiliśmy na temat bliski naszej generacji — narastające przeciążenie, stres i wypalenie, z którymi mierzy się coraz więcej młodych ludzi.</p>
                 <br />
                 <p className="opacity-80 md:w-2/3">WorkSense to projekt, w którym łączymy wiedzę techniczną z empatią i zrozumieniem dla zdrowia psychicznego. Każdy z nas wnosi do zespołu inne umiejętności — programowanie, projektowanie interfejsów, analizę danych czy kreatywne myślenie. Wspólnie budujemy rozwiązanie, które nie tylko działa, lecz także wspiera użytkowników w budowaniu zdrowych nawyków i lepszej jakości życia.</p>
 

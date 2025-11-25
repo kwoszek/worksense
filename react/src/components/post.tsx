@@ -99,6 +99,7 @@ function Post(data: Posttype) {
                              <FeaturedBadgesRow badges={data.featuredBadges} className="mt-1 mb-1" />
                          </div>
              
+             <h2 className="text-2xl mb-1 mt-1 font-bold">{data.title}</h2>
             <p className="">{data.content}</p>
             <div className="flex justify-end mt-2">
             <div className="flex items-center justify-end gap-2">
