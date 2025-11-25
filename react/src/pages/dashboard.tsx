@@ -11,8 +11,7 @@ import { useSelector } from "react-redux";
 import { selectAuthUser } from "@/features/auth/authSlice";
 import { useGetPostsQuery } from "@/services/forumApi";
 import { useGetAnalysesQuery } from "@/services/analysisApi";
-import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter } from "@heroui/modal";
-import { Button } from "@heroui/button";
+import { Modal, ModalContent, ModalHeader, ModalBody } from "@heroui/modal";
 
 export default function DashboardPage() {
   // current date in Europe/Warsaw in YYYY-MM-DD format
