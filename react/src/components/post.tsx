@@ -10,6 +10,7 @@ import { useGetCommentsQuery, useLazyGetCommentsQuery, useAddCommentMutation, us
 import { useSelector } from 'react-redux';
 import { selectAuthUser } from '@/features/auth/authSlice';
 import { useState, useEffect, Fragment } from "react";
+import { splitContentWithBreaks } from "@/lib/utils";
 import { Divider } from "@heroui/divider";
 import "./post.css";
 
@@ -210,8 +211,4 @@ function commentsLabel(n: number) {
     const mod100 = n % 100;
     if (mod10 >= 2 && mod10 <= 4 && !(mod100 >= 12 && mod100 <= 14)) return `${n} komentarze`;
     return `${n} komentarzy`;
-}
-function splitContentWithBreaks(content?: string | null): string[] {
-    if (!content) return [];
-    return content.split(/(?:<br\s*\/?>|\r?\n)/gi);
 }
