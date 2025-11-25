@@ -2,9 +2,10 @@ import {User} from "@heroui/user";
 import { getStreakColor } from '@/utils/streak';
 import {Button} from "@heroui/button";
 import {Comment as CommentType, useLikeCommentMutation, useUnlikeCommentMutation} from "../services/forumApi";
-import { useState } from 'react';
+import { Fragment, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { selectAuthUser } from '@/features/auth/authSlice';
+import { splitContentWithBreaks } from '@/lib/utils';
 
 
 function Comment(data: CommentType){
@@ -27,12 +28,21 @@ function Comment(data: CommentType){
         } catch {}
     }
 
+    const contentSegments = splitContentWithBreaks(data.content);
+
     return(
         <div className="m-5 mb-0">
                         <div>
                             <User avatarProps={{ src: data?.avatar ? `data:image/png;base64,${data.avatar}` : undefined, name: data.username, style: { boxSizing: 'content-box', padding: 2, borderRadius: 9999, border: `3px solid ${getStreakColor(data.streak ?? 0)}` } }} name={data.username}/>
                         </div>
-            <p className="">{data.content}</p>
+            <p className="whitespace-pre-wrap">
+                {contentSegments.length === 0 ? data.content : contentSegments.map((segment, idx) => (
+                    <Fragment key={idx}>
+                        {segment}
+                        {idx < contentSegments.length - 1 && <br />}
+                    </Fragment>
+                ))}
+            </p>
             <div className="flex items-center justify-end gap-2 mt-2">
                 <Button
                     variant="ghost"
