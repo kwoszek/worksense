@@ -11,8 +11,7 @@ import {
   AuthUser,
 } from '@/services/usersApi';
 import { useDispatch } from 'react-redux';
-import { setCredentials } from '@/features/auth/authSlice';
-const siteKey = import.meta.env.VITE_RECAPTCHA_SITE_KEY;
+import { setCredentials, clearAuth } from '@/features/auth/authSlice';const siteKey = import.meta.env.VITE_RECAPTCHA_SITE_KEY;
 
 type AuthContextType = {
   user: AuthUser | null;
@@ -85,7 +84,7 @@ export const AuthProvider: React.FC<React.PropsWithChildren> = ({ children }) =>
     clearAccessToken();
     setToken('');
     setUser(null);
-    dispatch(setCredentials({ user: null as any, token: '' }));
+    dispatch(clearAuth());
   };
 
   const value = useMemo(

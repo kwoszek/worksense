@@ -94,15 +94,18 @@ export const usersApi = createApi({
         } catch {}
       },
     }),
-    logout: builder.mutation<void, void>({
-      query: () => ({ url: '/logout', method: 'POST' }),
-      invalidatesTags: ['Me'],
-      async onQueryStarted(_arg, { queryFulfilled, dispatch }) {
-        try { await queryFulfilled; } catch {}
-        clearAccessToken();
-        dispatch(clearAuth());
-      },
-    }),
+logout: builder.mutation<void, void>({
+  query: () => ({ url: '/logout', method: 'POST' }),
+  invalidatesTags: ['Me'],
+  async onQueryStarted(_arg, { queryFulfilled, dispatch }) {
+    try {
+      await queryFulfilled;
+    } catch {
+    }
+    clearAccessToken();
+    dispatch(clearAuth());
+  },
+}),
     me: builder.query<AuthUser, void>({
       query: () => ({ url: '/me' }),
       providesTags: ['Me'],
