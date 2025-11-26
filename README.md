@@ -1,4 +1,3 @@
-
 # WorkSense – README
 
 WorkSense to aplikacja wspierająca higienę pracy, zapobieganie wypaleniu oraz budowanie zdrowych nawyków poprzez technikę Pomodoro, codzienne check-iny i analizy oparte na danych. Projekt został stworzony w ramach hackathonu przez zespół FigoFagoFego z Gliwic.
