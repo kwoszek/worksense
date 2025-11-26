@@ -31,7 +31,7 @@ export default function Landing(){
     return (
         <>
          <DefaultLayout>
-            <div className=" min-h-screen scroll-smooth">
+            <div className=" min-h-screen max-w-10xl scroll-smooth max-w-[1500px] m-auto">
             <div className="flex flex-col md:flex-row justify-center items-center gap-10 p-6 mt-10 md:mt-25 h-[80svh]">
                 <div className="w-full md:w-1/3 flex flex-col gap-6  relative md:-top-[5vw] ">
                 <div className="md:translate-x-20 md:-translate-y-15">
@@ -299,19 +299,19 @@ export default function Landing(){
                     
                                         <div className="w-full sm:w-1/3 p-10 text-2xl flex flex-col  justify-between">
                                         <p className="">Zmiana nawyków pracy</p>
-                                         <div className="pt-15"> <ColumnSrc className="text-foreground grow-0 shrink-0 w-[40vw] sm:w-[15vw] m-auto h-fit" title="Column icon"/></div>
+                                         <div className="pt-15"> <ColumnSrc className="text-foreground grow-0 shrink-0 w-[40vw] sm:w-[15vw] m-auto h-fit max-w-[300px]" title="Column icon"/></div>
                                          
                                          </div>
                     
                                          <div className="w-full sm:w-1/3 p-10 text-2xl flex  flex-col justify-between ">
                                          <p className="">Psychoedukacja o stresie i wypaleniu</p>
-                                         <div className="pt-15"> <ColumnSrc className="text-foreground grow-0 shrink-0 w-[40vw] sm:w-[15vw] m-auto h-fit" title="Column icon"/></div>
+                                         <div className="pt-15"> <ColumnSrc className="text-foreground grow-0 shrink-0 w-[40vw] sm:w-[15vw] m-auto h-fit max-w-[300px]" title="Column icon"/></div>
                                        
                                         </div>
                     
                                         <div className="w-full sm:w-1/3 p-10 text-2xl flex  flex-col justify-between "> 
                                             <p className="">Wsparcie społeczne</p>
-                                            <div className="pt-15"><ColumnSrc className="text-foreground grow-0 shrink-0 w-[40vw] sm:w-[15vw] m-auto h-fit" title="Column icon"/></div>
+                                            <div className="pt-15"><ColumnSrc className="text-foreground grow-0 shrink-0 w-[40vw] sm:w-[15vw] m-auto h-fit max-w-[300px]" title="Column icon"/></div>
                                             
                                         </div>
                                 </div>

@@ -136,7 +136,7 @@ const prewencja = [
   return (
     <DefaultLayout>
 
-      <div className="grid place-items-start w-full grid-cols-1 md:grid-cols-2 p-5 md:p-20">
+      <div className="grid place-items-start w-full grid-cols-1 md:grid-cols-2 p-5 md:p-20 m-auto max-w-[1500px]">
       <div className="  px-5 mb-10 md:mb-25 p-10">
      
         <h2 className="text-4xl opacity-100 mt-3">Przeglądy</h2>

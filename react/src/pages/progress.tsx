@@ -249,7 +249,7 @@ export default function ProgressPage() {
 
   return (
     <DefaultLayout>
-  <div className="flex flex-col md:flex-row justify-center gap-5 px-4 md:px-0">
+  <div className="flex flex-col md:flex-row justify-center gap-5 px-4 md:px-0 max-w-[1500px] m-auto">
   <div className= "flex flex-col gap-5 w-full md:w-1/2" >
       
             <MoodChart checkins={chartCheckins} />
